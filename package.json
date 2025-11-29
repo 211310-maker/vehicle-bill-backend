@@ -4,16 +4,13 @@
   "description": "backend built with Node.js, MongoDb",
   "main": "server.js",
   "scripts": {
+    "start": "npm run prod:server",
     "prod:server": "cross-env NODE_ENV=production node server.js",
-    "dev:server": "cross-env NODE_ENV=dev nodemon server.js",
-    "client:local": "npm run local --prefix frontend",
-    "client:prod": "npm run local:prod --prefix frontend",
-    "client:prod:build": "rm -rf public/build && npm run build:prod --prefix frontend",
-    "client:local:build": "rm -rf public/build && npm run build:local --prefix frontend",
-    "dev": "concurrently \"npm run dev:server\" \"npm run client\""
+    "dev:server": "cross-env NODE_ENV=dev nodemon server.js"
   },
   "engines": {
-    "node": ">=10.16.2"
+    "node": "18.x",
+    "npm": "10.x"
   },
   "keywords": [],
   "author": "",
@@ -48,6 +45,7 @@
   },
   "devDependencies": {
     "concurrently": "^5.3.0",
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "nodemon": "^2.0.0"
   }
 }
