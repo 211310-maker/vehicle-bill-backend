@@ -1,0 +1,338 @@
+@page {
+  margin-top: 20px;
+  size: letter;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+
+* {
+  font-family: "Roboto", sans-serif;
+}
+
+.logo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  -webkit-transform: translateX(-50%);
+  z-index: -1;
+  top: 90px;
+  background-color: #fff;
+}
+
+.logo img {
+  height: 100%;
+  width: 100%;
+  -webkit-filter: grayscale(100%);
+  filter: grayscale(100%);
+  opacity: 0.5;
+  background-color: #fff;
+}
+.logo__hr {
+  top: 80px;
+}
+.logo__hr img {
+  height: 380px;
+  width: auto;
+}
+
+.logo__jh {
+  top: 42px;
+}
+.logo__jh img {
+  width: auto;
+  height: 440px;
+}
+
+.logo__pj {
+  top: 90px;
+  left: 48%;
+  height: 370px;
+  width: 350px;
+}
+.logo__pj img {
+  opacity: 1;
+  height: 100%;
+  width: 100%;
+}
+
+.logo__pj__uk {
+  opacity: 0.4;
+  top: 70px;
+}
+
+.logo__bh {
+  top: 55px;
+}
+.logo__bh img {
+  height: 280px;
+  width: 250px;
+  opacity: 0.5;
+}
+
+.logo__up {
+  top: 95px;
+}
+.logo__up img {
+  height: 350px;
+  width: 350px;
+  opacity: 0.4;
+}
+
+.logo__gj {
+  top: 90px;
+  left: 55%;
+}
+.logo__gj img {
+  height: 480px;
+  width: 480px;
+}
+.logo__hp {
+  top: 105px;
+}
+.logo__hp img {
+  height: 320px;
+  width: 350px;
+}
+
+.logo__rj img {
+  width: 300px;
+  height: 400px;
+}
+
+.main {
+  position: relative;
+  padding: 0px 42px;
+}
+
+.main__printing {
+  font-weight: bold;
+  font-size: 16px;
+  top: 24px;
+  width: 175px;
+  position: absolute;
+  left: 44px;
+}
+
+.main__warning {
+  font-size: 21px;
+  font-weight: bold;
+  word-spacing: 2px;
+  letter-spacing: 0.5;
+}
+.main__warning-2 {
+  margin-top: 4px;
+  height: 21px;
+  display: flex;
+  align-items: center;
+}
+.main__warning span {
+  font-weight: normal;
+}
+
+.content {
+  font-size: 12px;
+}
+
+.content__top {
+  text-align: center;
+}
+.content__heading {
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 8px;
+  margin-top: 29px;
+  font-size: 23px;
+  display: inline-block;
+  position: relative;
+  line-height: 13px;
+}
+.content__heading::after {
+  position: absolute;
+  border-top: 1px solid black;
+  content: "";
+  width: 100%;
+  bottom: -3px;
+  left: 0px;
+}
+
+.content__title {
+  text-align: center;
+  font-weight: 500;
+  margin: 0;
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+
+.content__desc {
+  font-weight: 500;
+  margin: 0;
+  font-size: 17px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.qr-image {
+  position: absolute;
+  right: 35px;
+  top: 5px;
+  height: 200px;
+  width: 200px;
+  background: #ffff;
+}
+
+.content__back {
+  position: absolute;
+  top: 20px;
+  color: rgba(0, 0, 0, 0.2);
+  height: 100%;
+  width: 100%;
+}
+
+.content__back p {
+  font-size: 24px;
+  line-height: 16px;
+  margin: 0;
+  margin-left: 1px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+table {
+  font-weight: 400;
+  font-size: 16px;
+}
+.content__grand {
+  font-weight: 400;
+  margin-top: 13px;
+}
+.content__grand p {
+  margin: 0;
+  line-height: 21px;
+}
+
+.content__grand {
+  font-size: 16px;
+}
+.content__grand--hr {
+  font-size: 15px;
+}
+.content__grand--pb {
+  font-size: 15px;
+}
+
+.content__grand--jh h2 {
+  font-size: 22px;
+  line-height: 27px;
+}
+.content__grand--jh h2 span {
+  font-weight: normal;
+}
+
+.content__generated-by {
+  float: right;
+}
+.content__generated-by p {
+  text-align: left;
+  font-size: 20px;
+  margin-bottom: 4px;
+  margin-top: 4px;
+}
+.r1 {
+  height: 30px;
+}
+table.rj {
+  font-size: 15px;
+}
+table.rj .r1-1 {
+  width: 110px;
+}
+table.rj .r1-2 {
+  width: 340px;
+}
+table.rj .r1-3 {
+  width: 130px;
+}
+table.rj .r1-4 {
+  /* width: 340px; */
+}
+
+.r1-1 {
+  width: 130px;
+}
+.r1-2 {
+  width: 350px;
+}
+
+.pb .r1-1 {
+  width: 120px;
+}
+.pb .r19 {
+  height: 40px;
+}
+
+.r20 {
+  height: 60px;
+}
+.r16-3 {
+  display: inline-block;
+}
+
+.uk .r1-1 {
+  width: 120px;
+}
+
+.uk .r20 {
+  height: auto;
+}
+.uk .space {
+  height: 20px;
+}
+
+.border {
+  border: 1px solid red;
+}
+
+.d-flex {
+  display: flex !important;
+  display: -webkit-box; /* wkhtmltopdf uses this one */
+}
+.content__money {
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+  padding: 1px 0px;
+  margin-top: 14px;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+.content__money-r1 {
+  border-bottom: 1px solid #000;
+  padding: 2px 0px;
+}
+.content__money-r2 {
+  padding: 2px 0px;
+}
+.content__money-r2-border {
+  border-bottom: 1px solid #000;
+}
+
+.m1 {
+  width: 60%;
+}
+.m2 {
+  width: 15%;
+}
+.m3 {
+  width: 12%;
+}
+.m4 {
+  width: 12%;
+}
+
+.d-none {
+  display: none;
+}

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,400;1,500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="<%=data.host%>/css/style.css" />
+    <% if(data.cssFix){ %> <% } %>
+    <link rel="stylesheet" href="<%=data.host%>/css/page.css" />
+  </head>
+  <body>
+    <div class="main">
+      <div class="content">
+        <div class="content__top">
+          <h3 class="content__heading">GOVERNMENT OF RAJASTHAN</h3>
+          <p class="content__title">Department of Transport</p>
+          <p class="content__desc">Checkpost Tax e-Receipt</p>
+        </div>
+        <br />
+        <table>
+          <tr class="r1">
+            <td class="r1-1">Registration No.</td>
+            <td class="r1-2">: <b><%=data.vehicleNo%></b></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Receipt No.</td>
+            <td class="r1-2">: <%=data.receiptNo%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Payment Date</td>
+            <td class="r1-2">: <%=data.paymentDate%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Owner Name</td>
+            <td class="r1-2">: <%=data.ownerName%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Chassis No.</td>
+            <td class="r1-2">: <%=data.chassisNo%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Tax Mode</td>
+            <td class="r1-2">: <%=data.taxMode%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Vehicle Type</td>
+            <td class="r1-2">: <%=data.vehiclePermitType%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Vehicle Class</td>
+            <td class="r1-2">: <%=data.vehicleClass%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Mobile No.</td>
+            <td class="r1-2">: <%=data.mobileNo%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Checkpost Name</td>
+            <td class="r1-2">: <%=data.checkpostName%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Service Type</td>
+            <td class="r1-2">: <%=data.serviceType%></td>
+          </tr>
+          <% if(data.vehiclePermitType === 'GOODS VEHICLE'){ %>
+
+          <tr class="r1">
+            <td class="r1-1">Unladen Weight</td>
+            <td class="r1-2">: <%=data.unladenWeight%> kg</td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Laden Wright</td>
+            <td class="r1-2">: <%=data.grossVehicleWeight%> Kg</td>
+          </tr>
+          <% }else{ %>
+          <tr class="r1">
+            <td class="r1-1">Sleeper Cap.</td>
+            <td class="r1-2">: <%=data.sleeperCapacityExcludingDriver%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Seating Cap(Ex. Driver</td>
+            <td class="r1-2">: <%=data.seatingCapacityExcludingDriver%></td>
+          </tr>
+          <% } %>
+          <tr class="r1">
+            <td class="r1-1">Bank Ref. No.</td>
+            <td class="r1-2">: <%=data.rjBankRefNo%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Payment Mode</td>
+            <td class="r1-2">: <%=data.paymentMode%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Distance Traveled</td>
+            <td class="r1-2">: NA</td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">No of Visit</td>
+            <td class="r1-2">:NOT Applicable</td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Document Name</td>
+            <td class="r1-2">:NA</td>
+          </tr>
+        </table>
+
+        <div class="content__money">
+          <div class="content__money-r1 d-flex">
+            <div class="m1"><b>Particular</b></div>
+            <div class="m2"><b>Fees/Tax</b></div>
+            <div class="m3"><b>Fine</b></div>
+            <div class="m4"><b>Total</b></div>
+          </div>
+          <% if(data.counterSignatureFree){ %>
+          <div class="content__money-r2 content__money-r2-border d-flex">
+            <div class="m1">
+              MV Tax( <%=data.taxFrom_raj%> to <%=data.taxTo_raj%> )
+            </div>
+            <div class="m2"><%=data.mvTax%></div>
+            <div class="m3">0</div>
+            <div class="m4"><%=data.mvTax%></div>
+          </div>
+          <div class="content__money-r2 content__money-r2-border d-flex">
+            <div class="m1">Counter Signature Free</div>
+            <div class="m2"><%=data.counterSignatureFree%></div>
+            <div class="m3">0</div>
+            <div class="m4"><%=data.counterSignatureFree%></div>
+          </div>
+          <div class="content__money-r2 d-flex">
+            <div class="m1">Surcharge Fee</div>
+            <div class="m2"><%=data.surChargeFee%></div>
+            <div class="m3">0</div>
+            <div class="m4"><%=data.surChargeFee%></div>
+          </div>
+
+          <% }else{ %>
+          <div class="content__money-r2 content__money-r2-border d-flex">
+            <div class="m1">
+              MV Tax( <%=data.taxFrom_raj%> to <%=data.taxTo_raj%> )
+            </div>
+            <div class="m2"><%=data.mvTax%></div>
+            <div class="m3">0</div>
+            <div class="m4"><%=data.mvTax%></div>
+          </div>
+          <div class="content__money-r2 d-flex">
+            <div class="m1">Surcharge Fee</div>
+            <div class="m2"><%=data.surChargeFee%></div>
+            <div class="m3">0</div>
+            <div class="m4"><%=data.surChargeFee%></div>
+          </div>
+          <% } %>
+        </div>
+
+        <div class="content__grand content__grand--hr">
+          <p>
+            <span><b>Grand Total :</b></span> ₹ <%=data.totalAmount%>/- (
+            <%=data.totalAmountInWord%> )
+          </p>
+        </div>
+      </div>
+    </div>
+    <br /><br />
+    <br /><br />
+    <br /><br />
+    <br /><br />
+  </body>
+</html>

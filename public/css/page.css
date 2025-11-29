@@ -1,0 +1,22 @@
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.r1-1 {
+  width: 228px;
+}
+.content__heading {
+  margin-top: 10px;
+}
+.content__desc {
+  font-size: 16px;
+}
+
+.content__money {
+  margin-top: 4px;
+}
+
+.content__grand {
+  margin-top: 9px;
+}

@@ -1,0 +1,19 @@
+body {
+  zoom: 0.6;
+}
+
+.content__heading::after {
+  bottom: -4px;
+}
+.logo img {
+  opacity: 0.55;
+}
+
+.qr-image {
+  height: 210px;
+  width: 210px;
+}
+
+.content__back p {
+  font-size: 22.1px;
+}

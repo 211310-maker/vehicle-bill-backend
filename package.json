@@ -1,0 +1,53 @@
+{
+  "name": "billgenerator",
+  "version": "1.0.0",
+  "description": "backend built with Node.js, MongoDb",
+  "main": "server.js",
+  "scripts": {
+    "prod:server": "cross-env NODE_ENV=production node server.js",
+    "dev:server": "cross-env NODE_ENV=dev nodemon server.js",
+    "client:local": "npm run local --prefix frontend",
+    "client:prod": "npm run local:prod --prefix frontend",
+    "client:prod:build": "rm -rf public/build && npm run build:prod --prefix frontend",
+    "client:local:build": "rm -rf public/build && npm run build:local --prefix frontend",
+    "dev": "concurrently \"npm run dev:server\" \"npm run client\""
+  },
+  "engines": {
+    "node": ">=10.16.2"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.25.0",
+    "bcryptjs": "^2.4.3",
+    "colors": "1.4.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "2.8.5",
+    "dotenv": "8.2.0",
+    "ejs": "^3.1.6",
+    "express": "4.17.1",
+    "express-pdf": "^1.2.2",
+    "helmet": "3.22.0",
+    "hpp": "0.2.3",
+    "ip": "^1.1.5",
+    "jsonwebtoken": "8.5.1",
+    "lodash": "^4.17.20",
+    "moment": "^2.29.1",
+    "mongoose": "^6.0.12",
+    "mongoose-unique-validator": "^2.0.3",
+    "morgan": "1.10.0",
+    "puppeteer": "^19.7.5",
+    "qrcode": "^1.5.0",
+    "react-cookie": "^4.1.1",
+    "unique-username-generator": "^1.0.1",
+    "uuid": "7.0.3",
+    "winston": "^3.3.3",
+    "xss-clean": "0.1.1",
+    "yup": "^0.32.11"
+  },
+  "devDependencies": {
+    "concurrently": "^5.3.0",
+    "cross-env": "^7.0.3"
+  }
+}

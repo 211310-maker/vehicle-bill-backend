@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,400;1,500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="<%=data.host%>/css/style.css" />
+    <% if(data.cssFix){ %>
+    <link rel="stylesheet" href="<%=data.host%>/css/cssFix.css" />
+    <% } %>
+  </head>
+  <body>
+    <img class="qr-image" src="<%= data.src %>" alt="" />
+    <div class="main">
+      <div class="logo logo__hr">
+        <!-- <img src="<%=data.host%>/images1/HR_LOGO.png" alt="" /> -->
+      </div>
+      <div class="content">
+        <div class="content__top">
+          <h3 class="content__heading">GOVERNMENT OF TAMIL NADU</h3>
+          <p class="content__title">Department of Transport</p>
+          <p class="content__desc">Border Tax Cum Temporary Permit e-Receipt</p>
+          <p class="content__desc">(One Round Trip Only)</p>
+        </div>
+
+        <table>
+          <tr class="r1 r11">
+            <td class="r1-1">Registration No.</td>
+            <td class="r1-2">: <b><%=data.vehicleNo%></b></td>
+          </tr>
+          <tr class="r1 r12">
+            <td class="r1-1">Receipt No.</td>
+            <td class="r1-2">: <%=data.receiptNo%></td>
+          </tr>
+          <tr class="r1 r13">
+            <td class="r1-1">Payment Date</td>
+            <td class="r1-2">: <%=data.paymentDate%></td>
+          </tr>
+          <tr class="r1 r14">
+            <td class="r1-1">Owner Name</td>
+            <td class="r1-2">: <%=data.ownerName%></td>
+          </tr>
+          <tr class="r1 r15">
+            <td class="r1-1">Chassis No.</td>
+            <td class="r1-2">&nbsp;&nbsp;: <%=data.chassisNo%></td>
+            <td>Tax Mode</td>
+            <td>&nbsp;&nbsp;: <%=data.taxMode%></td>
+          </tr>
+          <tr class="r1 r16">
+            <td class="r1-1">Vehicle Type</td>
+            <td class="r1-2">
+              &nbsp;&nbsp;:
+              <div class="r16-3"><%=data.vehiclePermitType%></div>
+            </td>
+            <td>Vehicle Class</td>
+            <td>&nbsp;&nbsp;: <%=data.vehicleClass%></td>
+          </tr>
+          <tr class="r1 r17">
+            <td class="r1-1">Mobile No.</td>
+            <td class="r1-2">&nbsp;&nbsp;: <%=data.mobileNo%></td>
+            <td>Checkpost Name</td>
+            <td>&nbsp;&nbsp;: <%=data.borderBarrier%></td>
+          </tr>
+          <tr class="r1 r18">
+            <% if(data.vehiclePermitType === 'GOODS VEHICLE'){ %>
+            <td>Gross Weight</td>
+            <td>&nbsp;&nbsp;: <%=data.grossVehicleWeight%> KG.</td>
+            <% }else{ %>
+            <td>
+              Seating Cap(Ex. <br />
+              Driver
+            </td>
+            <td>&nbsp;&nbsp;: <%=data.seatingCapacityExcludingDriver%></td>
+            <% } %>
+            <td class="r1-1">Sleeper Cap.</td>
+            <td class="r1-2">&nbsp;&nbsp;: 0</td>
+          </tr>
+          <tr class="r1 r19">
+            <td class="r1-1">Bank Ref. No.</td>
+            <td class="r1-2">&nbsp;&nbsp;: <%=data.bankRefNo%></td>
+            <td>Payment Mode</td>
+            <td>&nbsp;&nbsp;: <%=data.paymentMode%></td>
+          </tr>
+          <tr class="r1 r19">
+            <td class="r1-1">Permit Number</td>
+            <td class="r1-2">&nbsp;&nbsp;: <%=data.bankRefNo%></td>
+            <td>Permit Validity</td>
+            <td>&nbsp;&nbsp;: <%=data.paymentMode%></td>
+          </tr>
+          <tr class="r1 r19">
+            <td class="r1-1">Fitness Validity</td>
+            <td class="r1-2">&nbsp;&nbsp;: <%=data.bankRefNo%></td>
+            <td>Insurance Validity</td>
+            <td>&nbsp;&nbsp;: <%=data.paymentMode%></td>
+          </tr>
+          <tr class="r1 r19">
+            <td class="r1-1">PUCC Validity</td>
+            <td class="r1-2">&nbsp;&nbsp;: <%=data.bankRefNo%></td>
+          </tr>
+          <tr class="r1 r20">
+            <td></td>
+            <td>&nbsp;&nbsp;</td>
+            <td class="r1-1">Permit Type</td>
+            <td class="r1-2">&nbsp;&nbsp;:</td>
+          </tr>
+          <tr class="r1 r21">
+            <td>Green Tax validity</td>
+            <td>&nbsp;&nbsp;</td>
+          </tr>
+        </table>
+
+        <div class="content__money">
+          <div class="content__money-r1 d-flex">
+            <div class="m1"><b>Particular</b></div>
+            <div class="m2"><b>Fees/Tax</b></div>
+            <div class="m3"><b>Fine</b></div>
+            <div class="m4"><b>Total</b></div>
+          </div>
+          <div class="content__money-r2-border d-flex">
+            <div class="m1">MV Tax( <%=data.taxFrom%> to <%=data.taxTo%> )</div>
+            <div class="m2"><%=data.totalAmount%></div>
+            <div class="m3">0</div>
+            <div class="m4"><%=data.totalAmount%></div>
+          </div>
+          <div class="content__money-r2-border d-flex">
+            <div class="m1">Service/User Charge</div>
+            <div class="m2"><%=data.totalAmount%></div>
+            <div class="m3">0</div>
+            <div class="m4"><%=data.totalAmount%></div>
+          </div>
+          <div class="content__money-r2-border d-flex">
+            <div class="m1">Welfare Tax</div>
+            <div class="m2"><%=data.totalAmount%></div>
+            <div class="m3">0</div>
+            <div class="m4"><%=data.totalAmount%></div>
+          </div>
+          <div class="content__money-r2 d-flex">
+            <div class="m1">Permit Fee</div>
+            <div class="m2"><%=data.totalAmount%></div>
+            <div class="m3">0</div>
+            <div class="m4"><%=data.totalAmount%></div>
+          </div>
+        </div>
+
+        <div class="content__grand content__grand--hr">
+          <p>
+            <span><b>Grand Total :</b></span> ₹ <%=data.totalAmount%>/- (
+            <%=data.totalAmountInWord%> )
+          </p>
+          <p>
+            <span><b>Note :</b></span>
+          </p>
+          <p>
+            <span><b>Terms and Conditions:</b></span>
+          </p>
+          <p>
+            <i> 1) This is a computer generated printout and no signature
+              is required.</i>
+          </p>
+          <p>
+            <i>
+              2) Should not carry unlawful/unaccompanied goods.
+            </i>
+          </p>
+          <p>
+            <i>
+              3) If any false information/discrepancies are found in later, necessary criminal action will be taken against vehicle owner/driver.
+            </i>
+          </p>
+        </div>
+      </div>
+
+      <div class="content__back">
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+        <p>
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

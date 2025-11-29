@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,400;1,500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="<%=data.host%>/css/style.css" />
+    <% if(data.cssFix){ %> <% } %>
+    <link rel="stylesheet" href="<%=data.host%>/css/page.css" />
+  </head>
+
+  <body>
+    <div class="main">
+      <div class="content">
+        <div class="content__top">
+          <h3 class="content__heading">GOVERMENT OF UTTRAKHAND</h3>
+          <p class="content__title">Department of Transport</p>
+          <p class="content__desc">Checkpost Tax e-Receipt</p>
+        </div>
+
+        <table class="">
+          <tr class="r1">
+            <td class="r1-1">Registration No.</td>
+            <td class="r1-2">: <b><%=data.vehicleNo%></b></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Receipt No.</td>
+            <td class="r1-2">: <%=data.receiptNo%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Payment Date</td>
+            <td class="r1-2">: <%=data.paymentDate%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Owner Name</td>
+            <td class="r1-2">: <%=data.ownerName%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Chassis No.</td>
+            <td class="r1-2">: <%=data.chassisNo%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Tax Mode</td>
+            <td class="r1-2">: <%=data.taxMode%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Vehicle Class</td>
+            <td class="r1-2">: <%=data.vehicleClass%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Mobile No.</td>
+            <td class="r1-2">: <%=data.mobileNo%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Checkpost Name</td>
+            <td class="r1-2">: <%=data.barrierName%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Service Type</td>
+            <td class="r1-2">: <%=data.serviceType%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Sleeper Cap.</td>
+            <td class="r1-2">: <%=data.sleeperCap%></td>
+          </tr>
+          <tr class="r1">
+            <% if(data.vehicleType === 'GOODS VEHICLE'){ %>
+            <td class="r1-1">Gross Weight</td>
+            <td class="r2-2">: <%=data.grossVehicleWeight%> KG.</td>
+            <% }else{ %>
+            <td class="r1-1">Seating Cap(Ex. Driver</td>
+            <td class="r1-2">: <%=data.seatingCapacityExcludingDriver%></td>
+            <% } %>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Bank Ref. No.</td>
+            <td class="r1-2">: NA</td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Payment Mode</td>
+            <td class="r1-2">: <%=data.paymentMode%></td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Distance Traveled</td>
+            <td class="r1-2">: NA</td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">No of Visit</td>
+            <td class="r1-2">:NOT Applicable</td>
+          </tr>
+          <tr class="r1">
+            <td class="r1-1">Document Name</td>
+            <td class="r1-2">:NA</td>
+          </tr>
+        </table>
+
+        <div class="content__money">
+          <div class="content__money-r1 d-flex">
+            <div class="m1"><b>Particular</b></div>
+            <div class="m2"><b>Fees/Tax</b></div>
+            <div class="m3"><b>Fine</b></div>
+            <div class="m4"><b>Total</b></div>
+          </div>
+          <div class="content__money-r2 content__money-r2-border d-flex">
+            <div class="m1">
+              MV Tax( <%=data.taxFrom_uk%> TO <%=data.taxTo_uk%> )
+            </div>
+            <div class="m2"><%=data.taxAmount%></div>
+            <div class="m3">0</div>
+            <div class="m2"><%=data.taxAmount%></div>
+          </div>
+          <div class="content__money-r2 content__money-r2-border d-flex">
+            <div class="m1">Service/User charge</div>
+            <div class="m2"><%=data.userCharge%></div>
+            <div class="m3">0</div>
+            <div class="m2"><%=data.userCharge%></div>
+          </div>
+          <div class="content__money-r2 d-flex">
+            <div class="m1">Civic Infra Cess</div>
+            <div class="m2"><%=data.infraCess%></div>
+            <div class="m3">0</div>
+            <div class="m2"><%=data.infraCess%></div>
+          </div>
+        </div>
+
+        <div class="content__grand content__grand-uk">
+          <p>
+            <span><b>Grand Total :</b></span> ₹ <%=data.totalAmount%>/- (
+            <%=data.totalAmountInWord%> )
+          </p>
+        </div>
+        <br />
+      </div>
+    </div>
+  </body>
+</html>
