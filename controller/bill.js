@@ -19,7 +19,7 @@ const puppeteer = require("puppeteer");
 
 //@desc    get details
 //@route   GET /bill/get-details?vehicleNo=XXX
-//@access  private (you’re using protect on the route)
+//@access  private (route is using protect)
 module.exports.getDetails = asyncHandler(async (req, res, next) => {
   logger.info(
     `member asked detail for ${req.query.vehicleNo} from ${req.params.state} form`
@@ -49,7 +49,7 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // 1. Get the bill details
+    // 1. get the bill details
     const bill = await Bill.findById(id);
     if (!bill) {
       logger.info(`bill not found with this id ${id}`);
@@ -96,14 +96,16 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       rjBankRefNo: "1KBVoBVBSMGg",
     };
 
-    // 5. Render HTML using EJS (Promise API)
+    // 5. Render HTML using EJS
     const templatePath = path.join(__dirname, `../views/${bill.state}Pdf.ejs`);
     const htmlContent = await ejs.renderFile(templatePath, { data });
 
     logger.error("Html content generated");
 
     if (!htmlContent) {
-      return res.status(500).send("An error occurred while generating HTML");
+      return res
+        .status(500)
+        .json({ success: false, code: 500, message: "Failed to render HTML" });
     }
 
     // 6. Use puppeteer to generate the PDF
@@ -129,7 +131,6 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
     );
     return res.send(pdfBuffer);
   } catch (err) {
-    // DEBUG: show real error for now
     logger.error(`PDF generation error: ${err.message}`, { stack: err.stack });
 
     return res.status(500).json({
