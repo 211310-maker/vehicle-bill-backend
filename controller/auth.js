@@ -38,28 +38,31 @@ module.exports.getPageAccessLink = asyncHandler(async (req, res, next) => {
   const token = jwt.sign({ id: user._id }, "page-access", {
     expiresIn: "1d",
   });
-  const tokenPath = `/app/register/${token}/get-access`;
+  user.token = token;
+  const tempUser = user;
 
-  // --- Build secure absolute access URL for temp user ---
-  // Prefer APP_BASE_URL (should include protocol https://)
+  // --- Build secure absolute access URL (always prefer HTTPS via APP_BASE_URL) ---
   const hostForAccess =
-    process.env.APP_BASE_URL && process.env.APP_BASE_URL.trim() !== ""
+    (process.env.APP_BASE_URL && process.env.APP_BASE_URL.trim() !== "")
       ? process.env.APP_BASE_URL.replace(/\/$/, "")
-      : `${req.protocol}://${req.get("host")}`.replace(/\/$/, "");
+      : (`${req.protocol}://${req.get('host')}`).replace(/\/$/, "");
 
-  // Build path: adjust if your code already has a variable for this path (tokenPath/link)
-  const finalUrl = tokenPath.startsWith("http")
-    ? tokenPath.replace(/^http:\/\//i, "https://")
-    : `${hostForAccess}${tokenPath}`;
+  // If your code already has a relative path (e.g. tokenPath), use it. Otherwise:
+  const tokenPath = (typeof tokenPath !== 'undefined' && tokenPath) ? tokenPath : `/app/register/${tempUser.token}/get-access`;
 
-  // debug log
-  console.log("Access URL:", finalUrl);
+  // Ensure finalUrl is absolute and HTTPS
+  let finalUrl = tokenPath.startsWith('http') ? tokenPath : `${hostForAccess}${tokenPath}`;
+  // if finalUrl uses http://, convert to https://
+  finalUrl = finalUrl.replace(/^http:\/\//i, 'https://');
 
-  // Return the finalUrl to client
+  // Debug log
+  console.log('Access URL:', finalUrl);
+
+  // Return the HTTPS URL
   return res.json({
     success: true,
     url: finalUrl,
-    tempUser: user,
+    tempUser,
   });
 });
 
