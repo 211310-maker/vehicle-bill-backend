@@ -41,29 +41,29 @@ module.exports.getPageAccessLink = asyncHandler(async (req, res, next) => {
   user.token = token;
   const tempUser = user;
 
-  // --- Build secure absolute access URL (always prefer HTTPS via APP_BASE_URL) ---
-  const hostForAccess =
-    (process.env.APP_BASE_URL && process.env.APP_BASE_URL.trim() !== "")
-      ? process.env.APP_BASE_URL.replace(/\/$/, "")
-      : (`${req.protocol}://${req.get('host')}`).replace(/\/$/, "");
+  try {
+    const hostForAccess =
+      process.env.APP_BASE_URL && process.env.APP_BASE_URL.trim() !== ""
+        ? process.env.APP_BASE_URL.replace(/\/$/, "")
+        : `${req.protocol}://${req.get("host")}`.replace(/\/$/, "");
 
-  // If your code already has a relative path (e.g. tokenPath), use it. Otherwise:
-  const tokenPath = (typeof tokenPath !== 'undefined' && tokenPath) ? tokenPath : `/app/register/${tempUser.token}/get-access`;
+    const tokenPath = `/app/register/${tempUser.token}/get-access`;
+    let finalUrl = tokenPath.startsWith("http")
+      ? tokenPath
+      : `${hostForAccess}${tokenPath}`;
+    finalUrl = finalUrl.replace(/^http:\/\//i, "https://");
 
-  // Ensure finalUrl is absolute and HTTPS
-  let finalUrl = tokenPath.startsWith('http') ? tokenPath : `${hostForAccess}${tokenPath}`;
-  // if finalUrl uses http://, convert to https://
-  finalUrl = finalUrl.replace(/^http:\/\//i, 'https://');
-
-  // Debug log
-  console.log('Access URL:', finalUrl);
-
-  // Return the HTTPS URL
-  return res.json({
-    success: true,
-    url: finalUrl,
-    tempUser,
-  });
+    console.log("Access URL:", finalUrl, { tempUserId: tempUser._id });
+    return res.json({ success: true, url: finalUrl, tempUser });
+  } catch (err) {
+    console.error("page-access-link error", {
+      err: err.stack || err,
+      reqPath: req.path,
+      tempUser: tempUser && tempUser._id,
+      headers: req && req.headers,
+    });
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
 });
 
 //@desc    get access
