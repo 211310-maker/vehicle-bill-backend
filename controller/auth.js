@@ -27,6 +27,23 @@ const ALL_STATES = [
   "TAMILNADU",
 ];
 
+// Helper: get host for links, preferring APP_BASE_URL then forwarded headers then req
+const buildHostForAccess = (req) => {
+  // prefer explicit env override
+  if (process.env.APP_BASE_URL && process.env.APP_BASE_URL.trim() !== "") {
+    return process.env.APP_BASE_URL.replace(/\/$/, "");
+  }
+
+  // Use forwarded headers that proxies set (Render / reverse proxies usually set these)
+  const forwardedProto = (req.headers["x-forwarded-proto"] || "").split(",")[0] || req.protocol;
+  const forwardedHost = (req.headers["x-forwarded-host"] || req.headers["host"] || req.get("host") || "").split(",")[0];
+
+  const proto = forwardedProto || req.protocol || "https";
+  const host = forwardedHost || req.get("host") || "";
+
+  return `${proto.replace(/:$/, "")}://${host.replace(/\/$/, "")}`;
+};
+
 //@desc    register user
 //@route   GET /auth/page-access-link
 //@access  Private
@@ -35,34 +52,43 @@ module.exports.getPageAccessLink = asyncHandler(async (req, res, next) => {
     isBlocked: true,
   });
   await user.save();
-  const token = jwt.sign({ id: user._id }, "page-access", {
+
+  // Use env secret for page access tokens if available
+  const pageAccessSecret = process.env.PAGE_ACCESS_SECRET || "page-access";
+
+  const token = jwt.sign({ id: user._id }, pageAccessSecret, {
     expiresIn: "1d",
   });
   user.token = token;
   const tempUser = user;
 
   try {
-    const hostForAccess =
-      process.env.APP_BASE_URL && process.env.APP_BASE_URL.trim() !== ""
-        ? process.env.APP_BASE_URL.replace(/\/$/, "")
-        : `${req.protocol}://${req.get("host")}`.replace(/\/$/, "");
+    // Build host safely (prefer APP_BASE_URL; fallback to forwarded headers then req)
+    const hostForAccess = buildHostForAccess(req);
 
     const tokenPath = `/app/register/${tempUser.token}/get-access`;
+
+    // Build final absolute url and force https
     let finalUrl = tokenPath.startsWith("http")
       ? tokenPath
       : `${hostForAccess}${tokenPath}`;
+
+    // Convert any http:// to https:// to avoid mixed content in browsers
     finalUrl = finalUrl.replace(/^http:\/\//i, "https://");
 
-    console.log("Access URL:", finalUrl, { tempUserId: tempUser._id });
+    logger.info("Access URL generated", { finalUrl, tempUserId: tempUser._id });
     return res.json({ success: true, url: finalUrl, tempUser });
   } catch (err) {
-    console.error("page-access-link error", {
+    // Detailed error log for Render logs (do not leak to clients)
+    logger.error("page-access-link error", {
       err: err.stack || err,
       reqPath: req.path,
       tempUser: tempUser && tempUser._id,
       headers: req && req.headers,
     });
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 });
 
@@ -71,9 +97,13 @@ module.exports.getPageAccessLink = asyncHandler(async (req, res, next) => {
 //@access  Private
 module.exports.getAccess = asyncHandler(async (req, res, next) => {
   const { token } = req.params;
-  const decoded = jwt.verify(token, "page-access");
-  let user;
-  if (decoded.exp < (new Date().getTime() + 1) / 1000) {
+
+  const pageAccessSecret = process.env.PAGE_ACCESS_SECRET || "page-access";
+
+  const decoded = jwt.verify(token, pageAccessSecret);
+
+  // expiration check — JWT library sets exp in seconds since epoch
+  if (decoded.exp < Math.floor(Date.now() / 1000)) {
     res.status(400).send({
       success: false,
       code: 400,
@@ -82,14 +112,22 @@ module.exports.getAccess = asyncHandler(async (req, res, next) => {
     return;
   }
 
-  user = await TempUser.findById(decoded.id);
+  const user = await TempUser.findById(decoded.id);
+  if (!user) {
+    return res.status(400).send({
+      success: false,
+      code: 400,
+      message: "Invalid or expired link",
+    });
+  }
+
   let otp = randomNumber(6);
   user.otp = otp;
   await user.save();
-  const pageAccessToken = jwt.sign(
-    { id: decoded.id },
-    "valid-page-access-token"
-  );
+  const pageAccessToken = jwt.sign({ id: decoded.id }, process.env.PAGE_TOKEN_SECRET || "valid-page-access-token", {
+    // you may want an expiry here; keeping similar to original
+    expiresIn: "1h",
+  });
   res.status(200).send({
     success: true,
     code: 200,
@@ -97,6 +135,7 @@ module.exports.getAccess = asyncHandler(async (req, res, next) => {
     otp,
   });
 });
+
 //@desc    verify Otp
 //@route   get /auth/admin/verify-otp
 //@access  Private
@@ -280,7 +319,7 @@ module.exports.loginUser = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse("You are blocked", 400, false));
   }
 
-  if (req.headers.referer.includes("/admin/login")) {
+  if (req.headers.referer && req.headers.referer.includes("/admin/login")) {
     if (user.role !== "admin") {
       return next(new ErrorResponse("Invalid Credentials", 400, false));
     }
@@ -340,7 +379,7 @@ module.exports.webIndex = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse("You are blocked", 400, false));
   }
 
-  if (req.headers.referer.includes("/admin/login")) {
+  if (req.headers.referer && req.headers.referer.includes("/admin/login")) {
     if (user.role !== "admin") {
       return next(new ErrorResponse("Invalid Credentials", 400, false));
     }
