@@ -320,7 +320,7 @@ module.exports.createBill = asyncHandler(async (req, res, next) => {
     `new bill generated with this id ${bill._id} and create by ${req.user._id}`
   );
 
-  const pdfUrl = `${process.env.APP_BASE_URL}/bill/${bill._id}/pdf`;
+  const pdfUrl = `${(process.env.APP_BASE_URL || "https://vehicle-bill-backend-1.onrender.com").replace(/\/$/, "")}/bill/${bill._id}/pdf`;
 
   return res.status(201).send({
     success: true,
