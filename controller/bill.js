@@ -15,6 +15,8 @@ const path = require("path");
 const ip = require("ip");
 const moment = require("moment");
 const axios = require("axios");
+const puppeteer = require("puppeteer");
+
 
 //@desc    get details
 //@route   get /bill/:state/get-details/:vehicleNo
