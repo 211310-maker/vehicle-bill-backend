@@ -15,7 +15,7 @@ const path = require("path");
 const ip = require("ip");
 const moment = require("moment");
 const axios = require("axios");
-const puppeteer = require("puppeteer");
+
 
 //@desc    get details
 //@route   GET /bill/get-details?vehicleNo=XXX
@@ -42,14 +42,14 @@ module.exports.getDetails = asyncHandler(async (req, res, next) => {
   });
 });
 
-//@desc    get pdf
+//@desc    get pdf (HTML receipt page; browser can print to PDF)
 //@route   GET /bill/:id/pdf
 //@access  public
 module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // 1. get the bill details
+    // 1. Get the bill details
     const bill = await Bill.findById(id);
     if (!bill) {
       logger.info(`bill not found with this id ${id}`);
@@ -59,14 +59,14 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
 
     logger.info(`bill found with this id ${id}`);
 
-    // 2. Build QR code payload
+    // 2. Build QR code payload (same as before)
     const pdfData = `${
       process.env.NODE_ENV === "production"
         ? process.env.APP_BASE_IP
         : ip.address()
     }/bill/${id}/page?ChassisNo=${bill.chassisNo}&ownerName=${bill.ownerName}`;
 
-    // 3. Generate QR code (Promise API)
+    // 3. Generate QR code
     const src = await qrCode.toDataURL(pdfData);
     logger.error("Qr code generated");
 
@@ -103,41 +103,21 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
     logger.error("Html content generated");
 
     if (!htmlContent) {
-      return res
-        .status(500)
-        .json({ success: false, code: 500, message: "Failed to render HTML" });
+      return res.status(500).send("An error occurred while generating HTML");
     }
 
-    // 6. Use puppeteer to generate the PDF
-    const browser = await puppeteer.launch({
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
-
-    const page = await browser.newPage();
-    await page.setContent(htmlContent, { waitUntil: "networkidle0" });
-
-    const pdfBuffer = await page.pdf({
-      format: "A4",
-      printBackground: true,
-    });
-
-    await browser.close();
-
-    // 7. Send PDF buffer as response
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `inline; filename="${bill.vehicleNo}.pdf"`
-    );
-    return res.send(pdfBuffer);
+    // 6. Just return the HTML (browser can Print → Save as PDF)
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    return res.send(htmlContent);
   } catch (err) {
-    logger.error(`PDF generation error: ${err.message}`, { stack: err.stack });
+    logger.error(`PDF (HTML) generation error: ${err.message}`, {
+      stack: err.stack,
+    });
 
     return res.status(500).json({
       success: false,
       code: 500,
-      message: err.message,
-      stack: err.stack,
+      message: "Unable to generate pdf page, try again later",
     });
   }
 });
