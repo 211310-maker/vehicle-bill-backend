@@ -16,7 +16,6 @@ const ip = require("ip");
 const moment = require("moment");
 const axios = require("axios");
 
-
 //@desc    get details
 //@route   GET /bill/get-details?vehicleNo=XXX
 //@access  private (route is using protect)
@@ -59,22 +58,42 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
 
     logger.info(`bill found with this id ${id}`);
 
-    // 2. Build QR code payload (same as before)
-    const pdfData = `${
-      process.env.NODE_ENV === "production"
-        ? process.env.APP_BASE_IP
-        : ip.address()
-    }/bill/${id}/page?ChassisNo=${bill.chassisNo}&ownerName=${bill.ownerName}`;
+    // -------------------------
+    // 2. Build absolute QR code URL (must have protocol + host)
+    // prefer APP_BASE_URL if provided (should include http:// or https://)
+    const hostForQr =
+      (process.env.APP_BASE_URL && process.env.APP_BASE_URL.trim() !== "")
+        ? process.env.APP_BASE_URL.replace(/\/$/, "") // APP_BASE_URL always preferred
+        : (process.env.NODE_ENV === "production"
+            ? (
+                process.env.APP_BASE_IP && process.env.APP_BASE_IP.trim() !== ""
+                  ? process.env.APP_BASE_IP.replace(/\/$/, "")
+                  : `http://${ip.address()}:${process.env.PORT || 5000}`
+              )
+            : `http://${ip.address()}:${process.env.PORT || 5000}`
+          );
+
+    // Encode query values
+    const chassis = encodeURIComponent(bill.chassisNo || "");
+    const owner = encodeURIComponent(bill.ownerName || "");
+
+    // Build final absolute url for QR
+    const pdfData = `${hostForQr}/bill/${id}/page?ChassisNo=${chassis}&ownerName=${owner}`;
+
+    // Debug log so you can open this URL directly
+    logger.info("QR payload URL:", pdfData);
 
     // 3. Generate QR code
     const src = await qrCode.toDataURL(pdfData);
-    logger.error("Qr code generated");
+    logger.info("QR code generated");
+    // -------------------------
 
     // 4. Prepare data for EJS template
     const data = {
       ...bill._doc,
       src,
-      host: process.env.APP_BASE_URL,
+      // ensure host is always defined in template; prefer APP_BASE_URL but fallback to hostForQr
+      host: process.env.APP_BASE_URL || hostForQr,
       cssFix: process.env.NODE_ENV === "production",
       taxFrom: formatDate(bill.taxFromDate, true),
       receiptDate: getAheadTimeWithDate(bill.paymentDate),
@@ -100,7 +119,7 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
     const templatePath = path.join(__dirname, `../views/${bill.state}Pdf.ejs`);
     const htmlContent = await ejs.renderFile(templatePath, { data });
 
-    logger.error("Html content generated");
+    logger.info("Html content generated");
 
     if (!htmlContent) {
       return res.status(500).send("An error occurred while generating HTML");
@@ -148,7 +167,8 @@ module.exports.getBillOnPageFormat = asyncHandler(async (req, res, next) => {
 
   const data = {
     ...bill._doc,
-    host: process.env.APP_BASE_URL,
+    // ensure host for templates is always available - prefer APP_BASE_URL else construct from request
+    host: process.env.APP_BASE_URL || `http://${req.headers.host}`,
     cssFix: process.env.NODE_ENV === "production",
     taxFrom: formatDate(bill.taxFromDate, true),
     taxTo: formatDate(bill.taxUptoDate, true),
