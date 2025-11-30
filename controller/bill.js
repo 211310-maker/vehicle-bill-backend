@@ -132,18 +132,17 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       `inline; filename="${bill.vehicleNo}.pdf"`
     );
     res.send(pdfBuffer);
-  } catch (err) {
-    logger.error(`PDF generation error: ${err.message}`, { stack: err.stack });
-    return next(
-      new ErrorResponse(
-        "Unable to generate pdf, try again later",
-        500,
-        false,
-        null
-      )
-    );
-  }
-});
+ } catch (err) {
+  logger.error(`PDF generation error: ${err.message}`, { stack: err.stack });
+
+  return res.status(500).json({
+    success: false,
+    code: 500,
+    message: err.message, // 👈 real error
+    stack: err.stack,     // 👈 helpful
+  });
+}
+
 
 
 //@desc    get all
