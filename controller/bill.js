@@ -17,32 +17,29 @@ const moment = require("moment");
 const axios = require("axios");
 const puppeteer = require("puppeteer");
 
-
 //@desc    get details
-//@route   get /bill/:state/get-details/:vehicleNo
-//@access  public
+//@route   GET /bill/get-details?vehicleNo=XXX
+//@access  private (you’re using protect on the route)
 module.exports.getDetails = asyncHandler(async (req, res, next) => {
-  // find from db
   logger.info(
     `member asked detail for ${req.query.vehicleNo} from ${req.params.state} form`
   );
+
   const detail = await Bill.findOne({ ...req.query }).sort({ createdAt: "-1" });
+
   if (!detail) {
-    res.status(404).send({
+    return res.status(404).send({
       success: false,
       code: 404,
       message: "No detail found",
     });
-  } else {
-    res.status(200).send({
-      success: true,
-      code: 200,
-      detail,
-    });
   }
 
-  //TODO:
-  // send different fields data based on different state
+  return res.status(200).send({
+    success: true,
+    code: 200,
+    detail,
+  });
 });
 
 //@desc    get pdf
@@ -112,7 +109,6 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
     // 6. Use puppeteer to generate the PDF
     const browser = await puppeteer.launch({
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      // headless: "new", // optional, but safe
     });
 
     const page = await browser.newPage();
@@ -131,19 +127,19 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       "Content-Disposition",
       `inline; filename="${bill.vehicleNo}.pdf"`
     );
-    res.send(pdfBuffer);
- } catch (err) {
-  logger.error(`PDF generation error: ${err.message}`, { stack: err.stack });
+    return res.send(pdfBuffer);
+  } catch (err) {
+    // DEBUG: show real error for now
+    logger.error(`PDF generation error: ${err.message}`, { stack: err.stack });
 
-  return res.status(500).json({
-    success: false,
-    code: 500,
-    message: err.message, // 👈 real error
-    stack: err.stack,     // 👈 helpful
-  });
-}
-
-
+    return res.status(500).json({
+      success: false,
+      code: 500,
+      message: err.message,
+      stack: err.stack,
+    });
+  }
+});
 
 //@desc    get all
 //@route   GET /bill
@@ -151,7 +147,7 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
 //@query   ?from=&to=&createdBy=&
 module.exports.getAllBills = asyncHandler(async (req, res, next) => {
   const bills = await Bill.find({ ...req.query }).sort({ createdAt: "-1" });
-  res
+  return res
     .status(200)
     .send({ success: true, code: 200, bills, count: bills.length });
 });
@@ -160,15 +156,15 @@ module.exports.getAllBills = asyncHandler(async (req, res, next) => {
 //@route   GET /bill/:id/page
 //@access  public
 module.exports.getBillOnPageFormat = asyncHandler(async (req, res, next) => {
-  // get id from params
   const { id } = req.params;
-  // // get the bill details
+
   const bill = await Bill.findById(id);
   if (!bill) {
     logger.info(`bill not found with this id ${id}`);
     res.status(404);
     return res.render("not-found");
   }
+
   const data = {
     ...bill._doc,
     host: process.env.APP_BASE_URL,
@@ -194,11 +190,15 @@ module.exports.getBillOnPageFormat = asyncHandler(async (req, res, next) => {
     path.join(__dirname, `../views/pages/${bill.state}Page.ejs`),
     { data },
     function (err, htmlContent) {
-      // render on success
+      if (err) {
+        logger.error(`Error rendering bill page: ${err.message}`);
+        return res.status(500).send("An error occurred");
+      }
+
       if (htmlContent) {
-        res.send(htmlContent);
+        return res.send(htmlContent);
       } else {
-        res.status(500).send("An error occurred");
+        return res.status(500).send("An error occurred");
       }
     }
   );
@@ -213,7 +213,7 @@ const formatDateMsg = (date, state, type) => {
     if (["up", "uk", "rajasthan"].includes(state)) {
       if (type !== "createdAt") {
         time.setHours(12);
-        time.setMinutes(00);
+        time.setMinutes(0);
       }
       time = time.toLocaleTimeString();
       if (type !== "createdAt") {
@@ -230,7 +230,7 @@ const formatDateMsg = (date, state, type) => {
         })
         .toUpperCase()}-${new Date(date).getFullYear()} ${time}`;
     } else {
-      if (type == "to") {
+      if (type === "to") {
         time.setMinutes(time.getMinutes() - 1);
       }
       time = time.toLocaleTimeString();
@@ -243,21 +243,23 @@ const formatDateMsg = (date, state, type) => {
     }
     return x;
   } else {
-    // fallback current date
-    return `${new Date().getDate()}-${new Date().toLocaleDateString("default", {
-      month: "short",
-    })}-${new Date().getFullYear()} ${new Date().toLocaleTimeString()}`;
+    return `${new Date().getDate()}-${new Date().toLocaleDateString(
+      "default",
+      {
+        month: "short",
+      }
+    )}-${new Date().getFullYear()} ${new Date().toLocaleTimeString()}`;
   }
 };
 
 //@desc    create bill
-//@route   POST /bill/post
+//@route   POST /bill
 //@access  private
 module.exports.createBill = asyncHandler(async (req, res, next) => {
-  // get data from body
   const { username, password } = req.body;
   console.log(username, password);
   console.log(process.env.PAYMENT_USERNAME);
+
   if (
     username !== process.env.PAYMENT_USERNAME &&
     password !== process.env.PAYMENT_PASSWORD
@@ -270,15 +272,16 @@ module.exports.createBill = asyncHandler(async (req, res, next) => {
   const bill = new Bill({ ...req.body });
   bill.createdBy = req.user._id;
   bill.receiptNo = receiptNoGenerator(req.body.state);
+
   let time = new Date(req.body.taxFromDate);
   time.setSeconds(new Date().getSeconds());
   bill.paymentDate = time;
-  // save to db
 
   await bill.save();
-  var data = JSON.stringify({});
 
-  var config = {
+  const data = JSON.stringify({});
+
+  const config = {
     method: "get",
     maxBodyLength: Infinity,
     url: `http://login.redsms.in/api/smsapi?key=c2c84407ebb090fc094fc169192f9cc8&route=2&sender=UVAHAN&number=${
@@ -315,12 +318,10 @@ module.exports.createBill = asyncHandler(async (req, res, next) => {
   logger.info(
     `new bill generated with this id ${bill._id} and create by ${req.user._id}`
   );
-  // generate pdf url
+
   const pdfUrl = `${process.env.APP_BASE_URL}/bill/${bill._id}/pdf`;
-  // send message to number
-  //TODO:
-  // return response
-  res.status(201).send({
+
+  return res.status(201).send({
     success: true,
     code: 201,
     bill,
