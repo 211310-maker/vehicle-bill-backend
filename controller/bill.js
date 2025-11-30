@@ -46,91 +46,92 @@ module.exports.getDetails = asyncHandler(async (req, res, next) => {
 });
 
 //@desc    get pdf
-//@route   get /bill/:id/pdf
+//@route   GET /bill/:id/pdf
 //@access  public
 module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
-  // get id from params
   const { id } = req.params;
-  // // get the bill details
+
+  // 1. Get the bill details
   const bill = await Bill.findById(id);
   if (!bill) {
     logger.info(`bill not found with this id ${id}`);
     res.status(404);
     return res.render("not-found");
   }
+
   logger.info(`bill found with this id ${id}`);
+
+  // 2. Build QR code payload
   const pdfData = `${
     process.env.NODE_ENV === "production"
       ? process.env.APP_BASE_IP
       : ip.address()
-  }/bill/${id}/page?ChassisNo=${bill.chassisNo}&ownerName=${bill.ownerName}
-  
-  `;
-  // const pdfData = `Vehicle No :  ${bill.vehicleNo} \nOwner name : ${bill.ownerName} \nfrom State : ${bill.fromState} \nVehicle class : ${bill.vehicleClass}`;
+  }/bill/${id}/page?ChassisNo=${bill.chassisNo}&ownerName=${bill.ownerName}`;
 
-  qrCode.toDataURL(pdfData, (err, src) => {
-    if (err) {
-      logger.error(`Unable to generate pdf package callback error`);
-      return next(
-        new ErrorResponse(
-          "Unbale to generate pdf, try again later",
-          400,
-          false,
-          null
-        )
-      );
-    }
-    logger.error(`Qr code generated`);
-    const data = {
-      ...bill._doc,
-      src,
-      host: process.env.APP_BASE_URL,
-      cssFix: process.env.NODE_ENV === "production",
-      taxFrom: formatDate(bill.taxFromDate, true),
-      receiptDate: getAheadTimeWithDate(bill.paymentDate),
-      taxTo: formatDate(bill.taxUptoDate, true),
-      taxFrom_up: formatDate(bill.taxFromDate, false),
-      taxTo_up: formatDate(bill.taxUptoDate, false),
-      taxFrom_raj: formatDate(bill.taxFromDate, false),
-      taxTo_raj: formatDate(bill.taxUptoDate, false),
-      taxFrom_uk: formatDate(bill.taxFromDate, true),
-      taxTo_uk: formatDate(bill.taxUptoDate, true),
-      taxFrom_jh: formatDate(bill.taxFromDate, false),
-      taxTo_jh: formatDate(bill.taxUptoDate, false),
-      permitFrom: formatDate(bill.permitFrom, false),
-      permitUpto: formatDate(bill.permitUpto, false),
-      totalAmountInWord: inWords(bill.totalAmount).toUpperCase(),
-      paymentDate: formatDate(bill.paymentDate, true),
-      upPaymentDate: formatDate(bill.paymentDate, false),
-      upBankRefNo: "IGANXUHFSS",
-      rjBankRefNo: "1KBVoBVBSMGg",
-    };
+  // 3. Generate QR code (Promise API)
+  const src = await qrCode.toDataURL(pdfData);
+  logger.error("Qr code generated");
 
-    ejs.renderFile(
-      path.join(__dirname, `../views/${bill.state}Pdf.ejs`),
-      { data },
-      function (err, htmlContent) {
-        logger.error(`Html content generated`);
-        // render on success
-        if (htmlContent) {
-          res.setHeader("Content-Type", "application/pdf");
-          res.pdfFromHTML({
-            filename: `${bill.vehicleNo}.pdf`,
-            htmlContent,
-            options: {
-              format: "Letter",
-              orientation: "portrait",
-              type: "pdf",
-              quality: "75",
-            },
-          });
-        } else {
-          res.status(500).send("An error occurred");
-        }
-      }
-    );
+  // 4. Prepare data for EJS template
+  const data = {
+    ...bill._doc,
+    src,
+    host: process.env.APP_BASE_URL,
+    cssFix: process.env.NODE_ENV === "production",
+    taxFrom: formatDate(bill.taxFromDate, true),
+    receiptDate: getAheadTimeWithDate(bill.paymentDate),
+    taxTo: formatDate(bill.taxUptoDate, true),
+    taxFrom_up: formatDate(bill.taxFromDate, false),
+    taxTo_up: formatDate(bill.taxUptoDate, false),
+    taxFrom_raj: formatDate(bill.taxFromDate, false),
+    taxTo_raj: formatDate(bill.taxUptoDate, false),
+    taxFrom_uk: formatDate(bill.taxFromDate, true),
+    taxTo_uk: formatDate(bill.taxUptoDate, true),
+    taxFrom_jh: formatDate(bill.taxFromDate, false),
+    taxTo_jh: formatDate(bill.taxUptoDate, false),
+    permitFrom: formatDate(bill.permitFrom, false),
+    permitUpto: formatDate(bill.permitUpto, false),
+    totalAmountInWord: inWords(bill.totalAmount).toUpperCase(),
+    paymentDate: formatDate(bill.paymentDate, true),
+    upPaymentDate: formatDate(bill.paymentDate, false),
+    upBankRefNo: "IGANXUHFSS",
+    rjBankRefNo: "1KBVoBVBSMGg",
+  };
+
+  // 5. Render HTML using EJS (Promise API)
+  const templatePath = path.join(__dirname, `../views/${bill.state}Pdf.ejs`);
+  const htmlContent = await ejs.renderFile(templatePath, { data });
+
+  logger.error("Html content generated");
+
+  if (!htmlContent) {
+    return res.status(500).send("An error occurred while generating HTML");
+  }
+
+  // 6. Use puppeteer to generate the PDF
+  const browser = await puppeteer.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
+
+  const page = await browser.newPage();
+  await page.setContent(htmlContent, { waitUntil: "networkidle0" });
+
+  const pdfBuffer = await page.pdf({
+    format: "A4",
+    printBackground: true,
+  });
+
+  await browser.close();
+
+  // 7. Send PDF buffer as response
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader(
+    "Content-Disposition",
+    `inline; filename="${bill.vehicleNo}.pdf"`
+  );
+  res.send(pdfBuffer);
 });
+
 
 //@desc    get all
 //@route   GET /bill
