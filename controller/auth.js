@@ -38,10 +38,18 @@ module.exports.getPageAccessLink = asyncHandler(async (req, res, next) => {
   const token = jwt.sign({ id: user._id }, "page-access", {
     expiresIn: "1d",
   });
-  res.status(200).send({
+  const host = process.env.APP_BASE_URL
+    ? process.env.APP_BASE_URL.replace(/\/$/, "")
+    : `${req.protocol}://${req.get("host")}`.replace(/\/$/, "");
+
+  const path = `/app/register/${token}/get-access`;
+  const finalUrl = `${host}${path}`;
+
+  console.log("Access URL:", finalUrl);
+
+  return res.json({
     success: true,
-    code: 200,
-    url: `/app/register/${token}/get-access`,
+    url: finalUrl,
     tempUser: user,
   });
 });
