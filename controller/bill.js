@@ -88,7 +88,7 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
     logger.info("QR code generated");
     // -------------------------
 
-    // 4. Prepare data for EJS template
+    // 4. Prepare data for EJS template (use safe defaults)
     const data = {
       ...bill._doc,
       src,
@@ -108,7 +108,7 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       taxTo_jh: formatDate(bill.taxUptoDate, false),
       permitFrom: formatDate(bill.permitFrom, false),
       permitUpto: formatDate(bill.permitUpto, false),
-      totalAmountInWord: inWords(bill.totalAmount).toUpperCase(),
+      totalAmountInWord: inWords(bill.totalAmount || 0).toUpperCase(),
       paymentDate: formatDate(bill.paymentDate, true),
       upPaymentDate: formatDate(bill.paymentDate, false),
       upBankRefNo: "IGANXUHFSS",
@@ -116,7 +116,9 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
     };
 
     // 5. Render HTML using EJS
-    const templatePath = path.join(__dirname, `../views/${bill.state}Pdf.ejs`);
+    // Normalize state filename to lowercase to avoid case mismatch on Linux/Render
+    const stateFile = String(bill.state || "").toLowerCase();
+    const templatePath = path.join(__dirname, `../views/${stateFile}Pdf.ejs`);
     const htmlContent = await ejs.renderFile(templatePath, { data });
 
     logger.info("Html content generated");
@@ -158,51 +160,80 @@ module.exports.getAllBills = asyncHandler(async (req, res, next) => {
 module.exports.getBillOnPageFormat = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 
-  const bill = await Bill.findById(id);
-  if (!bill) {
-    logger.info(`bill not found with this id ${id}`);
-    res.status(404);
-    return res.render("not-found");
-  }
+  try {
+    const bill = await Bill.findById(id);
+    if (!bill) {
+      logger.info(`bill not found with this id ${id}`);
+      res.status(404);
+      return res.render("not-found");
+    }
 
-  const data = {
-    ...bill._doc,
-    // ensure host for templates is always available - prefer APP_BASE_URL else construct from request
-    host: process.env.APP_BASE_URL || `http://${req.headers.host}`,
-    cssFix: process.env.NODE_ENV === "production",
-    taxFrom: formatDate(bill.taxFromDate, true),
-    taxTo: formatDate(bill.taxUptoDate, true),
-    taxFrom_up: formatDate(bill.taxFromDate, false),
-    taxTo_up: formatDate(bill.taxUptoDate, false),
-    taxFrom_raj: formatDate(bill.taxFromDate, true),
-    taxTo_raj: formatDate(bill.taxUptoDate, true),
-    taxFrom_uk: formatDate(bill.taxFromDate, true),
-    taxTo_uk: formatDate(bill.taxUptoDate, true),
-    permitFrom: formatDate(bill.permitFrom, false),
-    permitUpto: formatDate(bill.permitUpto, false),
-    totalAmountInWord: inWords(bill.totalAmount).toUpperCase(),
-    paymentDate: formatDate(bill.paymentDate, true),
-    upPaymentDate: formatDate(bill.paymentDate, false),
-    upBankRefNo: "IGANXUHFSS",
-    rjBankRefNo: "1KBVoBVBSMGg",
-  };
+    // Build data object for template with safe defaults
+    const data = {
+      ...bill._doc,
+      host: process.env.APP_BASE_URL || `https://${req.headers.host}`,
+      cssFix: process.env.NODE_ENV === "production",
+      taxFrom: formatDate(bill.taxFromDate, true),
+      taxTo: formatDate(bill.taxUptoDate, true),
+      taxFrom_up: formatDate(bill.taxFromDate, false),
+      taxTo_up: formatDate(bill.taxUptoDate, false),
+      taxFrom_raj: formatDate(bill.taxFromDate, true),
+      taxTo_raj: formatDate(bill.taxUptoDate, true),
+      taxFrom_uk: formatDate(bill.taxFromDate, true),
+      taxTo_uk: formatDate(bill.taxUptoDate, true),
+      permitFrom: formatDate(bill.permitFrom, false),
+      permitUpto: formatDate(bill.permitUpto, false),
+      totalAmountInWord: inWords(bill.totalAmount || 0).toUpperCase(),
+      paymentDate: formatDate(bill.paymentDate, true),
+      upPaymentDate: formatDate(bill.paymentDate, false),
+      upBankRefNo: "IGANXUHFSS",
+      rjBankRefNo: "1KBVoBVBSMGg",
+    };
 
-  ejs.renderFile(
-    path.join(__dirname, `../views/pages/${bill.state}Page.ejs`),
-    { data },
-    function (err, htmlContent) {
+    // Normalize state file name (lowercase) to avoid filename case issues on Linux
+    const stateFile = String(bill.state || "").toLowerCase();
+    const templatePath = path.join(__dirname, `../views/pages/${stateFile}Page.ejs`);
+
+    // Debug logs to help find the issue in Render logs
+    logger.info(`Rendering bill page. billId=${id}, billState=${bill.state}, templatePath=${templatePath}`);
+    logger.info(`Bill document keys: ${Object.keys(bill._doc).join(", ")}`);
+
+    // Check template exists before rendering
+    const fs = require("fs");
+    if (!fs.existsSync(templatePath)) {
+      logger.error(`Template missing for state=${bill.state}, path=${templatePath}`);
+      return res.status(500).send("Template for this state is not available.");
+    }
+
+    ejs.renderFile(templatePath, { data }, function (err, htmlContent) {
       if (err) {
-        logger.error(`Error rendering bill page: ${err.message}`);
-        return res.status(500).send("An error occurred");
+        // Log full stack and helpful context — this will appear in Render logs
+        logger.error(`Error rendering bill page for id=${id}, state=${bill.state}, err=${err.message}`, {
+          stack: err.stack,
+          billId: id,
+          billState: bill.state,
+          reqQuery: req.query,
+        });
+
+        // TEMP: send full stack back to client for debugging (remove ASAP once fixed)
+        return res.status(500).send(`<pre>${err.stack}</pre>`);
       }
 
       if (htmlContent) {
         return res.send(htmlContent);
       } else {
+        logger.error(`Rendered HTML empty for id=${id}, state=${bill.state}`);
         return res.status(500).send("An error occurred");
       }
-    }
-  );
+    });
+  } catch (err) {
+    logger.error(`Unhandled error in getBillOnPageFormat for id=${id}: ${err.message}`, {
+      stack: err.stack,
+      reqParams: req.params,
+      reqQuery: req.query,
+    });
+    return res.status(500).send("An error occurred");
+  }
 });
 
 const formatDateMsg = (date, state, type) => {
