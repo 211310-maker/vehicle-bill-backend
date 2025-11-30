@@ -4,9 +4,8 @@
   "description": "backend built with Node.js, MongoDb",
   "main": "server.js",
   "scripts": {
-  "start": "node server.js",
-  "dev": "cross-env NODE_ENV=dev nodemon server.js"
-}
+    "start": "node server.js",
+    "dev": "cross-env NODE_ENV=dev nodemon server.js"
   },
   "engines": {
     "node": "18.x",
