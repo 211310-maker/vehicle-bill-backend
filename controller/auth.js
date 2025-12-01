@@ -25,6 +25,12 @@ const ALL_STATES = [
   "CHHATTISGARH",
   "ODISHA",
   "TAMILNADU",
+  "TELANGANA",
+  "ASSAM",
+  "PUDUCHERRY",
+  "DAMAN & DIU",
+  "SIKKIM",
+  "TRIPURA",
 ];
 
 // Helper: get host for links, preferring APP_BASE_URL then forwarded headers then req

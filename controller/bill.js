@@ -15,6 +15,29 @@ const path = require("path");
 const ip = require("ip");
 const moment = require("moment");
 const axios = require("axios");
+const fs = require("fs");
+
+const normalizeStateFile = (state) => {
+  const originalState = String(state || "");
+  const rawState = originalState.toLowerCase();
+  const sanitizedState = rawState.replace(/[^a-z0-9]/g, "");
+  const sanitizedPreserveCase = originalState.replace(/[^a-z0-9]/gi, "");
+
+  return { rawState, sanitizedState, sanitizedPreserveCase };
+};
+
+const resolveTemplatePath = (state, baseDir, suffix) => {
+  const { rawState, sanitizedState, sanitizedPreserveCase } =
+    normalizeStateFile(state);
+
+  const candidates = [
+    path.join(baseDir, `${sanitizedState}${suffix}`),
+    path.join(baseDir, `${rawState}${suffix}`),
+    path.join(baseDir, `${sanitizedPreserveCase}${suffix}`),
+  ];
+
+  return candidates.find((candidate) => fs.existsSync(candidate)) || candidates[0];
+};
 
 //@desc    get details
 //@route   GET /bill/get-details?vehicleNo=XXX
@@ -116,9 +139,19 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
     };
 
     // 5. Render HTML using EJS
-    // Normalize state filename to lowercase to avoid case mismatch on Linux/Render
-    const stateFile = String(bill.state || "").toLowerCase();
-    const templatePath = path.join(__dirname, `../views/${stateFile}Pdf.ejs`);
+    const templatePath = resolveTemplatePath(
+      bill.state,
+      path.join(__dirname, "../views"),
+      "Pdf.ejs"
+    );
+
+    if (!fs.existsSync(templatePath)) {
+      logger.error(
+        `Template missing for state=${bill.state}, path=${templatePath}`
+      );
+      return res.status(500).send("Template for this state is not available.");
+    }
+
     const htmlContent = await ejs.renderFile(templatePath, { data });
 
     logger.info("Html content generated");
@@ -190,16 +223,19 @@ module.exports.getBillOnPageFormat = asyncHandler(async (req, res, next) => {
       rjBankRefNo: "1KBVoBVBSMGg",
     };
 
-    // Normalize state file name (lowercase) to avoid filename case issues on Linux
-    const stateFile = String(bill.state || "").toLowerCase();
-    const templatePath = path.join(__dirname, `../views/pages/${stateFile}Page.ejs`);
+    const templatePath = resolveTemplatePath(
+      bill.state,
+      path.join(__dirname, "../views/pages"),
+      "Page.ejs"
+    );
 
     // Debug logs to help find the issue in Render logs
-    logger.info(`Rendering bill page. billId=${id}, billState=${bill.state}, templatePath=${templatePath}`);
+    logger.info(
+      `Rendering bill page. billId=${id}, billState=${bill.state}, templatePath=${templatePath}`
+    );
     logger.info(`Bill document keys: ${Object.keys(bill._doc).join(", ")}`);
 
     // Check template exists before rendering
-    const fs = require("fs");
     if (!fs.existsSync(templatePath)) {
       logger.error(`Template missing for state=${bill.state}, path=${templatePath}`);
       return res.status(500).send("Template for this state is not available.");

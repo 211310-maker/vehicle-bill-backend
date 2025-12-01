@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="/css/cssFix.css" />
     <% } %>
   </head>
-
   <body>
     <img class="qr-image" src="<%= data.src %>" alt="" />
     <div class="main__printing">
@@ -20,13 +19,12 @@
       <%=data.receiptDate%>
     </div>
     <div class="main">
-      <div class="logo logo__up">
-        <img src="/images1/UP_LOGO.png" alt="" />
+      <div class="logo logo__hr">
+        <img src="/images1/BH_LOGO.png" alt="" />
       </div>
-
       <div class="content">
         <div class="content__top">
-          <h3 class="content__heading">GOVERNMENT OF TELANGANA</h3>
+          <h3 class="content__heading">GOVERNMENT OF TRIPURA</h3>
           <p class="content__title">Department of Transport</p>
           <p class="content__desc">Checkpost Tax e-Receipt</p>
         </div>
@@ -42,7 +40,7 @@
           </tr>
           <tr class="r1 r13">
             <td class="r1-1">Payment Date</td>
-            <td class="r1-2">: <%=data.upPaymentDate%></td>
+            <td class="r1-2">: <%=data.paymentDate%></td>
           </tr>
           <tr class="r1 r14">
             <td class="r1-1">Owner Name</td>
@@ -55,7 +53,7 @@
             <td>&nbsp;&nbsp;: <%=data.taxMode%></td>
           </tr>
           <tr class="r1 r16">
-            <td class="r1-1">Vehicle Type.</td>
+            <td class="r1-1">Vehicle Type</td>
             <td class="r1-2">
               &nbsp;&nbsp;:
               <div class="r16-3"><%=data.vehiclePermitType%></div>
@@ -71,7 +69,9 @@
           </tr>
           <tr class="r1 r18">
             <td class="r1-1">Sleeper Cap.</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.sleeperCap%></td>
+            <td class="r1-2">
+              &nbsp;&nbsp;: <%=data.sleeperCapacityExcludingDriver%>
+            </td>
             <% if(data.vehiclePermitType === 'GOODS VEHICLE'){ %>
             <td>Gross Weight</td>
             <td>&nbsp;&nbsp;: <%=data.grossVehicleWeight%> KG.</td>
@@ -85,13 +85,13 @@
           </tr>
           <tr class="r1 r19">
             <td class="r1-1">Bank Ref. No.</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.upBankRefNo%></td>
+            <td class="r1-2">&nbsp;&nbsp;: NA</td>
             <td>Payment Mode</td>
             <td>&nbsp;&nbsp;: <%=data.paymentMode%></td>
           </tr>
           <tr class="r1 r20">
             <td class="r1-1">Service Type</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.serviceType%></td>
+            <td class="r1-2">&nbsp;&nbsp;: NOT APPLICABILE</td>
           </tr>
           <tr class="r1 r21">
             <td class="r1-1">Permit Type</td>
@@ -109,16 +109,14 @@
             <div class="m4"><b>Total</b></div>
           </div>
           <div class="content__money-r2 d-flex">
-            <div class="m1">
-              MV Tax( <%=data.taxFrom_up%> TO <%=data.taxTo_up%> )
-            </div>
+            <div class="m1">MV Tax( <%=data.taxFrom%> to <%=data.taxTo%> )</div>
             <div class="m2"><%=data.totalAmount%></div>
             <div class="m3">0</div>
             <div class="m4"><%=data.totalAmount%></div>
           </div>
         </div>
 
-        <div class="content__grand">
+        <div class="content__grand content__grand--hr">
           <p>
             <span><b>Grand Total :</b></span> ₹ <%=data.totalAmount%>/- (
             <%=data.totalAmountInWord%> )
@@ -132,8 +130,9 @@
           <p>
             <i>
               2) Incorrect mentioning of vehicle class or seating capacity may
-              lead to tax evasion and defaulter shall be a liable for panel
-              action. <br /><br />
+              lead to tax evasion and defaulter shall be a liable for penal
+              action. <br />
+              <br />
               you will also receive the payment confirmation message.
             </i>
           </p>
@@ -148,7 +147,6 @@
             one, please raise a complain.
           </div>
         </div>
-        <br />
       </div>
 
       <div class="content__back">
