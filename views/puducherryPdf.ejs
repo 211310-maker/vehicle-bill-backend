@@ -40,7 +40,7 @@
           </tr>
           <tr class="r1 r13">
             <td class="r1-1">Payment Date</td>
-            <td class="r1-2">: <%=data.paymentDate%></td>
+            <td class="r1-2">: <%=data.upPaymentDate%></td>
           </tr>
           <tr class="r1 r14">
             <td class="r1-1">Owner Name</td>
@@ -53,7 +53,7 @@
             <td>&nbsp;&nbsp;: <%=data.taxMode%></td>
           </tr>
           <tr class="r1 r16">
-            <td class="r1-1">Vehicle Type</td>
+            <td class="r1-1">Vehicle Type.</td>
             <td class="r1-2">
               &nbsp;&nbsp;:
               <div class="r16-3"><%=data.vehiclePermitType%></div>
@@ -69,9 +69,7 @@
           </tr>
           <tr class="r1 r18">
             <td class="r1-1">Sleeper Cap.</td>
-            <td class="r1-2">
-              &nbsp;&nbsp;: <%=data.sleeperCapacityExcludingDriver%>
-            </td>
+            <td class="r1-2">&nbsp;&nbsp;: <%=data.sleeperCap%></td>
             <% if(data.vehiclePermitType === 'GOODS VEHICLE'){ %>
             <td>Gross Weight</td>
             <td>&nbsp;&nbsp;: <%=data.grossVehicleWeight%> KG.</td>
@@ -85,13 +83,13 @@
           </tr>
           <tr class="r1 r19">
             <td class="r1-1">Bank Ref. No.</td>
-            <td class="r1-2">&nbsp;&nbsp;: NA</td>
+            <td class="r1-2">&nbsp;&nbsp;: <%=data.upBankRefNo%></td>
             <td>Payment Mode</td>
             <td>&nbsp;&nbsp;: <%=data.paymentMode%></td>
           </tr>
           <tr class="r1 r20">
             <td class="r1-1">Service Type</td>
-            <td class="r1-2">&nbsp;&nbsp;: NOT APPLICABILE</td>
+            <td class="r1-2">&nbsp;&nbsp;: <%=data.serviceType%></td>
           </tr>
           <tr class="r1 r21">
             <td class="r1-1">Permit Type</td>
@@ -109,111 +107,48 @@
             <div class="m4"><b>Total</b></div>
           </div>
           <div class="content__money-r2 d-flex">
-            <div class="m1">MV Tax( <%=data.taxFrom%> to <%=data.taxTo%> )</div>
+            <div class="m1">
+              MV Tax( <%=data.taxFrom_up%> TO <%=data.taxTo_up%> )
+            </div>
             <div class="m2"><%=data.totalAmount%></div>
             <div class="m3">0</div>
             <div class="m4"><%=data.totalAmount%></div>
           </div>
         </div>
 
-        <div class="content__grand content__grand--hr">
-          <p>
-            <span><b>Grand Total :</b></span> ₹ <%=data.totalAmount%>/- (
-            <%=data.totalAmountInWord%> )
-          </p>
-          <p>
-            <i
-              >Note : 1) This is a computer generated printout and no signature
-              is required</i
-            >
-          </p>
-          <p>
-            <i>
-              2) Incorrect mentioning of vehicle class or seating capacity may
-              lead to tax evasion and defaulter shall be a liable for penal
-              action. <br />
-              <br />
-              you will also receive the payment confirmation message.
-            </i>
-          </p>
-          <br />
-          <br />
-          <p class="main__warning">
-            Scan the QR code for genuinity of the receipt, It should land at
-            <span><u>https://kms.privahan.gov.in</u></span> <br />
-          </p>
-          <div class="main__warning main__warning-2">
-            site. In case the URL is different, then receipt could be a fake
-            one, please raise a complain.
+        <div class="content__amount">
+          <div class="content__amount-r1">
+            <div class="a1">
+              Amount in Words: <%=data.totalAmountInWord%> ONLY</div>
+          </div>
+          <div class="content__amount-r2">
+            <div class="a1">
+              Paid Upto: <%=data.taxTo_up%>
+            </div>
+            <div class="a2">Total Paid: <%=data.totalAmount%></div>
           </div>
         </div>
-      </div>
-
-      <div class="content__back">
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
+        <div class="content__last">
+          <div class="content__last-title">
+            <p>Condition for Acceptance of Payment of Tax</p>
+          </div>
+          <div class="content__last-text">
+            <p>
+              1. The Tax so recovered is subject to verification of documents and
+              loading capacity of vehicle. In case of any false information
+              pertaining to the documents such as vehicle particulars, the tax,
+              penalty and other charges collected shall be adjusted against tax
+              due and balance collected from the vehicle owner/user.
+            </p>
+            <br />
+            <p>
+              2. Checkpost authorities reserve the right to cancel or modify the
+              entire tax in case where the owner of the vehicle or driver provide
+              false information in the payment of tax. Any excess payment shall
+              be refunded back to the vehicle owner/user on reconciliation.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </body>
