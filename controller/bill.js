@@ -84,17 +84,16 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
     // -------------------------
     // 2. Build absolute QR code URL (must have protocol + host)
     // prefer APP_BASE_URL if provided (should include http:// or https://)
+    const defaultRenderHost = "https://vehicle-bill-backend-1.onrender.com";
+
     const hostForQr =
-      (process.env.APP_BASE_URL && process.env.APP_BASE_URL.trim() !== "")
+      process.env.APP_BASE_URL && process.env.APP_BASE_URL.trim() !== ""
         ? process.env.APP_BASE_URL.replace(/\/$/, "") // APP_BASE_URL always preferred
-        : (process.env.NODE_ENV === "production"
-            ? (
-                process.env.APP_BASE_IP && process.env.APP_BASE_IP.trim() !== ""
-                  ? process.env.APP_BASE_IP.replace(/\/$/, "")
-                  : `http://${ip.address()}:${process.env.PORT || 5000}`
-              )
-            : `http://${ip.address()}:${process.env.PORT || 5000}`
-          );
+        : process.env.APP_BASE_IP && process.env.APP_BASE_IP.trim() !== ""
+          ? process.env.APP_BASE_IP.replace(/\/$/, "")
+          : process.env.NODE_ENV === "production"
+            ? defaultRenderHost
+            : `http://${ip.address()}:${process.env.PORT || 5000}`;
 
     // Encode query values
     const chassis = encodeURIComponent(bill.chassisNo || "");
