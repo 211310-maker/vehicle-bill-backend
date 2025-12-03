@@ -10,6 +10,7 @@ const logger = require("../logger");
 const { randomNumber } = require("../utils/helper");
 
 const ALL_STATES = [
+  // 28 Indian states (canonical order)
   "ANDHRA PRADESH",
   "ARUNACHAL PRADESH",
   "ASSAM",
@@ -29,17 +30,18 @@ const ALL_STATES = [
   "MIZORAM",
   "NAGALAND",
   "ODISHA",
-  "PUDUCHERRY",
   "PUNJAB",
   "RAJASTHAN",
   "SIKKIM",
   "TAMIL NADU",
   "TELANGANA",
   "TRIPURA",
-  "DAMAN & DIU",
   "UTTAR PRADESH",
   "UTTARAKHAND",
   "WEST BENGAL",
+  // Supported union territories
+  "DAMAN & DIU",
+  "PUDUCHERRY",
 ];
 
 // Helper: get host for links, preferring APP_BASE_URL then forwarded headers then req
