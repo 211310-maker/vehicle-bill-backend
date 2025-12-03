@@ -26,6 +26,10 @@ const STATE_TEMPLATE_MAP = {
   andhrapradesh: "andhrapradesh",
   "andhra-pradesh": "andhrapradesh",
   "andhra_pradesh": "andhrapradesh",
+  // Chhattisgarh aliases:
+  cg: "chhattisgarh",
+  chhattisgarh: "chhattisgarh",
+  chhattisgarhstate: "chhattisgarh",
   // add other mappings below if you need more aliases in the future
 };
 
