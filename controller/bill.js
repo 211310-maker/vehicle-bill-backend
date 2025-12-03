@@ -17,6 +17,18 @@ const moment = require("moment");
 const axios = require("axios");
 const fs = require("fs");
 
+// Map common short/alias keys to canonical template base names (filenames without suffix)
+// Add aliases here as needed — the keys are lowercased and sanitized for lookup.
+const STATE_TEMPLATE_MAP = {
+  // Andhra Pradesh
+  ap: "andhrapradesh",
+  andhra: "andhrapradesh",
+  andhrapradesh: "andhrapradesh",
+  "andhra-pradesh": "andhrapradesh",
+  "andhra_pradesh": "andhrapradesh",
+  // add other mappings below if you need more aliases in the future
+};
+
 const normalizeStateFile = (state) => {
   const originalState = String(state || "");
   const rawState = originalState.toLowerCase();
@@ -30,12 +42,30 @@ const resolveTemplatePath = (state, baseDir, suffix) => {
   const { rawState, sanitizedState, sanitizedPreserveCase } =
     normalizeStateFile(state);
 
-  const candidates = [
-    path.join(baseDir, `${sanitizedState}${suffix}`),
-    path.join(baseDir, `${rawState}${suffix}`),
-    path.join(baseDir, `${sanitizedPreserveCase}${suffix}`),
-  ];
+  // Determine canonical state token to look up templates.
+  // Try mapping from sanitizedState first (handles 'ap', 'andhrapradesh', 'andhra-pradesh' -> sanitize)
+  const sanitizedKey = String(sanitizedState || "").toLowerCase();
+  const rawKey = String(rawState || "").toLowerCase();
+  const preserveCaseKey = String(sanitizedPreserveCase || "").toLowerCase();
 
+  // prefer mapping by sanitized key, then raw, then preserveCase
+  const mapped =
+    STATE_TEMPLATE_MAP[sanitizedKey] ||
+    STATE_TEMPLATE_MAP[rawKey] ||
+    STATE_TEMPLATE_MAP[preserveCaseKey] ||
+    null;
+
+  // If we found a mapped canonical name, use that as base; otherwise use sanitized/raw names.
+  const baseNames = mapped
+    ? [mapped, sanitizedState, rawState, sanitizedPreserveCase]
+    : [sanitizedState, rawState, sanitizedPreserveCase];
+
+  // Build candidate file paths in order of preference.
+  const candidates = baseNames
+    .filter(Boolean)
+    .map((name) => path.join(baseDir, `${name}${suffix}`));
+
+  // Finally: return the first existing candidate OR the first candidate path (so error logs still point to expected paths)
   return candidates.find((candidate) => fs.existsSync(candidate)) || candidates[0];
 };
 
