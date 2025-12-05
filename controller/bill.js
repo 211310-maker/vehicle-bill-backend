@@ -33,6 +33,7 @@ const STATE_TEMPLATE_MAP = {
   chhattisgarhstate: "chhattisgarh",
   // GUJARAT aliases:
   gujrat: "gujarat",
+  gj: "gujarat",
   gujarat: "gujarat",
   gujaratstate: "gujarat",
   // Haryana aliases:
