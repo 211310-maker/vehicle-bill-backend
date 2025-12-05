@@ -30,6 +30,16 @@ const STATE_TEMPLATE_MAP = {
   cg: "chhattisgarh",
   chhattisgarh: "chhattisgarh",
   chhattisgarhstate: "chhattisgarh",
+  // Gujarat aliases:
+  gujrat: "gujarat",
+  gujarat: "gujarat",
+  // Haryana aliases:
+  haryana: "haryana",
+  // Himachal Pradesh aliases:
+  hp: "himachalpradesh",
+  himachalpradesh: "himachalpradesh",
+  "himachal-pradesh": "himachalpradesh",
+  "himachal_pradesh": "himachalpradesh",
   // add other mappings below if you need more aliases in the future
 };
 
