@@ -17,8 +17,9 @@ const moment = require("moment");
 const axios = require("axios");
 const fs = require("fs");
 
-// Map common short/alias keys to canonical template base names (filenames without suffix)
-// Add aliases here as needed — the keys are lowercased and sanitized for lookup.
+// --- TEMPLATE ALIASES MAP ---
+// Map short / aliased state tokens to canonical template base names (file names without suffix).
+// Add Gujarat aliases here so frontend 'gujrat' (typo) and 'gujarat' both map to same template.
 const STATE_TEMPLATE_MAP = {
   // Andhra Pradesh
   ap: "andhrapradesh",
@@ -30,9 +31,10 @@ const STATE_TEMPLATE_MAP = {
   cg: "chhattisgarh",
   chhattisgarh: "chhattisgarh",
   chhattisgarhstate: "chhattisgarh",
-  // Gujarat aliases:
+  // GUJARAT aliases:
   gujrat: "gujarat",
   gujarat: "gujarat",
+  gujaratstate: "gujarat",
   // Haryana aliases:
   haryana: "haryana",
   // Himachal Pradesh aliases:
@@ -186,6 +188,10 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       bill.state,
       path.join(__dirname, "../views"),
       "Pdf.ejs"
+    );
+
+    logger.info(
+      `[bill] resolveTemplatePath state=${bill.state} -> ${templatePath}`
     );
 
     if (!fs.existsSync(templatePath)) {
