@@ -45,6 +45,8 @@ const STATE_TEMPLATE_MAP = {
   "himachal_pradesh": "himachalpradesh",
   // Bihar mapping
   bihar: "bihar",
+  // Jharkhand mapping
+  jharkhand: "jharkhand",
   // add other mappings below if you need more aliases in the future
 };
 
