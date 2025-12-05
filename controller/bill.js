@@ -47,6 +47,13 @@ const STATE_TEMPLATE_MAP = {
   bihar: "bihar",
   // Jharkhand mapping
   jharkhand: "jharkhand",
+  // New supported states
+  karnataka: "karnataka",
+  kerala: "kerala",
+  kerela: "kerala",
+  mp: "madhyapradesh",
+  madhyapradesh: "madhyapradesh",
+  maharashtra: "maharashtra",
   // add other mappings below if you need more aliases in the future
 };
 
@@ -89,6 +96,9 @@ const resolveTemplatePath = (state, baseDir, suffix) => {
   // Finally: return the first existing candidate OR the first candidate path (so error logs still point to expected paths)
   return candidates.find((candidate) => fs.existsSync(candidate)) || candidates[0];
 };
+
+module.exports.resolveTemplatePath = resolveTemplatePath;
+module.exports.STATE_TEMPLATE_MAP = STATE_TEMPLATE_MAP;
 
 //@desc    get details
 //@route   GET /bill/get-details?vehicleNo=XXX

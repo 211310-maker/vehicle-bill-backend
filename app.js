@@ -11,6 +11,7 @@ const fs = require('fs');
 const pdf = require('express-pdf');
 const cookieParser = require('cookie-parser');
 const logger = require('./logger');
+const apiRouter = require('./routes/api');
 require('colors');
 // process.env.TZ = 'Asia/Kolkata';
 dotenv.config({
@@ -46,10 +47,26 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // routes;
+app.use('/api', apiRouter);
 app.use('/auth', authRoute);
 app.use('/bill', billRoute);
 app.use('/app', appView);
 app.get('/check', statusView);
+
+// serve static files if present (non-destructive)
+if (fs.existsSync(buildDir)) {
+  app.use(express.static(buildDir));
+  console.info('[server] serving frontend static from', buildDir);
+}
+
+// Redirect common typo for kerala -> kerala (do NOT add gujrat/jharkhand/bihar)
+app.get(['/app/kerela', '/kerela'], (req, res) => {
+  const original = req.originalUrl;
+  if (original.startsWith('/app/kerela')) {
+    return res.redirect(301, original.replace('/app/kerela', '/app/kerala'));
+  }
+  return res.redirect(301, original.replace('/kerela', '/kerala'));
+});
 
 // 1) redirect /app/gujarat -> /app/gujrat (and root /gujarat -> /gujrat)
 app.get(['/app/gujarat', '/gujarat'], (req, res) => {

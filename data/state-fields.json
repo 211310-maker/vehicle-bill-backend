@@ -1,0 +1,36 @@
+{
+  "karnataka": {
+    "vehiclePermitType": [{"name":"CONTRACT CARRIAGE/PASSANGER VEHICLES"},{"name":"GOODS VEHICLE"}],
+    "permitType":[{"name":"TOURIST PERMIT"},{"name":"NATIONAL PERMIT"}],
+    "borderBarrier":[{"name":"BENGALURU"}],
+    "checkPostName":[{"name":"BENGALURU CP","district":"BENGALURU"}],
+    "serviceType":[{"name":"Tourist"}],
+    "taxMode":[{"name":"ANNUAL"},{"name":"MONTHLY"}]
+  },
+  "kerala": {
+    "vehiclePermitType":[{"name":"CONTRACT CARRIAGE/PASSANGER VEHICLES"},{"name":"GOODS VEHICLE"}],
+    "permitType":[{"name":"TOURIST"}],
+    "borderBarrier":[{"name":"THIRUVANANTHAPURAM"}],
+    "checkPostName":[{"name":"KOCHI CP","district":"KOCHI"}],
+    "districtName":[{"name":"KOCHI"}],
+    "enteringDistrict":[{"name":"KOCHI"}],
+    "purposeOfJourney":[{"name":"TOURISM"}],
+    "serviceType":[{"name":"Tourist"}],
+    "taxMode":[{"name":"ANNUAL"},{"name":"MONTHLY"}]
+  },
+  "mp": {
+    "vehiclePermitType":[{"name":"CONTRACT CARRIAGE/PASSANGER VEHICLES"},{"name":"GOODS VEHICLE"}],
+    "permitType":[{"name":"TOURIST"}],
+    "borderBarrier":[{"name":"BHOPAL"}],
+    "serviceType":[{"name":"Tourist"}],
+    "taxMode":[{"name":"ANNUAL"},{"name":"MONTHLY"}]
+  },
+  "maharashtra": {
+    "vehiclePermitType":[{"name":"CONTRACT CARRIAGE/PASSANGER VEHICLES"},{"name":"GOODS VEHICLE"}],
+    "permitType":[{"name":"TOURIST"}],
+    "borderBarrier":[{"name":"MUMBAI"}],
+    "checkPostName":[{"name":"MUMBAI CP","district":"MUMBAI"}],
+    "serviceType":[{"name":"Tourist"}],
+    "taxMode":[{"name":"ANNUAL"},{"name":"MONTHLY"}]
+  }
+}
