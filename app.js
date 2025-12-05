@@ -7,6 +7,7 @@ const cors = require('cors');
 const xssClean = require('xss-clean');
 const hpp = require('hpp');
 const path = require('path');
+const fs = require('fs');
 const pdf = require('express-pdf');
 const cookieParser = require('cookie-parser');
 const logger = require('./logger');
@@ -15,6 +16,9 @@ require('colors');
 dotenv.config({
   path: `${path.join(__dirname, 'config', process.env.NODE_ENV)}.env`,
 });
+
+// adjust buildDir if your build output is elsewhere
+const buildDir = path.join(__dirname, 'public', 'build');
 
 // routes imports
 const authRoute = require('./routes/auth');
@@ -46,6 +50,28 @@ app.use('/auth', authRoute);
 app.use('/bill', billRoute);
 app.use('/app', appView);
 app.get('/check', statusView);
+
+// 1) redirect /app/gujarat -> /app/gujrat (and root /gujarat -> /gujrat)
+app.get(['/app/gujarat', '/gujarat'], (req, res) => {
+  const original = req.originalUrl;
+  if (original.startsWith('/app/gujarat')) {
+    return res.redirect(301, original.replace('/app/gujarat', '/app/gujrat'));
+  }
+  return res.redirect(301, original.replace('/gujarat', '/gujrat'));
+});
+
+// 2) SPA fallback to serve index.html for client-side routes under /app/*
+app.get('/app/*', (req, res, next) => {
+  // skip API routes
+  if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+    return next();
+  }
+  const indexPath = path.join(buildDir, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    return res.sendFile(indexPath);
+  }
+  return next(); // let existing 404/handlers run if index.html missing
+});
 
 app.use(errorHandler);
 
