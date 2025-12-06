@@ -100,6 +100,36 @@ const resolveTemplatePath = (state, baseDir, suffix) => {
 module.exports.resolveTemplatePath = resolveTemplatePath;
 module.exports.STATE_TEMPLATE_MAP = STATE_TEMPLATE_MAP;
 
+const DETAIL_DEFAULTS = {
+  state: "",
+  chassisNo: "",
+  mobileNo: "",
+  ownerName: "",
+  borderBarrier: "",
+  checkpostName: "",
+  checkPostName: "",
+  seatingCapacityExcludingDriver: "",
+  serviceType: "",
+  taxMode: "",
+};
+
+const normalizeDetailResponse = (detailDoc = {}) => {
+  const payload =
+    detailDoc && typeof detailDoc.toObject === "function"
+      ? detailDoc.toObject()
+      : { ...detailDoc };
+
+  const merged = { ...DETAIL_DEFAULTS, ...payload };
+  merged.checkpostName = merged.checkpostName || merged.checkPostName;
+  merged.checkPostName = merged.checkPostName || merged.checkpostName;
+
+  if (merged.state && merged.state.toLowerCase() === "kerela") {
+    merged.state = "kerala";
+  }
+
+  return merged;
+};
+
 //@desc    get details
 //@route   GET /bill/get-details?vehicleNo=XXX
 //@access  private (route is using protect)
@@ -121,7 +151,7 @@ module.exports.getDetails = asyncHandler(async (req, res, next) => {
   return res.status(200).send({
     success: true,
     code: 200,
-    detail,
+    detail: normalizeDetailResponse(detail),
   });
 });
 

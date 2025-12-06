@@ -5,6 +5,8 @@ const path = require('path');
 const fs = require('fs');
 
 const STATE_FIELDS_FILE = path.join(__dirname, '..', 'data', 'state-fields.json');
+const STATE_ALIAS_MAP = { kerela: 'kerala', kerala: 'kerala', madhyapradesh: 'mp', madhya: 'mp' };
+
 let stateFields = {};
 if (fs.existsSync(STATE_FIELDS_FILE)) {
   try {
@@ -14,19 +16,47 @@ if (fs.existsSync(STATE_FIELDS_FILE)) {
   }
 }
 
+const canonicalState = (stateKey = '') => {
+  const safe = String(stateKey || '').toLowerCase();
+  return STATE_ALIAS_MAP[safe] || safe;
+};
+
+const buildDetailSkeleton = (detail = {}) => {
+  const defaults = {
+    vehicleNo: '',
+    state: '',
+    chassisNo: '',
+    mobileNo: '',
+    ownerName: '',
+    borderBarrier: '',
+    checkpostName: '',
+    checkPostName: '',
+    seatingCapacityExcludingDriver: '',
+    serviceType: '',
+    taxMode: '',
+  };
+
+  const merged = { ...defaults, ...detail };
+  merged.checkpostName = merged.checkpostName || merged.checkPostName;
+  merged.checkPostName = merged.checkPostName || merged.checkpostName;
+  return merged;
+};
+
+// GET /api/fields
+router.get('/fields', (req, res) => {
+  return res.json({ success: true, fields: stateFields, states: Object.keys(stateFields || {}) });
+});
+
 // GET /api/fields/:state
 router.get('/fields/:state', (req, res) => {
-  const s = (req.params.state || '').toLowerCase();
-  const aliasMap = { kerela: 'kerala', madhyapradesh: 'mp', madhya: 'mp' };
-  const canonical = aliasMap[s] || s;
+  const canonical = canonicalState(req.params.state);
   const payload = stateFields[canonical] || {};
   res.json({ success: true, state: canonical, fields: payload });
 });
 
 // GET /api/fields/:state/checkposts?district=...
 router.get('/fields/:state/checkposts', (req, res) => {
-  const s = (req.params.state || '').toLowerCase();
-  const canonical = s === 'kerela' ? 'kerala' : (s === 'madhyapradesh' ? 'mp' : s);
+  const canonical = canonicalState(req.params.state);
   const district = (req.query.district || '').trim().toLowerCase();
   const list = (stateFields[canonical] && stateFields[canonical].checkPostName) || [];
   const filtered = district ? list.filter(p => ((p.district||'').toLowerCase() === district)) : list;
@@ -57,6 +87,16 @@ router.get('/vehicle-details', async (req, res) => {
     console.error('[api] vehicle-details error', err);
     return res.status(500).json({ success: false, message: 'internal error' });
   }
+});
+
+// POST /api/get-details
+router.post('/get-details', async (req, res) => {
+  const vehicleNo = (req.body && req.body.vehicleNo) || '';
+  const state = canonicalState(req.body && req.body.state);
+
+  const detail = buildDetailSkeleton({ vehicleNo, state });
+
+  return res.json({ success: true, state, detail });
 });
 
 module.exports = router;

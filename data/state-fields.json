@@ -8,14 +8,50 @@
     "taxMode":[{"name":"ANNUAL"},{"name":"MONTHLY"}]
   },
   "kerala": {
-    "vehiclePermitType":[{"name":"CONTRACT CARRIAGE/PASSANGER VEHICLES"},{"name":"GOODS VEHICLE"}],
-    "permitType":[{"name":"TOURIST"}],
+    "districtName": [
+      {"name":"THIRUVANANTHAPURAM"},
+      {"name":"KOLLAM"},
+      {"name":"ALAPPUZHA"},
+      {"name":"PATHANAMTHITTA"},
+      {"name":"KOTTAYAM"},
+      {"name":"IDUKKI"},
+      {"name":"ERNAKULAM"},
+      {"name":"THRISSUR"},
+      {"name":"PALAKKAD"},
+      {"name":"MALAPPURAM"},
+      {"name":"KOZHIKODE"},
+      {"name":"WAYANAD"},
+      {"name":"KANNUR"},
+      {"name":"KASARAGOD"}
+    ],
+    "checkPostName": [
+      {"name":"WALAYAR ICP","district":"PALAKKAD"},
+      {"name":"BEPUR CP","district":"KOZHIKODE"},
+      {"name":"MANJESHWAR CP","district":"KASARAGOD"},
+      {"name":"MUNNAR CP","district":"IDUKKI"}
+    ],
+    "vehiclePermitType": [
+      {"name":"CONTRACT CARRIAGE/PASSANGER VEHICLES"},
+      {"name":"GOODS VEHICLE"}
+    ],
+    "vehicleClass": [
+      {"name":"LIGHT GOODS VEHICLE","category":"GOODS VEHICLE"},
+      {"name":"HEAVY GOODS VEHICLE","category":"GOODS VEHICLE"},
+      {"name":"OMNI BUS","category":"PASSENGER"}
+    ],
+    "goodsName": [],
+    "permitType": [{"name":"TOURIST"}],
+    "permitCategory": [],
+    "registrationType": [],
+    "tipperBody": [],
+    "permit": [],
+    "fuelType": [],
     "borderBarrier":[{"name":"THIRUVANANTHAPURAM"}],
-    "checkPostName":[{"name":"KOCHI CP","district":"KOCHI"}],
-    "districtName":[{"name":"KOCHI"}],
-    "enteringDistrict":[{"name":"KOCHI"}],
-    "purposeOfJourney":[{"name":"TOURISM"}],
+    "vehiclePermit": [],
+    "permitMode": [],
     "serviceType":[{"name":"Tourist"}],
+    "purposeOfJourney":[{"name":"TOURISM"}],
+    "enteringDistrict":[{"name":"KOCHI"}],
     "taxMode":[{"name":"ANNUAL"},{"name":"MONTHLY"}]
   },
   "mp": {
