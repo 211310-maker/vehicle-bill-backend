@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs');
+const Bill = require('../model/Bill');
 
 const STATE_FIELDS_FILE = path.join(__dirname, '..', 'data', 'state-fields.json');
 const STATE_ALIAS_MAP = { kerela: 'kerala', kerala: 'kerala', madhyapradesh: 'mp', madhya: 'mp' };
@@ -91,12 +92,48 @@ router.get('/vehicle-details', async (req, res) => {
 
 // POST /api/get-details
 router.post('/get-details', async (req, res) => {
-  const vehicleNo = (req.body && req.body.vehicleNo) || '';
-  const state = canonicalState(req.body && req.body.state);
+  try {
+    const vehicleNoRaw = req.body && req.body.vehicleNo;
+    if (!vehicleNoRaw || typeof vehicleNoRaw !== 'string' || vehicleNoRaw.trim() === '') {
+      return res.status(400).json({ success: false, message: 'vehicleNo is required' });
+    }
 
-  const detail = buildDetailSkeleton({ vehicleNo, state });
+    const vehicleNo = vehicleNoRaw.trim().toUpperCase();
 
-  return res.json({ success: true, state, detail });
+    // If database is not connected, exit early to avoid hanging requests
+    if (![1, 2].includes(Bill.db.readyState)) {
+      return res.status(503).json({ success: false, message: 'Database not connected' });
+    }
+
+    const latestBill = await Bill.findOne({ vehicleNo }).sort({ createdAt: -1 }).lean();
+
+    if (!latestBill) {
+      return res.status(404).json({ success: false, message: 'Vehicle not found' });
+    }
+
+    const toNumberOrNull = (value) => {
+      const numeric = typeof value === 'number' ? value : Number(value);
+      return Number.isFinite(numeric) ? numeric : null;
+    };
+
+    const detail = {
+      chassisNo: latestBill.chassisNo || '',
+      mobileNo: latestBill.mobileNo || '',
+      ownerName: latestBill.ownerName || '',
+      borderBarrier: latestBill.borderBarrier || '',
+      checkpostName: latestBill.checkpostName || latestBill.checkPostName || '',
+      permitType: latestBill.permitType || '',
+      vehiclePermitType: latestBill.vehiclePermitType || '',
+      vehicleClass: latestBill.vehicleClass || '',
+      grossVehicleWeight: toNumberOrNull(latestBill.grossVehicleWeight),
+      unladenWeight: toNumberOrNull(latestBill.unladenWeight),
+    };
+
+    return res.json({ success: true, detail });
+  } catch (err) {
+    console.error('[api] get-details error', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
 });
 
 module.exports = router;
