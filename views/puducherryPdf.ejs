@@ -113,16 +113,15 @@
       }
 
       /* Main kv table */
-      table.kv td.label {
-        width: 22%;        /* Increased from 20% */
-        white-space: nowrap;
-       }
+      table.kv {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 6px;
+      }
 
-     table.kv td.value {
-        width: 28%;        /* Reduced from 30% to maintain alignment */
-        font-weight: bold;
-        padding-left: 4px;
-        white-space: nowrap;   /* NEW: prevents value from going to next line */
+      table.kv td {
+        padding: 2px 2px;
+        vertical-align: top;
       }
 
       table.kv td.label {
@@ -305,7 +304,7 @@
           </tr>
           <tr>
             <td class="label">Vehicle Category</td>
-            <td class="value" style="white-space: nowrap;">: <%= data.vehicleCategory || '' %></td>
+            <td class="value">: <%= data.vehicleCategory || '' %></td>
             <td class="label">Mobile No.</td>
             <td class="value">: <%= data.mobileNo || '' %></td>
           </tr>
