@@ -4,7 +4,6 @@ const asyncHandler = require("../middleware/asyncHandler");
 const ErrorResponse = require("../utils/errorResponse");
 const qrCode = require("qrcode");
 const logger = require("../logger");
-const puppeteer = require("puppeteer");
 const {
   receiptNoGenerator,
   inWords,
@@ -139,17 +138,7 @@ module.exports.getDetails = asyncHandler(async (req, res, next) => {
     `member asked detail for ${req.query.vehicleNo} from ${req.params.state} form`
   );
 
-  const filters = _.pick(req.query, ["vehicleNo"]);
-
-  if (!filters.vehicleNo) {
-    return res.status(400).send({
-      success: false,
-      code: 400,
-      message: "vehicleNo is required",
-    });
-  }
-
-  const detail = await Bill.findOne(filters).sort({ createdAt: "-1" });
+  const detail = await Bill.findOne({ ...req.query }).sort({ createdAt: "-1" });
 
   if (!detail) {
     return res.status(404).send({
@@ -166,15 +155,14 @@ module.exports.getDetails = asyncHandler(async (req, res, next) => {
   });
 });
 
-//@desc    get pdf (generate real PDF and force download)
+//@desc    get pdf (HTML receipt page; browser can print to PDF)
 //@route   GET /bill/:id/pdf
 //@access  public
 module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  let browser = null;
-  let htmlContent = "";
-
   try {
+    const { id } = req.params;
+
+    // 1. Get the bill details
     const bill = await Bill.findById(id);
     if (!bill) {
       logger.info(`bill not found with this id ${id}`);
@@ -184,30 +172,40 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
 
     logger.info(`bill found with this id ${id}`);
 
+    // -------------------------
+    // 2. Build absolute QR code URL (must have protocol + host)
+    // prefer APP_BASE_URL if provided (should include http:// or https://)
     const defaultRenderHost = "https://vehicle-bill-backend-1.onrender.com";
 
     const hostForQr =
       process.env.APP_BASE_URL && process.env.APP_BASE_URL.trim() !== ""
-        ? process.env.APP_BASE_URL.replace(/\/$/, "")
+        ? process.env.APP_BASE_URL.replace(/\/$/, "") // APP_BASE_URL always preferred
         : process.env.APP_BASE_IP && process.env.APP_BASE_IP.trim() !== ""
-          ? process.env.APP_BASE_IP.replace(/\/$/, "")
-          : process.env.NODE_ENV === "production"
-            ? defaultRenderHost
-            : `http://${ip.address()}:${process.env.PORT || 5000}`;
+        ? process.env.APP_BASE_IP.replace(/\/$/, "")
+        : process.env.NODE_ENV === "production"
+        ? defaultRenderHost
+        : `http://${ip.address()}:${process.env.PORT || 5000}`;
 
+    // Encode query values
     const chassis = encodeURIComponent(bill.chassisNo || "");
     const owner = encodeURIComponent(bill.ownerName || "");
 
+    // Build final absolute url for QR
     const pdfData = `${hostForQr}/bill/${id}/page?ChassisNo=${chassis}&ownerName=${owner}`;
 
+    // Debug log so you can open this URL directly
     logger.info("QR payload URL:", pdfData);
 
+    // 3. Generate QR code
     const src = await qrCode.toDataURL(pdfData);
     logger.info("QR code generated");
+    // -------------------------
 
+    // 4. Prepare data for EJS template (use safe defaults)
     const data = {
       ...bill._doc,
       src,
+      // ensure host is always defined in template; prefer APP_BASE_URL but fallback to hostForQr
       host: process.env.APP_BASE_URL || hostForQr,
       cssFix: process.env.NODE_ENV === "production",
       taxFrom: formatDate(bill.taxFromDate, true),
@@ -230,6 +228,7 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       rjBankRefNo: "1KBVoBVBSMGg",
     };
 
+    // 5. Render HTML using EJS
     const templatePath = resolveTemplatePath(
       bill.state,
       path.join(__dirname, "../views"),
@@ -247,7 +246,7 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       return res.status(500).send("Template for this state is not available.");
     }
 
-    htmlContent = await ejs.renderFile(templatePath, { data });
+    const htmlContent = await ejs.renderFile(templatePath, { data });
 
     logger.info("Html content generated");
 
@@ -255,104 +254,19 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       return res.status(500).send("An error occurred while generating HTML");
     }
 
-    const launchOptions = {
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-      ],
-      headless: true,
-    };
-
-    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-      launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-      logger.warn("Using custom Puppeteer executable path from environment");
-    }
-
-    logger.info("Launching Puppeteer for PDF generation", {
-      args: launchOptions.args,
-      headless: launchOptions.headless,
-      hasExecutablePath: Boolean(process.env.PUPPETEER_EXECUTABLE_PATH),
-    });
-
-    browser = await puppeteer.launch(launchOptions);
-    const page = await browser.newPage();
-    const pdfOptions = {
-      format: "A4",
-      printBackground: true,
-      margin: { top: "10mm", bottom: "10mm", left: "8mm", right: "8mm" },
-    };
-
-    let pdfBuffer = null;
-
-    try {
-      logger.info("[pdf] attempting setContent render for bill", { billId: id });
-      await page.setContent(htmlContent, {
-        waitUntil: "networkidle0",
-        timeout: 30000,
-      });
-      await page.emulateMediaType("screen");
-      pdfBuffer = await page.pdf(pdfOptions);
-      if (!pdfBuffer || !pdfBuffer.length) {
-        logger.warn("[pdf] empty PDF buffer after setContent, will try fallback", {
-          billId: id,
-        });
-        pdfBuffer = null;
-      }
-    } catch (err) {
-      logger.error("[pdf] setContent flow failed, attempting fallback", {
-        billId: id,
-        stack: err.stack,
-        message: err.message,
-      });
-      pdfBuffer = null;
-    }
-
-    if (!pdfBuffer) {
-      const fallbackUrl = `${hostForQr}/bill/${id}/page?ChassisNo=${chassis}&ownerName=${owner}`;
-      logger.warn("[pdf] attempting fallback page.goto for bill", {
-        billId: id,
-        url: fallbackUrl,
-      });
-      await page.goto(fallbackUrl, { waitUntil: "networkidle0", timeout: 45000 });
-      await page.emulateMediaType("screen");
-      pdfBuffer = await page.pdf(pdfOptions);
-    }
-
-    if (!pdfBuffer || !pdfBuffer.length) {
-      throw new Error("Failed to generate PDF buffer");
-    }
-
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename="bill-${id}.pdf"`);
-
-    return res.send(pdfBuffer);
+    // 6. Just return the HTML (browser can Print → Save as PDF)
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    return res.send(htmlContent);
   } catch (err) {
-    logger.error(`PDF generation error: ${err.message}`, { stack: err.stack });
-
-    if (process.env.PDF_ALLOW_HTML_FALLBACK === "1" && htmlContent) {
-      logger.warn("Returning HTML fallback for PDF generation failure", {
-        billId: id,
-      });
-      res.setHeader("Content-Type", "text/html; charset=utf-8");
-      return res.send(htmlContent);
-    }
+    logger.error(`PDF (HTML) generation error: ${err.message}`, {
+      stack: err.stack,
+    });
 
     return res.status(500).json({
       success: false,
       code: 500,
-      message: "Unable to generate pdf, try again later",
+      message: "Unable to generate pdf page, try again later",
     });
-  } finally {
-    if (browser) {
-      try {
-        await browser.close();
-        logger.info("[pdf] Puppeteer browser closed");
-      } catch (closeErr) {
-        logger.warn(`[pdf] error closing Puppeteer browser: ${closeErr.message}`);
-      }
-    }
   }
 });
 
@@ -421,30 +335,27 @@ module.exports.getBillOnPageFormat = asyncHandler(async (req, res, next) => {
       return res.status(500).send("Template for this state is not available.");
     }
 
-    try {
-      const htmlContent = await ejs.renderFile(templatePath, { data });
-
-      if (htmlContent) {
-        return res.send(htmlContent);
-      }
-
-      logger.error(`Rendered HTML empty for id=${id}, state=${bill.state}`);
-      return res.status(500).send("An error occurred");
-    } catch (err) {
-      // Log full stack and helpful context — this will appear in Render logs
-      logger.error(
-        `Error rendering bill page for id=${id}, state=${bill.state}, err=${err.message}`,
-        {
+    ejs.renderFile(templatePath, { data }, function (err, htmlContent) {
+      if (err) {
+        // Log full stack and helpful context — this will appear in Render logs
+        logger.error(`Error rendering bill page for id=${id}, state=${bill.state}, err=${err.message}`, {
           stack: err.stack,
           billId: id,
           billState: bill.state,
           reqQuery: req.query,
-        }
-      );
+        });
 
-      // TEMP: send full stack back to client for debugging (remove ASAP once fixed)
-      return res.status(500).send(`<pre>${err.stack}</pre>`);
-    }
+        // TEMP: send full stack back to client for debugging (remove ASAP once fixed)
+        return res.status(500).send(`<pre>${err.stack}</pre>`);
+      }
+
+      if (htmlContent) {
+        return res.send(htmlContent);
+      } else {
+        logger.error(`Rendered HTML empty for id=${id}, state=${bill.state}`);
+        return res.status(500).send("An error occurred");
+      }
+    });
   } catch (err) {
     logger.error(`Unhandled error in getBillOnPageFormat for id=${id}: ${err.message}`, {
       stack: err.stack,
@@ -494,12 +405,9 @@ const formatDateMsg = (date, state, type) => {
     }
     return x;
   } else {
-    return `${new Date().getDate()}-${new Date().toLocaleDateString(
-      "default",
-      {
-        month: "short",
-      }
-    )}-${new Date().getFullYear()} ${new Date().toLocaleTimeString()}`;
+    return `${new Date().getDate()}-${new Date().toLocaleDateString("default", {
+      month: "short",
+    })}-${new Date().getFullYear()} ${new Date().toLocaleTimeString()}`;
   }
 };
 
@@ -508,9 +416,11 @@ const formatDateMsg = (date, state, type) => {
 //@access  private
 module.exports.createBill = asyncHandler(async (req, res, next) => {
   const { username, password } = req.body;
+  console.log(username, password);
+  console.log(process.env.PAYMENT_USERNAME);
 
   if (
-    username !== process.env.PAYMENT_USERNAME ||
+    username !== process.env.PAYMENT_USERNAME &&
     password !== process.env.PAYMENT_PASSWORD
   ) {
     return next(
@@ -518,7 +428,6 @@ module.exports.createBill = asyncHandler(async (req, res, next) => {
     );
   }
 
-  // TODO: validate/whitelist req.body fields before creating the Bill document.
   const bill = new Bill({ ...req.body });
   bill.createdBy = req.user._id;
   bill.receiptNo = receiptNoGenerator(req.body.state);
@@ -529,48 +438,41 @@ module.exports.createBill = asyncHandler(async (req, res, next) => {
 
   await bill.save();
 
-  const smsApiKey = process.env.SMS_API_KEY;
-  const smsSender = process.env.SMS_SENDER || "UVAHAN";
-  const smsTemplateId = process.env.SMS_TEMPLATE_ID;
+  const data = JSON.stringify({});
 
-  if (smsApiKey && smsTemplateId) {
-    const smsUrl = "http://login.redsms.in/api/smsapi";
-    const smsParams = {
-      key: smsApiKey,
-      route: 2,
-      sender: smsSender,
-      number: bill.mobileNo,
-      sms: `Your tax of Rs. ${bill.totalAmount}/- has been paid for Vehicle No. ${bill.vehicleNo}, valid from ${formatDateMsg(
-        bill.taxFromDate,
-        bill.state,
-        "from"
-      )} to ${formatDateMsg(bill.taxUptoDate, bill.state, "to")} paid on ${formatDateMsg(
-        bill.createdAt,
-        bill.state,
-        "createdAt"
-      )}. ${smsSender}`,
-      templateid: smsTemplateId,
-    };
+  const config = {
+    method: "get",
+    maxBodyLength: Infinity,
+    url: `http://login.redsms.in/api/smsapi?key=c2c84407ebb090fc094fc169192f9cc8&route=2&sender=UVAHAN&number=${
+      bill.mobileNo
+    }&sms=Your tax of Rs. ${bill.totalAmount}/- has been paid for Vehicle No. ${
+      bill.vehicleNo
+    }, valid from ${formatDateMsg(
+      bill.taxFromDate,
+      bill.state,
+      "from"
+    )} to ${formatDateMsg(
+      bill.taxUptoDate,
+      bill.state,
+      "to"
+    )} paid on ${formatDateMsg(
+      bill.createdAt,
+      bill.state,
+      "createdAt"
+    )}. UVAHAN&templateid=1207163490769304299`,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: data,
+  };
 
-    try {
-      const smsResponse = await axios.get(smsUrl, { params: smsParams });
-      logger.info("SMS sent successfully", {
-        billId: bill._id,
-        status: smsResponse.status,
-        data: smsResponse.data,
-      });
-    } catch (error) {
-      logger.warn("Failed to send SMS notification", {
-        billId: bill._id,
-        error: error.message,
-      });
-    }
-  } else {
-    logger.warn("SMS not sent because SMS configuration is missing", {
-      hasApiKey: Boolean(smsApiKey),
-      hasTemplateId: Boolean(smsTemplateId),
+  axios(config)
+    .then(function (response) {
+      console.log(JSON.stringify(response.data));
+    })
+    .catch(function (error) {
+      console.log(error);
     });
-  }
 
   logger.info(
     `new bill generated with this id ${bill._id} and create by ${req.user._id}`
