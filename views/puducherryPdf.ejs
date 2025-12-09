@@ -2,11 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
-    <title>FORM P.Temp – Puducherry</title>
-
     <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,400;1,500&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/css/style.css" />
@@ -16,218 +13,191 @@
   </head>
 
   <body>
-    <div class="state-wrapper">
-      <!-- HEADER -->
-      <div class="state-header">
-        <div class="state-header-left">
-          <img src="/images1/Puducherry.png" alt="Government of Puducherry" />
-        </div>
+    <img class="qr-image" src="<%= data.src %>" alt="" />
 
-        <div class="content">
+    <div class="main__printing">
+      Receipt Printing Date:
+      <br />
+      <%= data.receiptDate %>
+    </div>
+
+    <div class="main">
+      <div class="logo logo__hr">
+        <img src="/images1/Puducherry.png" alt="" />
+      </div>
+
+      <div class="content">
         <div class="content__top">
           <h3 class="content__heading">GOVERNMENT OF PUDUCHERRY</h3>
           <p class="content__title">Department of Transport</p>
           <p class="content__desc">Checkpost Tax e-Receipt</p>
         </div>
 
-        <div class="content">
-          <!-- QR in top-right just like PDF -->
-          <img class="qr-image" src="<%= data.src %>" alt="QR Code" />
+        <table>
+          <tr class="r1 r11">
+            <td class="r1-1">Registration No.</td>
+            <td class="r1-2">
+              : <b><%= data.vehicleNo %></b>
+            </td>
+          </tr>
+
+          <tr class="r1 r12">
+            <td class="r1-1">Receipt No.</td>
+            <td class="r1-2">: <%= data.receiptNo %></td>
+          </tr>
+
+          <tr class="r1 r13">
+            <td class="r1-1">Payment Date</td>
+            <td class="r1-2">: <%= data.upPaymentDate %></td>
+          </tr>
+
+          <tr class="r1 r14">
+            <td class="r1-1">Owner Name</td>
+            <td class="r1-2">: <%= data.ownerName %></td>
+          </tr>
+
+          <tr class="r1 r15">
+            <td class="r1-1">Chassis No.</td>
+            <td class="r1-2">
+              &nbsp;&nbsp;: <%= data.chassisNo %>
+            </td>
+            <td>Tax Mode</td>
+            <td>
+              &nbsp;&nbsp;: <%= data.taxMode %>
+            </td>
+          </tr>
+
+          <tr class="r1 r16">
+            <td class="r1-1">Vehicle Type.</td>
+            <td class="r1-2">
+              &nbsp;&nbsp;:
+              <div class="r16-3"><%= data.vehiclePermitType %></div>
+            </td>
+            <td>Vehicle Class</td>
+            <td>
+              &nbsp;&nbsp;: <%= data.vehicleClass %>
+            </td>
+          </tr>
+
+          <tr class="r1 r17">
+            <td class="r1-1">Mobile No.</td>
+            <td class="r1-2">
+              &nbsp;&nbsp;: <%= data.mobileNo %>
+            </td>
+            <td>Checkpost Name</td>
+            <td>
+              &nbsp;&nbsp;: <%= data.borderBarrier %>
+            </td>
+          </tr>
+
+          <tr class="r1 r18">
+            <td class="r1-1">Sleeper Cap.</td>
+            <td class="r1-2">
+              &nbsp;&nbsp;: <%= data.sleeperCap %>
+            </td>
+
+            <% if (data.vehiclePermitType === 'GOODS VEHICLE') { %>
+              <td>Gross Weight</td>
+              <td>
+                &nbsp;&nbsp;: <%= data.grossVehicleWeight %> KG.
+              </td>
+            <% } else { %>
+              <td>
+                Seating Cap(Ex. <br />
+                Driver
+              </td>
+              <td>
+                &nbsp;&nbsp;: <%= data.seatingCapacityExcludingDriver %>
+              </td>
+            <% } %>
+          </tr>
+
+          <tr class="r1 r19">
+            <td class="r1-1">Bank Ref. No.</td>
+            <td class="r1-2">
+              &nbsp;&nbsp;: <%= data.upBankRefNo %>
+            </td>
+            <td>Payment Mode</td>
+            <td>
+              &nbsp;&nbsp;: <%= data.paymentMode %>
+            </td>
+          </tr>
+
+          <tr class="r1 r20">
+            <td class="r1-1">Service Type</td>
+            <td class="r1-2">
+              &nbsp;&nbsp;: <%= data.serviceType %>
+            </td>
+          </tr>
+
+          <tr class="r1 r21">
+            <td class="r1-1">Permit Type</td>
+            <td class="r1-2">
+              &nbsp;&nbsp;: <%= data.permitType %>
+            </td>
+            <td>Permit Category</td>
+            <td>&nbsp;&nbsp;:</td>
+          </tr>
+        </table>
+
+        <div class="content__money">
+          <div class="content__money-r1 d-flex">
+            <div class="m1"><b>Particular</b></div>
+            <div class="m2"><b>Fees/Tax</b></div>
+            <div class="m3"><b>Fine</b></div>
+            <div class="m4"><b>Total</b></div>
+          </div>
+
+          <div class="content__money-r2 d-flex">
+            <div class="m1">
+              MV Tax( <%= data.taxFrom_up %> TO <%= data.taxTo_up %> )
+            </div>
+            <div class="m2"><%= data.totalAmount %></div>
+            <div class="m3">0</div>
+            <div class="m4"><%= data.totalAmount %></div>
+          </div>
         </div>
-      </div>
 
-      <!-- TOP DETAILS (TWO COLUMNS LIKE PDF) -->
-      <table class="state-meta-table">
-        <tr>
-          <td class="label">Registration No.</td>
-          <td class="value">
-            : <%= data.vehicleNo %>
-          </td>
-          <td class="label">Receipt No.</td>
-          <td class="value">
-            : <%= data.receiptNo %>
-          </td>
-        </tr>
+        <div class="content__amount">
+          <div class="content__amount-r1">
+            <div class="a1">
+              Amount in Words: <%= data.totalAmountInWord %> ONLY
+            </div>
+          </div>
 
-        <tr>
-          <td class="label">Payment Date</td>
-          <td class="value">
-            : <%= data.upPaymentDate %>
-          </td>
-          <td class="label">Owner Name.</td>
-          <td class="value">
-            : <%= data.ownerName %>
-          </td>
-        </tr>
+          <div class="content__amount-r2">
+            <div class="a1">
+              Paid Upto: <%= data.taxTo_up %>
+            </div>
+            <div class="a2">
+              Total Paid: <%= data.totalAmount %>
+            </div>
+          </div>
+        </div>
 
-        <tr>
-          <td class="label">Chassis No.</td>
-          <td class="value">
-            : <%= data.chassisNo %>
-          </td>
-          <td class="label">Tax Mode</td>
-          <td class="value">
-            : <%= data.taxMode %>
-          </td>
-        </tr>
+        <div class="content__last">
+          <div class="content__last-title">
+            <p>Condition for Acceptance of Payment of Tax</p>
+          </div>
 
-        <tr>
-          <td class="label">Vehilce Type</td>
-          <td class="value">
-            : <%= data.vehiclePermitType %>
-          </td>
-          <td class="label">Vehicle Class</td>
-          <td class="value">
-            : <%= data.vehicleClass %>
-          </td>
-        </tr>
-
-        <tr>
-          <td class="label">Vehicle Category</td>
-          <td class="value">
-            : <%= data.vehicleCategory %>
-          </td>
-          <td class="label">Mobile No.</td>
-          <td class="value">
-            : <%= data.mobileNo %>
-          </td>
-        </tr>
-
-        <tr>
-          <td class="label">CheckPost Name</td>
-          <td class="value">
-            : <%= data.borderBarrier %>
-          </td>
-          <td class="label">Seating Capacity</td>
-          <td class="value">
-            : <%= data.seatingCapacity || data.seatingCapacityExcludingDriver %>
-          </td>
-        </tr>
-
-        <tr>
-          <td class="label">Sleeper Cap</td>
-          <td class="value">
-            : <%= data.sleeperCap %>
-          </td>
-          <td class="label">Payment Mode</td>
-          <td class="value">
-            : <%= data.paymentMode %>
-          </td>
-        </tr>
-      </table>
-
-      <!-- PERMIT TEXT 1 -->
-      <p class="state-permit-text">
-        This permit shall be subject to all rules relating to Permits made under
-        the Motor Vehicles Act, 1988 and in force for the time being.
-      </p>
-
-      <!-- SECOND BLOCK OF DETAILS -->
-      <table class="state-meta-table">
-        <tr>
-          <td class="label">Bank Ref. No.</td>
-          <td class="value">
-            : <%= data.upBankRefNo %>
-          </td>
-          <td class="label">Permit Validity</td>
-          <td class="value">
-            : <%= data.permitValidity || '' %>
-          </td>
-        </tr>
-
-        <tr>
-          <td class="label">Fitness Validity</td>
-          <td class="value">
-            : <%= data.fitnessValidity %>
-          </td>
-          <td class="label">Insurance Validity</td>
-          <td class="value">
-            : <%= data.insuranceValidity %>
-          </td>
-        </tr>
-
-        <tr>
-          <td class="label">Service Type</td>
-          <td class="value">
-            : <%= data.serviceType %>
-          </td>
-          <td class="label">Permit Type</td>
-          <td class="value">
-            : <%= data.permitType %>
-          </td>
-        </tr>
-      </table>
-
-      <!-- PERMIT TEXT 2 -->
-      <p class="state-permit-text">
-        Under the provision of sub-section(4) of section 89 of Act and with the
-        particular consent of the Transport Authority concerned. This Permit is
-        valid for -- <%= data.validDays || 7 %> Days only.
-      </p>
-
-      <!-- TAX / FEE TABLE -->
-      <table class="state-tax-table">
-        <thead>
-          <tr>
-            <th class="tax-col-1">Tax/Fee Particular</th>
-            <th class="tax-col-2">Tax/Fees</th>
-            <th class="tax-col-3">Fine</th>
-            <th class="tax-col-4">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="tax-col-1">
-              MV Tax ( <%= data.taxFrom_up %> To <%= data.taxTo_up %> )
-            </td>
-            <td class="tax-col-2"><%= data.mvTaxAmount %></td>
-            <td class="tax-col-3"><%= data.mvTaxFine || 0 %></td>
-            <td class="tax-col-4">
-              <%= data.mvTaxTotal || data.mvTaxAmount %>
-            </td>
-          </tr>
-
-          <tr>
-            <td class="tax-col-1">
-              Service/User Charge ( <%= data.taxFrom_up %> To
-              <%= data.taxTo_up %> )
-            </td>
-            <td class="tax-col-2"><%= data.serviceChargeAmount %></td>
-            <td class="tax-col-3"><%= data.serviceChargeFine || 0 %></td>
-            <td class="tax-col-4">
-              <%= data.serviceChargeTotal || data.serviceChargeAmount %>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <!-- GRAND TOTAL -->
-      <p class="state-grand-total">
-        Grand Total : <%= data.grandTotal %>/- <%= data.grandTotalInWords %>
-        Only
-      </p>
-
-      <!-- NOTES + TERMS (BOTTOM PART) -->
-      <div class="state-notes">
-        <p><strong>Note :</strong></p>
-        <p><strong>Terms and Conditions:</strong></p>
-        <ol>
-          <li>
-            This is a computer generated printout and no signature is required.
-          </li>
-          <li>
-            Incorrect mentioning of vehicle class or seating capacity may lead to
-            tax evasion and defaulter shall be liable for penal action.
-          </li>
-        </ol>
-      </div>
-
-      <div class="state-footer-note">
-        <p>
-          Scan the QR code for genuinity of the receipt, It should land at
-          https://kms.parivahan.gov.in site. In case the URL is different, then
-          receipt could be a fake one, please raise a complain.
-        </p>
+          <div class="content__last-text">
+            <p>
+              1. The Tax so recovered is subject to verification of documents and
+              loading capacity of vehicle. In case of any false information
+              pertaining to the documents such as vehicle particulars, the tax,
+              penalty and other charges collected shall be adjusted against tax
+              due and balance collected from the vehicle owner/user.
+            </p>
+            <br />
+            <p>
+              2. Checkpost authorities reserve the right to cancel or modify the
+              entire tax in case where the owner of the vehicle or driver
+              provide false information in the payment of tax. Any excess
+              payment shall be refunded back to the vehicle owner/user on
+              reconciliation.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </body>
