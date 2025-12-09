@@ -16,6 +16,12 @@
         box-sizing: border-box;
       }
 
+      /* ensure single A4 page, no extra blank page */
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
       body {
         margin: 0;
         padding: 0;
@@ -27,10 +33,9 @@
 
       /* A4-like canvas so print→PDF matches sample */
       .main {
-        width: 794px;          /* A4 width @96dpi */
-        min-height: 1123px;    /* A4 height */
+        width: 210mm;
         margin: 0 auto;
-        padding: 28px 36px;
+        padding: 12mm 15mm;
         position: relative;
       }
 
@@ -39,7 +44,7 @@
         z-index: 1;
       }
 
-      /* optional watermark */
+      /* centered background watermark */
       .watermark {
         position: absolute;
         top: 230px;
@@ -48,12 +53,6 @@
         opacity: 0.06;
         width: 260px;
         z-index: 0;
-      }
-
-      .printing-date {
-        text-align: right;
-        font-size: 10px;
-        margin-bottom: 4px;
       }
 
       /* Header */
@@ -248,19 +247,14 @@
 
   <body>
     <div class="main">
-      <% if (data.watermarkSrc) { %>
-        <img src="<%= data.watermarkSrc %>" class="watermark" alt="Watermark" />
-      <% } %>
+      <!-- centered background image using Puducherry.png -->
+      <img
+        src="<%= data.host %>/images1/Puducherry.png"
+        class="watermark"
+        alt="Watermark"
+      />
 
       <div class="content">
-        <% if (data.receiptDate || data.paymentDate) { %>
-          <div class="printing-date">
-            Receipt Printing Date:
-            <br />
-            <%= data.paymentDate || data.receiptDate %>
-          </div>
-        <% } %>
-
         <!-- HEADER -->
         <div class="header">
           <div class="header-cell header-logo">
