@@ -160,10 +160,11 @@ module.exports.getDetails = asyncHandler(async (req, res, next) => {
 //@route   GET /bill/:id/pdf
 //@access  public
 module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
-  try {
-    const { id } = req.params;
+  const { id } = req.params;
+  let browser = null;
+  let htmlContent = "";
 
-    // 1. Get the bill details
+  try {
     const bill = await Bill.findById(id);
     if (!bill) {
       logger.info(`bill not found with this id ${id}`);
@@ -173,8 +174,6 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
 
     logger.info(`bill found with this id ${id}`);
 
-    // -------------------------
-    // 2. Build absolute QR code URL (must have protocol + host)
     const defaultRenderHost = "https://vehicle-bill-backend-1.onrender.com";
 
     const hostForQr =
@@ -186,22 +185,16 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
             ? defaultRenderHost
             : `http://${ip.address()}:${process.env.PORT || 5000}`;
 
-    // Encode query values
     const chassis = encodeURIComponent(bill.chassisNo || "");
     const owner = encodeURIComponent(bill.ownerName || "");
 
-    // Build final absolute url for QR
     const pdfData = `${hostForQr}/bill/${id}/page?ChassisNo=${chassis}&ownerName=${owner}`;
 
-    // Debug log so you can open this URL directly
     logger.info("QR payload URL:", pdfData);
 
-    // 3. Generate QR code
     const src = await qrCode.toDataURL(pdfData);
     logger.info("QR code generated");
-    // -------------------------
 
-    // 4. Prepare data for EJS template (use safe defaults)
     const data = {
       ...bill._doc,
       src,
@@ -227,7 +220,6 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       rjBankRefNo: "1KBVoBVBSMGg",
     };
 
-    // 5. Render HTML using EJS
     const templatePath = resolveTemplatePath(
       bill.state,
       path.join(__dirname, "../views"),
@@ -245,7 +237,7 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       return res.status(500).send("Template for this state is not available.");
     }
 
-    const htmlContent = await ejs.renderFile(templatePath, { data });
+    htmlContent = await ejs.renderFile(templatePath, { data });
 
     logger.info("Html content generated");
 
@@ -253,53 +245,104 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       return res.status(500).send("An error occurred while generating HTML");
     }
 
-    // 6. Launch Puppeteer and generate PDF buffer
     const launchOptions = {
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+      ],
       headless: true,
     };
 
-    let browser;
-    try {
-      browser = await puppeteer.launch(launchOptions);
-      const page = await browser.newPage();
-
-      // If your template references external assets by absolute URLs this is fine.
-      await page.setContent(htmlContent, { waitUntil: "networkidle0" });
-      // If assets require absolute URLs, consider using:
-      // await page.goto(`${hostForQr}/bill/${id}/page`, { waitUntil: 'networkidle0' });
-
-      await page.emulateMediaType("screen");
-
-      const pdfBuffer = await page.pdf({
-        format: "A4",
-        printBackground: true,
-        margin: { top: "10mm", bottom: "10mm", left: "8mm", right: "8mm" },
-      });
-
-      await browser.close();
-
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename="bill-${id}.pdf"`
-      );
-
-      return res.send(pdfBuffer);
-    } catch (err) {
-      if (browser) {
-        await browser.close();
-      }
-      throw err;
+    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+      launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+      logger.warn("Using custom Puppeteer executable path from environment");
     }
+
+    logger.info("Launching Puppeteer for PDF generation", {
+      args: launchOptions.args,
+      headless: launchOptions.headless,
+      hasExecutablePath: Boolean(process.env.PUPPETEER_EXECUTABLE_PATH),
+    });
+
+    browser = await puppeteer.launch(launchOptions);
+    const page = await browser.newPage();
+    const pdfOptions = {
+      format: "A4",
+      printBackground: true,
+      margin: { top: "10mm", bottom: "10mm", left: "8mm", right: "8mm" },
+    };
+
+    let pdfBuffer = null;
+
+    try {
+      logger.info("[pdf] attempting setContent render for bill", { billId: id });
+      await page.setContent(htmlContent, {
+        waitUntil: "networkidle0",
+        timeout: 30000,
+      });
+      await page.emulateMediaType("screen");
+      pdfBuffer = await page.pdf(pdfOptions);
+      if (!pdfBuffer || !pdfBuffer.length) {
+        logger.warn("[pdf] empty PDF buffer after setContent, will try fallback", {
+          billId: id,
+        });
+        pdfBuffer = null;
+      }
+    } catch (err) {
+      logger.error("[pdf] setContent flow failed, attempting fallback", {
+        billId: id,
+        stack: err.stack,
+        message: err.message,
+      });
+      pdfBuffer = null;
+    }
+
+    if (!pdfBuffer) {
+      const fallbackUrl = `${hostForQr}/bill/${id}/page?ChassisNo=${chassis}&ownerName=${owner}`;
+      logger.warn("[pdf] attempting fallback page.goto for bill", {
+        billId: id,
+        url: fallbackUrl,
+      });
+      await page.goto(fallbackUrl, { waitUntil: "networkidle0", timeout: 45000 });
+      await page.emulateMediaType("screen");
+      pdfBuffer = await page.pdf(pdfOptions);
+    }
+
+    if (!pdfBuffer || !pdfBuffer.length) {
+      throw new Error("Failed to generate PDF buffer");
+    }
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="bill-${id}.pdf"`);
+
+    return res.send(pdfBuffer);
   } catch (err) {
     logger.error(`PDF generation error: ${err.message}`, { stack: err.stack });
+
+    if (process.env.PDF_ALLOW_HTML_FALLBACK === "1" && htmlContent) {
+      logger.warn("Returning HTML fallback for PDF generation failure", {
+        billId: id,
+      });
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      return res.send(htmlContent);
+    }
 
     return res.status(500).json({
       success: false,
       code: 500,
       message: "Unable to generate pdf, try again later",
     });
+  } finally {
+    if (browser) {
+      try {
+        await browser.close();
+        logger.info("[pdf] Puppeteer browser closed");
+      } catch (closeErr) {
+        logger.warn(`[pdf] error closing Puppeteer browser: ${closeErr.message}`);
+      }
+    }
   }
 });
 
