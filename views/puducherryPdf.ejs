@@ -2,153 +2,187 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <title>State Transport Receipt</title>
+
     <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,400;1,500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/css/style.css" />
-    <% if(data.cssFix){ %>
-    <link rel="stylesheet" href="/css/cssFix.css" />
+    <% if (data.cssFix) { %>
+      <link rel="stylesheet" href="/css/cssFix.css" />
     <% } %>
   </head>
   <body>
-    <img class="qr-image" src="<%= data.src %>" alt="" />
+    <!-- QR top-right -->
+    <img class="qr-image" src="<%= data.src %>" alt="QR" />
+
+    <!-- Optional small print date like old template -->
     <div class="main__printing">
       Receipt Printing Date:
       <br />
-      <%=data.receiptDate%>
+      <%= data.receiptDate %>
     </div>
-    <div class="main">
-      <div class="logo logo__hr">
-        <img src="/images1/Puducherry.png" alt="" />
+
+    <div class="state-main">
+      <!-- HEADER -->
+      <div class="state-header">
+        <div class="state-header__logo">
+          <img src="/images1/Puducherry.png" alt="Gov Logo" />
+        </div>
+
+        <div class="state-header__center">
+          <h3 class="state-header__gov">GOVERNMENT OF PUDUCHERRY</h3>
+          <p class="state-header__form">FORM P.Temp</p>
+          <p class="state-header__rule">[See rule 61(1)(iv)]</p>
+          <p class="state-header__title">
+            THE STATE TRANSPORT<br />
+            AUTHORITY, PUDUCHERRY
+          </p>
+        </div>
+
+        <div class="state-header__right">
+          <!-- keep empty, QR positioned via .qr-image -->
+        </div>
       </div>
-      <div class="content">
-        <div class="content__top">
-          <h3 class="content__heading">GOVERNMENT OF PUDUCHERRY</h3>
-          <p class="content__title">Department of Transport</p>
-          <p class="content__desc">Checkpost Tax e-Receipt</p>
-        </div>
 
-        <table>
-          <tr class="r1 r11">
-            <td class="r1-1">Registration No.</td>
-            <td class="r1-2">: <b><%=data.vehicleNo%></b></td>
+      <!-- BASIC DETAILS (TWO COLUMN TABLE) -->
+      <table class="state-meta-table">
+        <tr>
+          <td class="label">Registration No.</td>
+          <td class="value">: <%= data.vehicleNo %></td>
+          <td class="label">Receipt No.</td>
+          <td class="value">: <%= data.receiptNo %></td>
+        </tr>
+        <tr>
+          <td class="label">Payment Date</td>
+          <td class="value">: <%= data.upPaymentDate %></td>
+          <td class="label">Owner Name</td>
+          <td class="value">: <%= data.ownerName %></td>
+        </tr>
+        <tr>
+          <td class="label">Chassis No.</td>
+          <td class="value">: <%= data.chassisNo %></td>
+          <td class="label">Tax Mode</td>
+          <td class="value">: <%= data.taxMode %></td>
+        </tr>
+        <tr>
+          <td class="label">Vehicle Type</td>
+          <td class="value">: <%= data.vehiclePermitType %></td>
+          <td class="label">Vehicle Class</td>
+          <td class="value">: <%= data.vehicleClass %></td>
+        </tr>
+        <tr>
+          <td class="label">Vehicle Category</td>
+          <td class="value">: <%= data.vehicleCategory %></td>
+          <td class="label">Mobile No.</td>
+          <td class="value">: <%= data.mobileNo %></td>
+        </tr>
+        <tr>
+          <td class="label">CheckPost Name</td>
+          <td class="value">: <%= data.borderBarrier %></td>
+          <td class="label">Seating Capacity</td>
+          <td class="value">: <%= data.seatingCapacity %></td>
+        </tr>
+        <tr>
+          <td class="label">Sleeper Cap.</td>
+          <td class="value">: <%= data.sleeperCap %></td>
+          <td class="label">Payment Mode</td>
+          <td class="value">: <%= data.paymentMode %></td>
+        </tr>
+        <tr>
+          <td class="label">Bank Ref. No.</td>
+          <td class="value">: <%= data.upBankRefNo %></td>
+          <td class="label">Permit Validity</td>
+          <td class="value">: <%= data.permitValidity %></td>
+        </tr>
+        <tr>
+          <td class="label">Fitness Validity</td>
+          <td class="value">: <%= data.fitnessValidity %></td>
+          <td class="label">Insurance Validity</td>
+          <td class="value">: <%= data.insuranceValidity %></td>
+        </tr>
+        <tr>
+          <td class="label">Service Type</td>
+          <td class="value">: <%= data.serviceType %></td>
+          <td class="label">Permit Type</td>
+          <td class="value">: <%= data.permitType %></td>
+        </tr>
+      </table>
+
+      <!-- PERMIT TEXT -->
+      <div class="state-permit-text">
+        <p>
+          This permit shall be subject to all rules relating to Permits made
+          under the Motor Vehicles Act, 1988 and in force for the time being.
+        </p>
+        <p>
+          Under the provision of sub-section(4) of section 89 of Act and with
+          the particular consent of the Transport Authority concerned. This
+          Permit is valid for -- <%= data.validDays || 7 %> Days only.
+        </p>
+      </div>
+
+      <!-- TAX / FEES TABLE -->
+      <table class="state-tax-table">
+        <thead>
+          <tr>
+            <th class="t1">Tax/Fee Particular</th>
+            <th class="t2">Tax/Fees</th>
+            <th class="t3">Fine</th>
+            <th class="t4">Total</th>
           </tr>
-          <tr class="r1 r12">
-            <td class="r1-1">Receipt No.</td>
-            <td class="r1-2">: <%=data.receiptNo%></td>
-          </tr>
-          <tr class="r1 r13">
-            <td class="r1-1">Payment Date</td>
-            <td class="r1-2">: <%=data.upPaymentDate%></td>
-          </tr>
-          <tr class="r1 r14">
-            <td class="r1-1">Owner Name</td>
-            <td class="r1-2">: <%=data.ownerName%></td>
-          </tr>
-          <tr class="r1 r15">
-            <td class="r1-1">Chassis No.</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.chassisNo%></td>
-            <td>Tax Mode</td>
-            <td>&nbsp;&nbsp;: <%=data.taxMode%></td>
-          </tr>
-          <tr class="r1 r16">
-            <td class="r1-1">Vehicle Type.</td>
-            <td class="r1-2">
-              &nbsp;&nbsp;:
-              <div class="r16-3"><%=data.vehiclePermitType%></div>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="t1">
+              MV Tax ( <%= data.taxFrom_up %> To <%= data.taxTo_up %> )
             </td>
-            <td>Vehicle Class</td>
-            <td>&nbsp;&nbsp;: <%=data.vehicleClass%></td>
+            <td class="t2"><%= data.mvTaxAmount %></td>
+            <td class="t3"><%= data.mvTaxFine || 0 %></td>
+            <td class="t4"><%= data.mvTaxTotal || data.mvTaxAmount %></td>
           </tr>
-          <tr class="r1 r17">
-            <td class="r1-1">Mobile No.</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.mobileNo%></td>
-            <td>Checkpost Name</td>
-            <td>&nbsp;&nbsp;: <%=data.borderBarrier%></td>
-          </tr>
-          <tr class="r1 r18">
-            <td class="r1-1">Sleeper Cap.</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.sleeperCap%></td>
-            <% if(data.vehiclePermitType === 'GOODS VEHICLE'){ %>
-            <td>Gross Weight</td>
-            <td>&nbsp;&nbsp;: <%=data.grossVehicleWeight%> KG.</td>
-            <% }else{ %>
-            <td>
-              Seating Cap(Ex. <br />
-              Driver
+          <tr>
+            <td class="t1">
+              Service/User Charge ( <%= data.taxFrom_up %> To
+              <%= data.taxTo_up %> )
             </td>
-            <td>&nbsp;&nbsp;: <%=data.seatingCapacityExcludingDriver%></td>
-            <% } %>
+            <td class="t2"><%= data.serviceChargeAmount %></td>
+            <td class="t3"><%= data.serviceChargeFine || 0 %></td>
+            <td class="t4">
+              <%= data.serviceChargeTotal || data.serviceChargeAmount %>
+            </td>
           </tr>
-          <tr class="r1 r19">
-            <td class="r1-1">Bank Ref. No.</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.upBankRefNo%></td>
-            <td>Payment Mode</td>
-            <td>&nbsp;&nbsp;: <%=data.paymentMode%></td>
-          </tr>
-          <tr class="r1 r20">
-            <td class="r1-1">Service Type</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.serviceType%></td>
-          </tr>
-          <tr class="r1 r21">
-            <td class="r1-1">Permit Type</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.permitType%></td>
-            <td>Permit Category</td>
-            <td>&nbsp;&nbsp;:</td>
-          </tr>
-        </table>
+        </tbody>
+      </table>
 
-        <div class="content__money">
-          <div class="content__money-r1 d-flex">
-            <div class="m1"><b>Particular</b></div>
-            <div class="m2"><b>Fees/Tax</b></div>
-            <div class="m3"><b>Fine</b></div>
-            <div class="m4"><b>Total</b></div>
-          </div>
-          <div class="content__money-r2 d-flex">
-            <div class="m1">
-              MV Tax( <%=data.taxFrom_up%> TO <%=data.taxTo_up%> )
-            </div>
-            <div class="m2"><%=data.totalAmount%></div>
-            <div class="m3">0</div>
-            <div class="m4"><%=data.totalAmount%></div>
-          </div>
-        </div>
+      <!-- GRAND TOTAL -->
+      <div class="state-grand-total">
+        Grand Total : <%= data.grandTotal %>/- <%= data.grandTotalInWords %>
+        Only
+      </div>
 
-        <div class="content__amount">
-          <div class="content__amount-r1">
-            <div class="a1">
-              Amount in Words: <%=data.totalAmountInWord%> ONLY</div>
-          </div>
-          <div class="content__amount-r2">
-            <div class="a1">
-              Paid Upto: <%=data.taxTo_up%>
-            </div>
-            <div class="a2">Total Paid: <%=data.totalAmount%></div>
-          </div>
-        </div>
-        <div class="content__last">
-          <div class="content__last-title">
-            <p>Condition for Acceptance of Payment of Tax</p>
-          </div>
-          <div class="content__last-text">
-            <p>
-              1. The Tax so recovered is subject to verification of documents and
-              loading capacity of vehicle. In case of any false information
-              pertaining to the documents such as vehicle particulars, the tax,
-              penalty and other charges collected shall be adjusted against tax
-              due and balance collected from the vehicle owner/user.
-            </p>
-            <br />
-            <p>
-              2. Checkpost authorities reserve the right to cancel or modify the
-              entire tax in case where the owner of the vehicle or driver provide
-              false information in the payment of tax. Any excess payment shall
-              be refunded back to the vehicle owner/user on reconciliation.
-            </p>
-          </div>
-        </div>
+      <!-- NOTES & TERMS -->
+      <div class="state-notes">
+        <p><strong>Note :</strong></p>
+        <ol>
+          <li>
+            This is a computer generated printout and no signature is required.
+          </li>
+          <li>
+            Incorrect mentioning of vehicle class or seating capacity may lead to
+            tax evasion and defaulter shall be liable for penal action.
+          </li>
+        </ol>
+      </div>
+
+      <div class="state-terms">
+        <p><strong>Note :</strong> This document is generated from testing Server and has no legal or official value.</p>
+        <p>
+          Scan the QR code for genuinity of the receipt, It should land at
+          https://kms.parivahan.gov.in site. In case the URL is different, then
+          receipt could be a fake one, please raise a complain.
+        </p>
       </div>
     </div>
   </body>
