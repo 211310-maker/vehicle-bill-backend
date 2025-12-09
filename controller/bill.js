@@ -4,6 +4,7 @@ const asyncHandler = require("../middleware/asyncHandler");
 const ErrorResponse = require("../utils/errorResponse");
 const qrCode = require("qrcode");
 const logger = require("../logger");
+const puppeteer = require("puppeteer");
 const {
   receiptNoGenerator,
   inWords,
@@ -155,7 +156,7 @@ module.exports.getDetails = asyncHandler(async (req, res, next) => {
   });
 });
 
-//@desc    get pdf (HTML receipt page; browser can print to PDF)
+//@desc    get pdf (generate real PDF and force download)
 //@route   GET /bill/:id/pdf
 //@access  public
 module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
@@ -174,12 +175,11 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
 
     // -------------------------
     // 2. Build absolute QR code URL (must have protocol + host)
-    // prefer APP_BASE_URL if provided (should include http:// or https://)
     const defaultRenderHost = "https://vehicle-bill-backend-1.onrender.com";
 
     const hostForQr =
       process.env.APP_BASE_URL && process.env.APP_BASE_URL.trim() !== ""
-        ? process.env.APP_BASE_URL.replace(/\/$/, "") // APP_BASE_URL always preferred
+        ? process.env.APP_BASE_URL.replace(/\/$/, "")
         : process.env.APP_BASE_IP && process.env.APP_BASE_IP.trim() !== ""
           ? process.env.APP_BASE_IP.replace(/\/$/, "")
           : process.env.NODE_ENV === "production"
@@ -205,7 +205,6 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
     const data = {
       ...bill._doc,
       src,
-      // ensure host is always defined in template; prefer APP_BASE_URL but fallback to hostForQr
       host: process.env.APP_BASE_URL || hostForQr,
       cssFix: process.env.NODE_ENV === "production",
       taxFrom: formatDate(bill.taxFromDate, true),
@@ -254,18 +253,52 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       return res.status(500).send("An error occurred while generating HTML");
     }
 
-    // 6. Just return the HTML (browser can Print → Save as PDF)
-    res.setHeader("Content-Type", "text/html; charset=utf-8");
-    return res.send(htmlContent);
+    // 6. Launch Puppeteer and generate PDF buffer
+    const launchOptions = {
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      headless: true,
+    };
+
+    let browser;
+    try {
+      browser = await puppeteer.launch(launchOptions);
+      const page = await browser.newPage();
+
+      // If your template references external assets by absolute URLs this is fine.
+      await page.setContent(htmlContent, { waitUntil: "networkidle0" });
+      // If assets require absolute URLs, consider using:
+      // await page.goto(`${hostForQr}/bill/${id}/page`, { waitUntil: 'networkidle0' });
+
+      await page.emulateMediaType("screen");
+
+      const pdfBuffer = await page.pdf({
+        format: "A4",
+        printBackground: true,
+        margin: { top: "10mm", bottom: "10mm", left: "8mm", right: "8mm" },
+      });
+
+      await browser.close();
+
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="bill-${id}.pdf"`
+      );
+
+      return res.send(pdfBuffer);
+    } catch (err) {
+      if (browser) {
+        await browser.close();
+      }
+      throw err;
+    }
   } catch (err) {
-    logger.error(`PDF (HTML) generation error: ${err.message}`, {
-      stack: err.stack,
-    });
+    logger.error(`PDF generation error: ${err.message}`, { stack: err.stack });
 
     return res.status(500).json({
       success: false,
       code: 500,
-      message: "Unable to generate pdf page, try again later",
+      message: "Unable to generate pdf, try again later",
     });
   }
 });
