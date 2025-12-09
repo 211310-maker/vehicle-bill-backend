@@ -2,379 +2,264 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>FORM P.Temp</title>
+    <title>Puducherry - Tax Receipt</title>
 
-    <!-- You can keep or remove these if you already include them globally -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,400;1,500&display=swap"
       rel="stylesheet"
     />
+    <!-- shared site styles (ensure these exist and are reachable) -->
+    <link rel="stylesheet" href="<%= data.host %>/css/style.css" />
+    <link rel="stylesheet" href="<%= data.host %>/css/page.css" />
 
     <style>
-      * {
+      /* PDF specific small tweaks */
+      html, body {
+        margin: 0;
+        padding: 0;
+        font-family: "Roboto", Arial, Helvetica, sans-serif;
+        color: #111;
+      }
+
+      /* Background image container (Puppeteer printBackground:true will render it) */
+      .pdf-wrapper {
+        position: relative;
+        width: 210mm;
+        min-height: 297mm;
+        padding: 32px;
         box-sizing: border-box;
       }
 
-      body {
+      .pdf-bg {
+        position: absolute;
+        inset: 0;
+        background-repeat: no-repeat;
+        background-position: center top;
+        background-size: cover;
+        opacity: 0.12; /* subtle */
+        z-index: 0;
+      }
+
+      .content {
+        position: relative;
+        z-index: 2;
+        background: transparent;
+      }
+
+      .content__top {
+        text-align: center;
+        margin-bottom: 8px;
+      }
+      .content__heading {
         margin: 0;
-        padding: 0;
-        font-family: "Roboto", Arial, sans-serif;
-        font-size: 11px;
-        color: #000;
+        font-size: 18px;
+        letter-spacing: 1px;
       }
-
-      /* A4-ish page container so print-to-PDF looks like the original */
-      .page {
-        width: 794px;              /* ~A4 width at 96dpi */
-        min-height: 1123px;        /* ~A4 height */
-        margin: 0 auto;
-        padding: 36px 48px;
+      .content__title {
+        margin: 4px 0;
+        font-size: 14px;
       }
-
-      .printing-date {
-        text-align: right;
-        font-size: 10px;
-        margin-bottom: 6px;
-      }
-
-      .header-row {
-        display: table;
-        width: 100%;
-        margin-bottom: 10px;
-      }
-
-      .header-cell {
-        display: table-cell;
-        vertical-align: top;
-      }
-
-      .header-logo {
-        width: 22%;
-      }
-
-      .header-logo img {
-        width: 80px;
-        height: auto;
-      }
-
-      .header-center {
-        width: 56%;
-        text-align: center;
-        line-height: 1.4;
-      }
-
-      .header-center .gov {
-        font-size: 13px;
-        font-weight: 700;
-        text-transform: uppercase;
-      }
-
-      .header-center .form {
+      .content__desc {
+        margin: 0 0 8px 0;
         font-size: 12px;
-        font-weight: 600;
       }
 
-      .header-center .rule {
-        font-size: 10px;
-        margin-top: 2px;
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 6px;
       }
-
-      .header-center .auth {
+      table tr.r1 td {
+        padding: 6px 8px;
+        vertical-align: top;
         font-size: 12px;
-        font-weight: 600;
-        margin-top: 2px;
+      }
+      .r1-1 { width: 20%; font-weight: 500; }
+      .r1-2 { width: 30%; }
+      .content__money {
+        margin-top: 14px;
+        border: 1px solid #ddd;
+        padding: 6px;
+      }
+      .content__money-r1, .content__money-r2 {
+        display: flex;
+        align-items: center;
+        font-size: 12px;
+      }
+      .content__money-r1 .m1 { flex: 2; font-weight: 600; }
+      .content__money-r1 .m2, .content__money-r1 .m3, .content__money-r1 .m4 { flex: 1; text-align: center; }
+      .content__money-r2 .m1 { flex: 2; }
+      .content__money-r2 .m2, .content__money-r2 .m3, .content__money-r2 .m4 { flex: 1; text-align: center; }
+
+      .content__amount { margin-top: 12px; display:flex; justify-content:space-between; font-size:12px; }
+      .content__last { margin-top: 16px; font-size: 11px; line-height: 1.35; color:#222; }
+
+      /* QR and signature area */
+      .pdf-footer {
+        margin-top: 18px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+      }
+      .qr-block {
+        width: 120px;
+      }
+      .signature {
+        text-align:right;
+        font-size:12px;
       }
 
-      .header-qr {
-        width: 22%;
-        text-align: right;
-      }
-
-      .header-qr img {
-        width: 70px;
-        height: 70px;
-        display: block;
-        margin-left: auto;
-        margin-bottom: 4px;
-      }
-
-      table.kv {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 6px;
-      }
-
-      table.kv td {
-        padding: 2px 2px;
-        vertical-align: top;
-      }
-
-      table.kv td.label {
-        width: 18%;
-        white-space: nowrap;
-      }
-
-      table.kv td.value {
-        width: 32%;
-        font-weight: 600;
-      }
-
-      .body-text {
-        margin-top: 4px;
-        font-size: 10.5px;
-        text-align: justify;
-      }
-
-      table.mini {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 6px;
-        font-size: 10.5px;
-      }
-
-      table.mini td {
-        padding: 2px 2px;
-        vertical-align: top;
-      }
-
-      table.mini td.label {
-        width: 18%;
-        white-space: nowrap;
-      }
-
-      table.mini td.value {
-        width: 32%;
-        font-weight: 600;
-      }
-
-      .small-text {
-        margin-top: 4px;
-        font-size: 10px;
-        text-align: justify;
-      }
-
-      table.tax {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-        font-size: 10.5px;
-      }
-
-      table.tax th,
-      table.tax td {
-        border: 1px solid #000;
-        padding: 3px 5px;
-      }
-
-      table.tax th {
-        text-align: center;
-        font-weight: 700;
-      }
-
-      table.tax td.num {
-        text-align: right;
-        width: 12%;
-      }
-
-      .grand-total {
-        margin-top: 6px;
-        font-size: 11px;
-        font-weight: 700;
-      }
-
-      .terms {
-        margin-top: 10px;
-        font-size: 9.5px;
-      }
-
-      .terms-title {
-        font-weight: 700;
-        margin-bottom: 2px;
-      }
-
-      .terms ol {
-        margin: 0 0 0 18px;
-        padding: 0;
-      }
-
-      .terms li {
-        margin-bottom: 2px;
-      }
-
-      .note {
-        margin-top: 6px;
-        font-size: 9.5px;
-      }
-
-      .note a {
-        color: #0000ee;
-        text-decoration: underline;
+      /* ensure small print/responsive adjustments */
+      @media print {
+        body { -webkit-print-color-adjust: exact; }
       }
     </style>
   </head>
 
   <body>
-    <div class="page">
-      <% if (data.receiptPrintingDate) { %>
-        <div class="printing-date">
-          Receipt Printing Date:
-          <br />
-          <%= data.receiptPrintingDate %>
-        </div>
-      <% } %>
+    <div class="pdf-wrapper">
+      <!-- background image (optional) -->
+      <div class="pdf-bg" style="background-image: url('<%= data.host %>/images/puducherry-bg.png');"></div>
 
-      <!-- Header: Logo - Title - QR -->
-      <div class="header-row">
-        <div class="header-cell header-logo">
-          <img src="/images1/Puducherry.png" alt="Logo" />
+      <div class="content">
+        <div class="content__top">
+          <h3 class="content__heading">GOVERNMENT OF PUDUCHERRY</h3>
+          <p class="content__title">Department of Transport</p>
+          <p class="content__desc">Checkpost Tax e-Receipt</p>
         </div>
 
-        <div class="header-cell header-center">
-          <div class="gov">GOVERNMENT OF PUDUCHERRY</div>
-          <div class="form">FORM P.Temp</div>
-          <div class="rule">[See rule 61(1)(iv)]</div>
-          <div class="auth">THE STATE TRANSPORT AUTHORITY, PUDUCHERRY</div>
-        </div>
+        <table>
+          <tr class="r1">
+            <td class="r1-1">Registration No.</td>
+            <td class="r1-2">: <b><%= data.vehicleNo || '' %></b></td>
 
-        <div class="header-cell header-qr">
-          <% if (data.qrLeft) { %>
-            <img src="<%= data.qrLeft %>" alt="QR Left" />
-          <% } %>
-          <% if (data.qrRight) { %>
-            <img src="<%= data.qrRight %>" alt="QR Right" />
-          <% } %>
-        </div>
-      </div>
-
-      <!-- Main key-value table -->
-      <table class="kv">
-        <tr>
-          <td class="label">Registration No.</td>
-          <td class="value">: <%= data.vehicleNo %></td>
-          <td class="label">Receipt No.</td>
-          <td class="value">: <%= data.receiptNo %></td>
-        </tr>
-        <tr>
-          <td class="label">Payment Date</td>
-          <td class="value">: <%= data.paymentDate %></td>
-          <td class="label">Owner Name</td>
-          <td class="value">: <%= data.ownerName %></td>
-        </tr>
-        <tr>
-          <td class="label">Chassis No.</td>
-          <td class="value">: <%= data.chassisNo %></td>
-          <td class="label">Tax Mode</td>
-          <td class="value">: <%= data.taxMode %></td>
-        </tr>
-        <tr>
-          <td class="label">Vehicle Type</td>
-          <td class="value">: <%= data.vehicleType %></td>
-          <td class="label">Vehicle Class</td>
-          <td class="value">: <%= data.vehicleClass %></td>
-        </tr>
-        <tr>
-          <td class="label">Vehicle Category</td>
-          <td class="value">: <%= data.vehicleCategory %></td>
-          <td class="label">Mobile No.</td>
-          <td class="value">: <%= data.mobileNo %></td>
-        </tr>
-        <tr>
-          <td class="label">Checkpost Name</td>
-          <td class="value">: <%= data.checkPostName %></td>
-          <td class="label">Seating Capacity</td>
-          <td class="value">: <%= data.seatingCapacity %></td>
-        </tr>
-        <tr>
-          <td class="label">Sleeper Cap.</td>
-          <td class="value">: <%= data.sleeperCap %></td>
-          <td class="label">Payment Mode</td>
-          <td class="value">: <%= data.paymentMode %></td>
-        </tr>
-      </table>
-
-      <div class="body-text">
-        This permit shall be subject to all rules relating to Permits made under the Motor Vehicles Act, 1988 and in
-        force for the time being.
-      </div>
-
-      <!-- Secondary info table -->
-      <table class="mini">
-        <tr>
-          <td class="label">Bank Ref. No.</td>
-          <td class="value">: <%= data.bankRefNo %></td>
-          <td class="label">Permit Validity</td>
-          <td class="value">: <%= data.permitValidity %></td>
-        </tr>
-        <tr>
-          <td class="label">Fitness Validity</td>
-          <td class="value">: <%= data.fitnessValidity %></td>
-          <td class="label">Insurance Validity</td>
-          <td class="value">: <%= data.insuranceValidity %></td>
-        </tr>
-        <tr>
-          <td class="label">Service Type</td>
-          <td class="value">: <%= data.serviceType %></td>
-          <td class="label">Permit Type</td>
-          <td class="value">: <%= data.permitType %></td>
-        </tr>
-      </table>
-
-      <div class="small-text">
-        Under the provision of sub-section (4) of section 89 of Act and with the particular consent of the Transport
-        Authority concerned, this Permit is valid for <strong><%= data.validDays %></strong> days only.
-      </div>
-
-      <!-- Tax table -->
-      <table class="tax">
-        <thead>
-          <tr>
-            <th>Tax/Fee Particular</th>
-            <th>Tax/Fees</th>
-            <th>Fine</th>
-            <th>Total</th>
+            <td class="r1-1">Receipt No.</td>
+            <td class="r1-2">: <%= data.receiptNo || '' %></td>
           </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              MV Tax ( <%= data.mvTaxFrom %> TO <%= data.mvTaxTo %> )
+
+          <tr class="r1">
+            <td class="r1-1">Payment Date</td>
+            <td class="r1-2">: <%= data.paymentDate || data.receiptDate || '' %></td>
+
+            <td class="r1-1">Owner Name</td>
+            <td class="r1-2">: <%= data.ownerName || '' %></td>
+          </tr>
+
+          <tr class="r1">
+            <td class="r1-1">Chassis No.</td>
+            <td class="r1-2">: <%= data.chassisNo || '' %></td>
+
+            <td class="r1-1">Tax Mode</td>
+            <td class="r1-2">: <%= data.taxMode || '' %></td>
+          </tr>
+
+          <tr class="r1">
+            <td class="r1-1">Vehicle Type</td>
+            <td class="r1-2">: <%= data.vehiclePermitType || '' %></td>
+
+            <td class="r1-1">Vehicle Class</td>
+            <td class="r1-2">: <%= data.vehicleClass || '' %></td>
+          </tr>
+
+          <tr class="r1">
+            <td class="r1-1">Mobile No.</td>
+            <td class="r1-2">: <%= data.mobileNo || '' %></td>
+
+            <td class="r1-1">District</td>
+            <td class="r1-2">: <%= data.borderBarrier || data.districtName || '' %></td>
+          </tr>
+
+          <tr class="r1">
+            <td class="r1-1">Checkpost Name</td>
+            <td class="r1-2">: <%= data.checkpostName || data.checkPostName || '' %></td>
+
+            <% if (data.vehiclePermitType === 'GOODS VEHICLE') { %>
+              <td class="r1-1">Gross Weight</td>
+              <td class="r1-2">: <%= data.grossVehicleWeight || '' %> KG</td>
+            <% } else { %>
+              <td class="r1-1">Seating Cap (Ex. Driver)</td>
+              <td class="r1-2">: <%= data.seatingCapacityExcludingDriver || '' %></td>
+            <% } %>
+          </tr>
+
+          <tr class="r1">
+            <td class="r1-1">Sleeper Cap.</td>
+            <td class="r1-2">: <%= data.sleeperCap || data.sleeperCapacityExcludingDriver || '' %></td>
+
+            <td class="r1-1">Bank Ref. No.</td>
+            <td class="r1-2">: <%= data.upBankRefNo || data.bankRefNo || '' %></td>
+          </tr>
+
+          <tr class="r1">
+            <td class="r1-1">Payment Mode</td>
+            <td class="r1-2">: <%= data.paymentMode || '' %></td>
+
+            <td class="r1-1">Service Type</td>
+            <td class="r1-2">: <%= data.serviceType || '' %></td>
+          </tr>
+
+          <tr class="r1">
+            <td class="r1-1">Permit Type</td>
+            <td class="r1-2">: <%= data.permitType || '' %></td>
+
+            <td class="r1-1">Permit From / Upto</td>
+            <td class="r1-2">:
+              <%= (data.permitFrom ? data.permitFrom : '') %>
+              <% if (data.permitUpto) { %>
+                / <%= data.permitUpto %>
+              <% } %>
             </td>
-            <td class="num"><%= data.mvTaxAmount %></td>
-            <td class="num"><%= data.mvTaxFine %></td>
-            <td class="num"><%= data.mvTaxTotal %></td>
           </tr>
-          <tr>
-            <td>
-              Service/User Charge ( <%= data.serviceFrom %> TO <%= data.serviceTo %> )
-            </td>
-            <td class="num"><%= data.serviceAmount %></td>
-            <td class="num"><%= data.serviceFine %></td>
-            <td class="num"><%= data.serviceTotal %></td>
-          </tr>
-        </tbody>
-      </table>
+        </table>
 
-      <div class="grand-total">
-        Grand Total : <%= data.grandTotal %>/- <%= data.grandTotalWords %> ONLY
-      </div>
+        <div class="content__money">
+          <div class="content__money-r1">
+            <div class="m1"><b>Particular</b></div>
+            <div class="m2"><b>Fees/Tax</b></div>
+            <div class="m3"><b>Fine</b></div>
+            <div class="m4"><b>Total</b></div>
+          </div>
 
-      <div class="terms">
-        <div class="terms-title">Terms and Conditions:</div>
-        <ol>
-          <li>This is a computer generated printout and no signature is required.</li>
-          <li>
-            Incorrect mentioning of vehicle class or seating capacity may lead to tax evasion and defaulter shall be
-            liable for penal action.
-          </li>
-        </ol>
-      </div>
+          <div class="content__money-r2">
+            <div class="m1">MV Tax ( <%= data.taxFrom_up || data.taxFrom %> TO <%= data.taxTo_up || data.taxTo %> )</div>
+            <div class="m2"><%= data.totalAmount || 0 %></div>
+            <div class="m3">0</div>
+            <div class="m4"><%= data.totalAmount || 0 %></div>
+          </div>
+        </div>
 
-      <div class="note">
-        Note : This document is generated from testing server and has no legal or official value.
-        <br />
-        Scan the QR code for genuinity of the receipt, it should land at
-        <a href="https://kms.parivahan.gov.in">https://kms.parivahan.gov.in</a>. If the URL is different, the receipt
-        could be fake, please raise a complaint.
+        <div class="content__amount">
+          <div class="content__amount-r1">
+            <div class="a1">Amount in Words: <strong><%= data.totalAmountInWord || '' %></strong> ONLY</div>
+          </div>
+
+          <div class="content__amount-r2" style="text-align:right;">
+            <div class="a1">Paid Upto: <%= data.taxTo_up || data.taxTo %></div>
+            <div class="a2">Total Paid: <%= data.totalAmount || 0 %></div>
+          </div>
+        </div>
+
+        <div class="pdf-footer">
+          <div class="qr-block">
+            <% if (data.src) { %>
+              <img src="<%= data.src %>" alt="QR" style="width:110px; height:110px;" />
+            <% } %>
+          </div>
+
+          <div class="signature">
+            <div>Authorised Signatory</div>
+            <div style="margin-top:40px">________________________</div>
+            <div style="font-size:11px; margin-top:6px;">For Transport Department</div>
+          </div>
+        </div>
+
+        <div class="content__last">
+          <div class="content__last-title"><p>Conditions for Acceptance of Payment of Tax</p></div>
+          <div class="content__last-text">
+            <p>1. The Tax so recovered is subject to verification of documents and loading capacity of vehicle. In case of any false information pertaining to the documents such as vehicle particulars, the tax, penalty and other charges collected shall be adjusted against tax due and balance collected from the vehicle owner/user.</p>
+            <p>2. Checkpost authorities reserve the right to cancel or modify the entire tax in case where the owner of the vehicle or driver provide false information in the payment of tax. Any excess payment shall be refunded back to the vehicle owner/user on reconciliation.</p>
+          </div>
+        </div>
       </div>
     </div>
   </body>
