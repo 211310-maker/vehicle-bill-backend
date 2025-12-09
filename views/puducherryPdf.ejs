@@ -113,27 +113,29 @@
       }
 
       /* Main kv table */
-      table.kv {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 6px;
+       table.kv {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 6px;
+          table-layout: fixed;       /* keep the 4 columns fixed */
       }
 
-      table.kv td {
-        padding: 2px 2px;
-        vertical-align: top;
+       table.kv td {
+         padding: 2px 2px;
+         vertical-align: top;
       }
 
-      table.kv td.label {
-        width: 20%;           /* a bit wider so long text wraps nicer */
-        white-space: nowrap;
+       table.kv td.label {
+        font-weight: normal;
+        white-space: nowrap;       /* label stays on one line */
       }
 
-      table.kv td.value {
-        width: 30%;
-        font-weight: bold;
-        padding-left: 2px;    /* keeps colon/value nicely aligned */
+        table.kv td.value {
+         font-weight: bold;
+         padding-left: 2px;
+         white-space: normal;       /* allow long values (like Vehicle Type) to wrap */
       }
+
 
       .body-text {
         margin-top: 4px;
@@ -276,6 +278,12 @@
 
         <!-- MAIN DETAILS -->
         <table class="kv">
+           <colgroup>
+           <col style="width:22%">
+           <col style="width:28%">
+           <col style="width:22%">
+           <col style="width:28%">
+          </colgroup>
           <tr>
             <td class="label">Registration No.</td>
             <td class="value">: <%= data.vehicleNo || '' %></td>
