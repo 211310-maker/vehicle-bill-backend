@@ -139,7 +139,17 @@ module.exports.getDetails = asyncHandler(async (req, res, next) => {
     `member asked detail for ${req.query.vehicleNo} from ${req.params.state} form`
   );
 
-  const detail = await Bill.findOne({ ...req.query }).sort({ createdAt: "-1" });
+  const filters = _.pick(req.query, ["vehicleNo"]);
+
+  if (!filters.vehicleNo) {
+    return res.status(400).send({
+      success: false,
+      code: 400,
+      message: "vehicleNo is required",
+    });
+  }
+
+  const detail = await Bill.findOne(filters).sort({ createdAt: "-1" });
 
   if (!detail) {
     return res.status(404).send({
@@ -411,27 +421,30 @@ module.exports.getBillOnPageFormat = asyncHandler(async (req, res, next) => {
       return res.status(500).send("Template for this state is not available.");
     }
 
-    ejs.renderFile(templatePath, { data }, function (err, htmlContent) {
-      if (err) {
-        // Log full stack and helpful context — this will appear in Render logs
-        logger.error(`Error rendering bill page for id=${id}, state=${bill.state}, err=${err.message}`, {
+    try {
+      const htmlContent = await ejs.renderFile(templatePath, { data });
+
+      if (htmlContent) {
+        return res.send(htmlContent);
+      }
+
+      logger.error(`Rendered HTML empty for id=${id}, state=${bill.state}`);
+      return res.status(500).send("An error occurred");
+    } catch (err) {
+      // Log full stack and helpful context — this will appear in Render logs
+      logger.error(
+        `Error rendering bill page for id=${id}, state=${bill.state}, err=${err.message}`,
+        {
           stack: err.stack,
           billId: id,
           billState: bill.state,
           reqQuery: req.query,
-        });
+        }
+      );
 
-        // TEMP: send full stack back to client for debugging (remove ASAP once fixed)
-        return res.status(500).send(`<pre>${err.stack}</pre>`);
-      }
-
-      if (htmlContent) {
-        return res.send(htmlContent);
-      } else {
-        logger.error(`Rendered HTML empty for id=${id}, state=${bill.state}`);
-        return res.status(500).send("An error occurred");
-      }
-    });
+      // TEMP: send full stack back to client for debugging (remove ASAP once fixed)
+      return res.status(500).send(`<pre>${err.stack}</pre>`);
+    }
   } catch (err) {
     logger.error(`Unhandled error in getBillOnPageFormat for id=${id}: ${err.message}`, {
       stack: err.stack,
@@ -495,11 +508,9 @@ const formatDateMsg = (date, state, type) => {
 //@access  private
 module.exports.createBill = asyncHandler(async (req, res, next) => {
   const { username, password } = req.body;
-  console.log(username, password);
-  console.log(process.env.PAYMENT_USERNAME);
 
   if (
-    username !== process.env.PAYMENT_USERNAME &&
+    username !== process.env.PAYMENT_USERNAME ||
     password !== process.env.PAYMENT_PASSWORD
   ) {
     return next(
@@ -507,6 +518,7 @@ module.exports.createBill = asyncHandler(async (req, res, next) => {
     );
   }
 
+  // TODO: validate/whitelist req.body fields before creating the Bill document.
   const bill = new Bill({ ...req.body });
   bill.createdBy = req.user._id;
   bill.receiptNo = receiptNoGenerator(req.body.state);
@@ -517,41 +529,48 @@ module.exports.createBill = asyncHandler(async (req, res, next) => {
 
   await bill.save();
 
-  const data = JSON.stringify({});
+  const smsApiKey = process.env.SMS_API_KEY;
+  const smsSender = process.env.SMS_SENDER || "UVAHAN";
+  const smsTemplateId = process.env.SMS_TEMPLATE_ID;
 
-  const config = {
-    method: "get",
-    maxBodyLength: Infinity,
-    url: `http://login.redsms.in/api/smsapi?key=c2c84407ebb090fc094fc169192f9cc8&route=2&sender=UVAHAN&number=${
-      bill.mobileNo
-    }&sms=Your tax of Rs. ${bill.totalAmount}/- has been paid for Vehicle No. ${
-      bill.vehicleNo
-    }, valid from ${formatDateMsg(
-      bill.taxFromDate,
-      bill.state,
-      "from"
-    )} to ${formatDateMsg(
-      bill.taxUptoDate,
-      bill.state,
-      "to"
-    )} paid on ${formatDateMsg(
-      bill.createdAt,
-      bill.state,
-      "createdAt"
-    )}. UVAHAN&templateid=1207163490769304299`,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data: data,
-  };
+  if (smsApiKey && smsTemplateId) {
+    const smsUrl = "http://login.redsms.in/api/smsapi";
+    const smsParams = {
+      key: smsApiKey,
+      route: 2,
+      sender: smsSender,
+      number: bill.mobileNo,
+      sms: `Your tax of Rs. ${bill.totalAmount}/- has been paid for Vehicle No. ${bill.vehicleNo}, valid from ${formatDateMsg(
+        bill.taxFromDate,
+        bill.state,
+        "from"
+      )} to ${formatDateMsg(bill.taxUptoDate, bill.state, "to")} paid on ${formatDateMsg(
+        bill.createdAt,
+        bill.state,
+        "createdAt"
+      )}. ${smsSender}`,
+      templateid: smsTemplateId,
+    };
 
-  axios(config)
-    .then(function (response) {
-      console.log(JSON.stringify(response.data));
-    })
-    .catch(function (error) {
-      console.log(error);
+    try {
+      const smsResponse = await axios.get(smsUrl, { params: smsParams });
+      logger.info("SMS sent successfully", {
+        billId: bill._id,
+        status: smsResponse.status,
+        data: smsResponse.data,
+      });
+    } catch (error) {
+      logger.warn("Failed to send SMS notification", {
+        billId: bill._id,
+        error: error.message,
+      });
+    }
+  } else {
+    logger.warn("SMS not sent because SMS configuration is missing", {
+      hasApiKey: Boolean(smsApiKey),
+      hasTemplateId: Boolean(smsTemplateId),
     });
+  }
 
   logger.info(
     `new bill generated with this id ${bill._id} and create by ${req.user._id}`
