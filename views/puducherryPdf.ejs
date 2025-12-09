@@ -16,7 +16,6 @@
         box-sizing: border-box;
       }
 
-      /* ensure single A4 page, no extra blank page */
       @page {
         size: A4;
         margin: 0;
@@ -31,7 +30,6 @@
         font-size: 12px;
       }
 
-      /* A4-like canvas so print→PDF matches sample */
       .main {
         width: 210mm;
         margin: 0 auto;
@@ -44,7 +42,7 @@
         z-index: 1;
       }
 
-      /* centered background watermark */
+      /* centered watermark */
       .watermark {
         position: absolute;
         top: 230px;
@@ -55,7 +53,6 @@
         z-index: 0;
       }
 
-      /* Header */
       .header {
         display: table;
         width: 100%;
@@ -128,13 +125,14 @@
       }
 
       table.kv td.label {
-        width: 18%;
+        width: 20%;           /* a bit wider so long text wraps nicer */
         white-space: nowrap;
       }
 
       table.kv td.value {
-        width: 32%;
+        width: 30%;
         font-weight: bold;
+        padding-left: 2px;    /* keeps colon/value nicely aligned */
       }
 
       .body-text {
@@ -143,7 +141,6 @@
         text-align: justify;
       }
 
-      /* Secondary info */
       table.mini {
         width: 100%;
         border-collapse: collapse;
@@ -157,12 +154,12 @@
       }
 
       table.mini td.label {
-        width: 18%;
+        width: 20%;
         white-space: nowrap;
       }
 
       table.mini td.value {
-        width: 32%;
+        width: 30%;
         font-weight: bold;
       }
 
@@ -172,7 +169,6 @@
         text-align: justify;
       }
 
-      /* Tax table */
       table.tax {
         width: 100%;
         border-collapse: collapse;
@@ -247,7 +243,7 @@
 
   <body>
     <div class="main">
-      <!-- centered background image using Puducherry.png -->
+      <!-- background emblem -->
       <img
         src="<%= data.host %>/images1/Puducherry.png"
         class="watermark"
@@ -372,21 +368,37 @@
         </div>
 
         <% 
-          // ---- TAX / GRAND TOTAL CALC FALLBACKS ----
+          // ---- TAX / GRAND TOTAL CALC FALLBACKS (force numbers to avoid "extra 0") ----
+          const toNumber = (v) => {
+            const n = Number(v);
+            return isNaN(n) ? 0 : n;
+          };
+
           const mvTaxFrom = data.mvTaxFrom || data.taxFrom_up || data.taxFrom || '';
           const mvTaxTo   = data.mvTaxTo   || data.taxTo_up   || data.taxTo   || '';
-          const mvBaseAmount = (data.mvTaxAmount != null ? data.mvTaxAmount : data.totalAmount);
-          const mvAmount = mvBaseAmount || 0;
-          const mvFine   = data.mvTaxFine || 0;
-          const mvTotal  = (data.mvTaxTotal != null ? data.mvTaxTotal : (mvAmount + mvFine));
+
+          const mvBaseAmountRaw = (data.mvTaxAmount != null && data.mvTaxAmount !== '')
+            ? data.mvTaxAmount
+            : data.totalAmount;
+
+          const mvAmount = toNumber(mvBaseAmountRaw);
+          const mvFine   = toNumber(data.mvTaxFine);
+          const mvTotal  = (data.mvTaxTotal != null && data.mvTaxTotal !== '')
+            ? toNumber(data.mvTaxTotal)
+            : mvAmount + mvFine;
 
           const svcFrom = data.serviceFrom || mvTaxFrom;
           const svcTo   = data.serviceTo   || mvTaxTo;
-          const svcAmount = data.serviceAmount || 0;
-          const svcFine   = data.serviceFine || 0;
-          const svcTotal  = (data.serviceTotal != null ? data.serviceTotal : (svcAmount + svcFine));
+          const svcAmount = toNumber(data.serviceAmount);
+          const svcFine   = toNumber(data.serviceFine);
+          const svcTotal  = (data.serviceTotal != null && data.serviceTotal !== '')
+            ? toNumber(data.serviceTotal)
+            : svcAmount + svcFine;
 
-          const grandTotal = (data.grandTotal != null ? data.grandTotal : (mvTotal + svcTotal));
+          const grandTotal = (data.grandTotal != null && data.grandTotal !== '')
+            ? toNumber(data.grandTotal)
+            : mvTotal + svcTotal;
+
           const grandWords = data.grandTotalWords || data.totalAmountInWord || '';
         %>
 
