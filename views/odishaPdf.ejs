@@ -41,7 +41,7 @@
     .logo__od {
       position: absolute;
       top: 20px;
-      left: 30px;
+      left: 35px;
       z-index: 10;
     }
 
@@ -51,22 +51,22 @@
       display: block;
     }
 
-    /* WATERMARK (Odisha.png) in center-right */
+    /* WATERMARK (Odisha.png) in exact center */
     .logo_od_main {
       position: absolute;
-      top: 45%;
-      left: 60%;
+      top: 50%;          /* center vertically */
+      left: 50%;         /* center horizontally */
       transform: translate(-50%, -50%);
-      opacity: 0.14; /* little more visible */
+      opacity: 0.16;     /* a bit more visible */
       z-index: 1;
       pointer-events: none;
-    }
+}
 
-    .logo_od_main img {
-      max-width: 380px;
-      width: 60%;
-      height: auto;
-    }
+     .logo_od_main img {
+       width: 70%;        /* make it bigger (try 70–80%) */
+       max-width: 450px;  /* optional hard cap */
+       height: auto;
+}
 
     /* Make sure actual content is above watermark */
     .content,
