@@ -83,6 +83,12 @@ const BillSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+  applicationFee: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
     surChargeFee: {
       type: String,
       default: "",
