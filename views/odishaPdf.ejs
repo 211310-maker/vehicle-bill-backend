@@ -3,473 +3,302 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,400;1,500&display=swap"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="<%=data.host%>/css/style.css" />
-  <% if(data.cssFix){ %>
-    <link rel="stylesheet" href="<%=data.host%>/css/cssFix.css" />
-  <% } %>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
 
-  <!-- Inline overrides for QR position + watermark -->
   <style>
     body {
       margin: 0;
+      padding: 0;
       font-family: 'Roboto', sans-serif;
     }
 
     .main {
-      position: relative;
       width: 100%;
-      max-width: 800px; /* adjust if needed */
+      max-width: 900px;
       margin: 0 auto;
-      padding: 20px 35px;
-      box-sizing: border-box;
+      position: relative;
+      padding: 20px 30px;
     }
 
-    /* QR code top-right */
+    /* TOP LEFT LOGO (ODISHA EMBLEM) */
+    .top-left-logo {
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      width: 95px;
+      height: auto;
+      z-index: 10;
+    }
+
+    /* QR CODE TOP RIGHT */
     .qr-image-od {
       position: absolute;
-      top: 20px;          /* adjust for vertical alignment */
-      right: 30px;        /* adjust for horizontal alignment */
-      width: 110px;       /* adjust size as per bill */
-      height: 110px;
+      top: 10px;
+      right: 20px;
+      width: 120px;
+      height: 120px;
       object-fit: contain;
-      z-index: 2;
+      z-index: 10;
     }
 
-    /* Odisha.png as watermark in the center */
-    .logo_od_main {
+    /* WATERMARK IN CENTER */
+    .watermark {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      opacity: 0.06;      /* lighter/darker watermark */
-      z-index: 0;
+      opacity: 0.13;  /* more visible */
+      z-index: 1;
       pointer-events: none;
     }
 
-    .logo_od_main img {
-      max-width: 70%;     /* adjust watermark size */
-      height: auto;
+    .watermark img {
+      width: 55%;
+      opacity: 0.13;
     }
 
-    /* Ensure all content stays above watermark */
-    .main > *:not(.logo_od_main),
-    .content,
-    .logo__od,
-    .content__grand,
-    .content__top,
-    .content__top_receiptNoOD,
-    table {
+    /* CONTENT OVER THE WATERMARK */
+    .content {
       position: relative;
-      z-index: 1;
-    }
-
-    /* Header alignment tweaks */
-    .content__top {
+      z-index: 5;
+      margin-top: 120px; /* ensures no overlap with top logos */
       text-align: center;
-      margin-top: 10px;
     }
 
-    .logo__od {
-      margin-top: 10px;
-      margin-bottom: 5px;
+    .content h3,
+    .content p {
+      margin: 3px 0;
+    }
+
+    /* TABLE ALIGNMENT */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-top: 15px;
+    }
+
+    td {
+      padding: 4px 6px;
+    }
+
+    /* MONEY TABLE */
+    .content__money {
+      margin-top: 20px;
+    }
+
+    .content__money-r1,
+    .content__money-r2 {
       display: flex;
-      justify-content: center;
+      width: 100%;
+      border-bottom: 1px solid #000;
+      padding: 5px 0;
     }
 
-    .logo__od img {
-      max-height: 60px;
-      width: auto;
+    .m1,
+    .m2,
+    .m3,
+    .m4 {
+      width: 25%;
+      text-align: left;
+    }
+
+    .content__grand {
+      margin-top: 25px;
+      font-size: 15px;
+    }
+
+    .container_signature {
+      text-align: right;
+      margin-top: 40px;
+      font-weight: bold;
     }
   </style>
 </head>
 
 <body>
+
   <div class="main">
-    <!-- QR moved inside .main so it aligns relative to the bill -->
-    <img class="qr-image-od" src="<%= data.src %>" alt="" />
 
-    <!-- Center watermark -->
-    <div class="main__printing logo_od_main">
-      <img src="<%=data.host%>/images1/Odisha.png" alt="" />
-    </div>
+    <!-- LEFT TOP LOGO -->
+    <img class="top-left-logo" src="<%=data.host%>/images1/Odisha.png" alt="logo" />
 
-    <!-- Top logo -->
-    <div class="logo logo__od">
-      <img src="<%=data.host%>/images1/Odisha.png" alt="" />
+    <!-- QR CODE RIGHT TOP -->
+    <img class="qr-image-od" src="<%= data.src %>" alt="QR" />
+
+    <!-- WATERMARK -->
+    <div class="watermark">
+      <img src="<%=data.host%>/images1/Odisha.png" />
     </div>
 
     <div class="content">
-      <div class="content__top">
-        <h3 class="content__heading">GOVERMENT OF ODISHA</h3>
-        <p class="content__title content__heading_kat">Odisha Motor Vehicles Department</p>
-        <p class="content__desc">Checkpost Tax e-Receipt</p>
-      </div>
-      <div class="content__top_receiptNoOD">
-        <h3 class="content__title"> Receipt No. : ORT<%=data.receiptNo%></h3>
-      </div>
+      <h3>GOVERMENT OF ODISHA</h3>
+      <p>Odisha Motor Vehicles Department</p>
+      <p><b>Checkpost Tax e-Receipt</b></p>
 
-      <table class="rj kat mr">
-        <tr class="r1 r11">
-          <td class="r1-1-od">Vehicle No.</td>
-          <td class="r1-2">: <%=data.vehicleNo%></td>
-          <td class="r1-3">Payment Date</td>
-          <td class="r1-4">: <%=data.paymentDate%></td>
+      <h3 style="margin-top:10px;">Receipt No. : ORT<%=data.receiptNo%></h3>
+
+      <!-- DETAILS TABLE -->
+      <table>
+        <tr>
+          <td>Vehicle No.</td>
+          <td>: <%=data.vehicleNo%></td>
+          <td>Payment Date</td>
+          <td>: <%=data.paymentDate%></td>
         </tr>
-        <!-- <tr class="r1 r12">
-            <td class="r1-1-od">Receipt No.</td>
-            <td class="r1-2">: <%=data.receiptNo%></td>
-          </tr> -->
-        <tr class="r1 r14">
-          <td class="r1-1-od">Owner Name</td>
-          <td class="r1-2">: <%=data.ownerName%></td>
-          <td class="r1-3">Mobile No.</td>
-          <td class="r1-4">&nbsp;&nbsp;: <%=data.mobileNo%></td>
+        <tr>
+          <td>Owner Name</td>
+          <td>: <%=data.ownerName%></td>
+          <td>Mobile No.</td>
+          <td>: <%=data.mobileNo%></td>
         </tr>
-        <tr class="r1 r15">
-          <td class="r1-1-od">Chassis No.</td>
-          <td class="r1-2">&nbsp;&nbsp;: <%=data.chassisNo%></td>
-          <td class="r1-3">Tax Mode</td>
-          <td class="r1-4">&nbsp;&nbsp;: <%=data.taxMode%></td>
+        <tr>
+          <td>Chassis No.</td>
+          <td>: <%=data.chassisNo%></td>
+          <td>Tax Mode</td>
+          <td>: <%=data.taxMode%></td>
         </tr>
-        <tr class="r1">
-          <td class="r1-1-od">Vehicle Type</td>
-          <td class="r1-2"> &nbsp;&nbsp;: <%=data.vehiclePermitType%></td>
-          <td class="r1-3">Vehicle Class</td>
-          <td class="r1-4">&nbsp;&nbsp;: <%=data.vehicleClass%></td>
+        <tr>
+          <td>Vehicle Type</td>
+          <td>: <%=data.vehiclePermitType%></td>
+          <td>Vehicle Class</td>
+          <td>: <%=data.vehicleClass%></td>
         </tr>
-        <!-- <tr class="r1">
-            <td class="r1-1-od">Permit Type</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.permitType%></td>
-            <td class="r1-3">Floor Area</td>
-            <td class="r1-4">&nbsp;&nbsp;: <%=data.floorArea%></td>
-          </tr> -->
+
         <% if(data.vehiclePermitType==='GOODS VEHICLE' ){ %>
-          <tr class="r1">
-            <td class="r1-1-od">Laden Weight</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.grossVehicleWeight%> Kg</td>
-            <td class="r1-3">Un Laden Weight</td>
-            <td class="r1-4">&nbsp;&nbsp;: <%=data.unladenWeight%> kg</td>
-          </tr>
-        <% } else { %>
-          <tr class="r1">
-            <td class="r1-3">
-              Seating Cap(Ex. <br />
-              Driver
-            </td>
-            <td class="r1-4">
-              &nbsp;&nbsp;: <%=data.seatingCapacityExcludingDriver%>
-            </td>
-            <td class="r1-1-od">Sleeper Cap.</td>
-            <td class="r1-2">
-              &nbsp;&nbsp;: <%=data.sleeperCapacityExcludingDriver%>
-            </td>
-          </tr>
-        <% } %>
-        <!-- <tr class="r1">
-                <td class="r1-1-od">Permit Validity</td>
-                <td class="r1-2">&nbsp;&nbsp;: <%=data.permitUpto%>
-                </td>
-                <td class="r1-1-od">Fitness Validity</td>
-                <td class="r1-2">&nbsp;&nbsp;: <%=data.fitnessValidity%>
-                </td>
-              </tr> -->
-        <!-- <tr class="r1">
-                <td class="r1-1-od">Insurance Validity</td>
-                <td class="r1-2">&nbsp;&nbsp;: <%=data.insuranceValidity%>
-                </td>
-                <td class="r1-1-od">Tax Validity</td>
-                <td class="r1-2">&nbsp;&nbsp;: <%=data.fitnessValidity%>
-                </td>
-              </tr> -->
-        <tr class="r1">
-          <td>Standing Capacity</td>
-          <td>&nbsp;&nbsp;: 0</td>
-          <td class="r1-1-od">Bank Ref No.</td>
-          <td class="r1-2">&nbsp;&nbsp;: <%=data.rjBankRefNo%></td>
+        <tr>
+          <td>Laden Weight</td>
+          <td>: <%=data.grossVehicleWeight%> Kg</td>
+          <td>Un Laden Weight</td>
+          <td>: <%=data.unladenWeight%> kg</td>
         </tr>
-        <tr class="r1">
-          <td class="r1-3">Payment Mode</td>
-          <td class="r1-4">&nbsp;&nbsp;: <%=data.paymentMode%></td>
-          <td class="r1-3">Payment Status</td>
-          <td class="r1-4">&nbsp;&nbsp;: SUCCESS</td>
+        <% } else { %>
+        <tr>
+          <td>Seating Capacity</td>
+          <td>: <%=data.seatingCapacityExcludingDriver%></td>
+          <td>Sleeper Cap.</td>
+          <td>: <%=data.sleeperCapacityExcludingDriver%></td>
+        </tr>
+        <% } %>
+
+        <tr>
+          <td>Standing Capacity</td>
+          <td>: 0</td>
+          <td>Bank Ref No.</td>
+          <td>: <%=data.rjBankRefNo%></td>
+        </tr>
+
+        <tr>
+          <td>Payment Mode</td>
+          <td>: <%=data.paymentMode%></td>
+          <td>Payment Status</td>
+          <td>: SUCCESS</td>
         </tr>
       </table>
 
-      <div class="content__money content__money_od">
-        <div class="content__money-r1 d-flex">
+      <!-- MONEY TABLE -->
+      <div class="content__money">
+        <div class="content__money-r1">
           <div class="m1"><b>Particular</b></div>
           <div class="m2"><b>Fees/Tax</b></div>
           <div class="m3"><b>Fine</b></div>
           <div class="m4"><b>Total</b></div>
         </div>
-        <% if (
-          (data.vehiclePermitType==="CONSTRUCTION EQUIPMENT VEHICLE" && data.permitType==="NOT APPLICABLE" ) ||
-          (data.vehiclePermitType==="CONTRACT CARRIAGE/PASSANGER VEHICLES" && data.permitType==="TOURIST PERMIT" ) ||
-          (data.vehiclePermitType==="GOODS VEHICLE" && data.permitType==="NATIONAL PERMIT" )
-        ){ %>
-          <div class="content__money-r2 content__money-r2-border d-flex odr">
-            <div class="m1">
-              MV Tax( <%=data.taxFrom_od%> to <%=data.taxTo_od%> )
-            </div>
-            <div class="m2">
-              <%=data.mvTax%>
-            </div>
-            <div class="m3">0</div>
-            <div class="m4">
-              <%=data.mvTax%>
-            </div>
-          </div>
-          <div class="content__money-r2 content__money-r2-border d-flex odr">
-            <div class="m1">
-              Application Fee
-            </div>
-            <div class="m2">
-              <%=data.applicationFee%>
-            </div>
-            <div class="m3">0</div>
-            <div class="m4">
-              <%=data.applicationFee%>
-            </div>
-          </div>
-          <div class="content__money-r2 d-flex odr content__money-r2-border">
-            <div class="m1">Permit Fee</div>
-            <div class="m2">
-              <%=data.permitFee%>
-            </div>
-            <div class="m3">0</div>
-            <div class="m4">
-              <%=data.permitFee%>
-            </div>
-          </div>
-          <!--
-          <div class="content__money-r2 content__money-r2-border d-flex">
-            <div class="m1">
-              Cess
-            </div>
-            <div class="m2">
-              <%=data.cess%>
-            </div>
-            <div class="m3">0</div>
-            <div class="m4">
-              <%=data.cess%>
-            </div>
-          </div>
-          <div class="content__money-r2 d-flex">
-            <div class="m1">
-              Infra cess
-            </div>
-            <div class="m2">
-              <%=data.infraCess%>
-            </div>
-            <div class="m3">0</div>
-            <div class="m4">
-              <%=data.infraCess%>
-            </div>
-          </div>
-          -->
-        <% } else { %>
-          <div class="content__money-r2 content__money-r2-border d-flex odr">
-            <div class="m1">
-              MV Tax( <%=data.taxFrom_od%> to <%=data.taxTo_od%> )
-            </div>
-            <div class="m2">
-              <%=data.mvTax%>
-            </div>
-            <div class="m3">0</div>
-            <div class="m4">
-              <%=data.mvTax%>
-            </div>
-          </div>
-          <!--
-          <div class="content__money-r2 content__money-r2-border d-flex">
-            <div class="m1">
-              Cess
-            </div>
-            <div class="m2">
-              <%=data.cess%>
-            </div>
-            <div class="m3">0</div>
-            <div class="m4">
-              <%=data.cess%>
-            </div>
-          </div>
-          <div class="content__money-r2 content__money-r2-border d-flex">
-            <div class="m1">
-              Infra cess
-            </div>
-            <div class="m2">
-              <%=data.infraCess%>
-            </div>
-            <div class="m3">0</div>
-            <div class="m4">
-              <%=data.infraCess%>
-            </div>
-          </div>
-          -->
-          <div class="content__money-r2 content__money-r2-border d-flex odr">
-            <div class="m1">
-              Application Fee
-            </div>
-            <div class="m2">
-              <%=data.applicationFee%>
-            </div>
-            <div class="m3">0</div>
-            <div class="m4">
-              <%=data.applicationFee%>
-            </div>
-          </div>
-          <div class="content__money-r2 d-flex odr content__money-r2-border">
-            <div class="m1">Permit Fee</div>
-            <div class="m2">
-              <%=data.permitFee%>
-            </div>
-            <div class="m3">0</div>
-            <div class="m4">
-              <%=data.permitFee%>
-            </div>
-          </div>
-          <!--
-          <div class="content__money-r2 d-flex">
-            <div class="m1">Permit Endoresment/Variation</div>
-            <div class="m2">
-              <%=data.permitEndoresment%>
-            </div>
-            <div class="m3">0</div>
-            <div class="m4">
-              <%=data.permitEndoresment%>
-            </div>
-          </div>
-          -->
-        <% } %>
-      </div>
 
-      <div class="content__grand content__grand--hr">
-        <p>
-          <b><span>Grand Total :</span> ₹ <%=data.totalAmount%>/- ( <%=data.totalAmountInWord%> )</b>
-        </p>
-        <div class="container">
-          <h4 class="content__title">
-            <b>FORM XXVI </b>
-          </h4>
-          <h4 class="content__title">
-            <b>See Rule 46(1)(v)</b>
-          </h4>
-          <h4 class="content__title">
-            <b><span>TEMP. PERMIT No.:</span> ORT<%=data.receiptNo%></b>
-          </h4>
+        <div class="content__money-r2">
+          <div class="m1">MV Tax( <%=data.taxFrom_od%> to <%=data.taxTo_od%> )</div>
+          <div class="m2"><%=data.mvTax%></div>
+          <div class="m3">0</div>
+          <div class="m4"><%=data.mvTax%></div>
         </div>
-        <table class="od">
-          <tr class="r1 r11">
-            <td class="r1-1-od1">1. Name of Holder</td>
-            <td class="r1-2od"></td>
-            <td class="r1-3">: &nbsp;&nbsp;<%=data.ownerName%></td>
-          </tr>
-          <tr class="r1 r11">
-            <td class="r1-1-od1">2. Area</td>
-            <td class="r1-2od"></td>
-            <td class="r1-3">: &nbsp;&nbsp;<%=data.floorArea%></td>
-          </tr>
-          <tr class="r1 r11">
-            <td class="r1-1-od1">3. (i) Type of vehicle</td>
-            <td class="r1-2od"></td>
-            <td class="r1-3">: &nbsp;&nbsp;<%=data.vehicleClass%></td>
-          </tr>
-          <tr class="r1 r11">
-            <td class="r1-1-od1">&nbsp;&nbsp;&nbsp; (ii) Registration Mark</td>
-            <td class="r1-2od"></td>
-            <td class="r1-3">: &nbsp;&nbsp;<%=data.vehicleNo%></td>
-          </tr>
-          <tr class="r1 r11">
-            <td class="r1-1-od1">&nbsp;&nbsp;&nbsp; (iii) Seating Capacity </td>
-            <td class="r1-2od"></td>
-            <td class="r1-3">: &nbsp;&nbsp;<%=data.seatingCapacityExcludingDriver%></td>
-          </tr>
-          <tr class="r1 r11">
-            <td class="r1-1-od1">&nbsp;&nbsp;&nbsp; (iv) Gross Vehicle Weight</td>
-            <td class="r1-2od"></td>
-            <td class="r1-3">: &nbsp;&nbsp;<%=data.grossVehicleWeight%></td>
-          </tr>
-          <tr class="r1 r11">
-            <td class="r1-1-od1">4. Purpose of Journey or Jounerys</td>
-            <td class="r1-2od"></td>
-            <td class="r1-3">: &nbsp;&nbsp;<%=data.purposeOfJourney%></td>
-          </tr>
-          <tr class="r1 r11">
-            <td class="r1-1-od1">5. Nature of goods if to be carried </td>
-            <td class="r1-2od"></td>
-            <td class="r1-3">: &nbsp;&nbsp;</td>
-          </tr>
-          <tr class="r1 r11">
-            <td class="r1-1-od1">6. Date of expiry </td>
-            <td class="r1-2od"></td>
-            <td class="r1-3">: &nbsp;&nbsp;<%=data.permitValidity%></td>
-          </tr>
-          <tr class="r1 r11">
-            <td colspan="3" class="od_td">
-              <div class="container_simple">
-                <p>7. Under the provisions of Sub-section(4)of Sec 63 of the Act and with the particular general
-                  consent </p>
-                <p>&nbsp;&nbsp;&nbsp;&nbsp;of the Transport Authority concerned, this</p>
-                <p>&nbsp;&nbsp;&nbsp;&nbsp;Permit is valid also in the following regions:</p>
-                <p>&nbsp;&nbsp;&nbsp;&nbsp;(1) ____________________(2) ____________________(3) ____________________(4)
-                  ____________________</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="r1 r11">
-            <td class="r1-1-od1">8. Route or Routes</td>
-            <td class="r1-2od"></td>
-            <td class="r1-3">: &nbsp;&nbsp;<%=data.routeOfTheJourney%></td>
-          </tr>
-        </table>
 
-        <div class="container_signature">
-          <p>Secretary</p>
-          <p>State Transport Authority, ODISHA</p>
+        <div class="content__money-r2">
+          <div class="m1">Application Fee</div>
+          <div class="m2"><%=data.applicationFee%></div>
+          <div class="m3">0</div>
+          <div class="m4"><%=data.applicationFee%></div>
+        </div>
+
+        <div class="content__money-r2">
+          <div class="m1">Permit Fee</div>
+          <div class="m2"><%=data.permitFee%></div>
+          <div class="m3">0</div>
+          <div class="m4"><%=data.permitFee%></div>
         </div>
       </div>
 
-      <div class="content__grand content__grand--hr">
+      <!-- GRAND TOTAL -->
+      <div class="content__grand">
         <p>
-          <i>Note : 1) This is a computer generated printout and no signature is required</i>
+          <b>Grand Total : ₹ <%=data.totalAmount%>/- ( <%=data.totalAmountInWord%> )</b>
         </p>
-        <p>
-          <i>
-            2) Incorrect mentioning of vehicle class or seating capacity may lead to tax evasion and defaulter shall be
-            liable for penal action.
-          </i>
-        </p>
-        <p>
-          <i>
-            3) You are not allowed to make any intrastate trip within Orisha and this permit is valid for one round trip
-            only.
-          </i>
-        </p>
-        <p>
-          <i>
-            4) The Temporary Permit should be accompanied by the Checkpost e-Receipt with QR code.
-            <br />
-            you will also receive the payment confirmation message.
-          </i>
-        </p>
-        <!--
-          <br />
-          <br />
-          <p class="main__warning">
-            Scan the QR code for genuinity of the receipt, It should land at
-            https://kms.privahan.gov.in<br />
-          </p>
-          <div class="main__warning main__warning-2">
-            site. In case the URL is different, then receipt could be a fake
-            one, please raise a complain.
-          </div>
-        -->
       </div>
+
+      <!-- PERMIT SECTION -->
+      <h4><b>FORM XXVI</b></h4>
+      <h4><b>See Rule 46(1)(v)</b></h4>
+      <h4><b>TEMP. PERMIT No.: ORT<%=data.receiptNo%></b></h4>
+
+      <table>
+        <tr>
+          <td>1. Name of Holder</td>
+          <td>: <%=data.ownerName%></td>
+        </tr>
+        <tr>
+          <td>2. Area</td>
+          <td>: <%=data.floorArea%></td>
+        </tr>
+        <tr>
+          <td>3. (i) Type of vehicle</td>
+          <td>: <%=data.vehicleClass%></td>
+        </tr>
+        <tr>
+          <td>&nbsp;&nbsp;&nbsp;(ii) Registration Mark</td>
+          <td>: <%=data.vehicleNo%></td>
+        </tr>
+        <tr>
+          <td>&nbsp;&nbsp;&nbsp;(iii) Seating Capacity</td>
+          <td>: <%=data.seatingCapacityExcludingDriver%></td>
+        </tr>
+        <tr>
+          <td>&nbsp;&nbsp;&nbsp;(iv) Gross Vehicle Weight</td>
+          <td>: <%=data.grossVehicleWeight%></td>
+        </tr>
+        <tr>
+          <td>4. Purpose of Journey</td>
+          <td>: <%=data.purposeOfJourney%></td>
+        </tr>
+        <tr>
+          <td>5. Nature of goods</td>
+          <td>: </td>
+        </tr>
+        <tr>
+          <td>6. Date of expiry</td>
+          <td>: <%=data.permitValidity%></td>
+        </tr>
+        <tr>
+          <td>7. Valid in following regions</td>
+          <td>: (1) _____________ (2) _____________ (3) _____________ (4) _____________</td>
+        </tr>
+        <tr>
+          <td>8. Route</td>
+          <td>: <%=data.routeOfTheJourney%></td>
+        </tr>
+      </table>
+
+      <div class="container_signature">
+        Secretary<br />
+        State Transport Authority, ODISHA
+      </div>
+
+      <p><i>Note: 1) This is a computer generated printout and no signature is required</i></p>
+      <p><i>2) Incorrect details may lead to penal action.</i></p>
+      <p><i>3) Permit valid for one round trip only.</i></p>
+      <p><i>4) Must accompany the Checkpost e-Receipt with QR code.</i></p>
+
     </div>
   </div>
+
 </body>
 
 </html>
