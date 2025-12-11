@@ -30,9 +30,9 @@
     .qr-image-ap {
       position: absolute;
       top: 20px;
-      right: 30px;
-      width: 140px;
-      height: 140px;
+      right: 35px;
+      width: 135px;
+      height: 135px;
       object-fit: contain;
       z-index: 10;
     }
@@ -40,54 +40,77 @@
     /* TOP-LEFT SMALL LOGO */
     .logo_ap {
       position: absolute;
-      top: 25px;
-      left: 35px;
+      top: 20px;
+      left: 40px;
       z-index: 10;
     }
 
     .logo_ap img {
-      width: 110px;
+      width: 115px;
       height: auto;
       display: block;
     }
 
-    /* BIG WATERMARK SEAL ON LEFT */
+    /* BIG WATERMARK – EXACT CENTER */
     .logo_ap_main {
       position: absolute;
       top: 50%;
-      left: 20%;
+      left: 50%;
       transform: translate(-50%, -50%);
-      opacity: 0.12;
-      z-index: 1;
+      opacity: 0.13;
+      z-index: 0;
       pointer-events: none;
     }
 
     .logo_ap_main img {
-      width: 280px;
+      width: 320px;
       height: auto;
     }
 
-    /* MAIN CONTENT ABOVE WATERMARK */
+    /* BACKGROUND TEXT (VEHICLE / DATE) */
+    .content__back {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 0;
+      opacity: 0.07;
+      pointer-events: none;
+      font-size: 11px;
+    }
+
+    .content__back p {
+      margin: 0;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+
+    /* TITLE BLOCK – CENTER TOP BETWEEN LOGO AND QR */
+    .ap-header {
+      position: absolute;
+      top: 35px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      z-index: 5;
+    }
+
+    .ap-header h3 {
+      margin: 0 0 2px 0;
+      font-size: 16px;
+    }
+
+    .ap-header p {
+      margin: 0;
+      font-size: 13px;
+    }
+
+    /* MAIN CONTENT BELOW HEADER */
     .content {
       position: relative;
       z-index: 5;
-      margin-top: 90px; /* space for logo + QR */
-    }
-
-    .content__top {
-      text-align: center;
-      margin-bottom: 6px;
-    }
-
-    .content__heading_ap {
-      font-size: 16px;
-      margin-bottom: 2px;
-    }
-
-    .content__title,
-    .content__desc {
-      margin: 0;
-      font-size: 13px;
+      margin-top: 115px; /* space for logo + QR + 3-line title */
     }
 
     table.rj.ap.mt {
@@ -129,7 +152,6 @@
       text-align: center;
     }
 
-    /* GRAND TOTAL / NOTES */
     .content__grand {
       margin-top: 18px;
       font-size: 12px;
@@ -139,49 +161,111 @@
       margin: 2px 0;
     }
 
-    /* BACKGROUND TEXT (VEHICLE / DATE) */
-    .content__back_ap {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 0;
-      opacity: 0.06;
-      pointer-events: none;
-      font-size: 11px;
-    }
-
-    .content__back_ap p {
-      margin: 0;
-      line-height: 1.4;
-      white-space: nowrap;
+    /* DO NOT PRINT BROWSER’S URL TEXT AFTER LINKS */
+    @media print {
+      a[href]:after {
+        content: "" !important;
+      }
     }
   </style>
 </head>
 
 <body>
-  <!-- QR top-right -->
   <div class="main">
+    <!-- QR top-right -->
     <img class="qr-image-ap" src="<%= data.src %>" alt="" />
 
-    <!-- Watermark emblem -->
+    <!-- WATERMARK (CENTER) -->
     <div class="main__printing logo_ap_main">
       <img src="<%=data.host%>/images1/Andra.jpg" alt="" />
     </div>
 
-    <!-- Small logo top-left -->
+    <!-- SMALL LOGO TOP-LEFT -->
     <div class="logo_ap">
       <img src="<%=data.host%>/images1/Andra.jpg" alt="" />
     </div>
 
-    <div class="content">
-      <div class="content__top">
-        <h3 class="content__heading content__heading_ap">GOVERMENT OF ANDHRA PRADESH</h3>
-        <p class="content__title content__heading_kat">Department of Transport</p>
-        <p class="content__desc">Checkpost Tax e-Receipt</p>
-      </div>
+    <!-- 3-LINE TITLE CENTER TOP -->
+    <div class="ap-header">
+      <h3 class="content__heading content__heading_ap">GOVERMENT OF ANDHRA PRADESH</h3>
+      <p class="content__title content__heading_kat">Department of Transport</p>
+      <p class="content__desc">Checkpost Tax e-Receipt</p>
+    </div>
 
+    <!-- BACKGROUND TEXT (VEHICLE / DATE) -->
+    <div class="content__back">
+      <p>
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+      </p>
+      <p>
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+      </p>
+      <p>
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+      </p>
+      <p>
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+      </p>
+      <p>
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+      </p>
+      <p>
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+      </p>
+      <p>
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+      </p>
+      <p>
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+      </p>
+      <p>
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+      </p>
+      <p>
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+      </p>
+      <p>
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+      </p>
+      <p>
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+      </p>
+      <p>
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+      </p>
+      <p>
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+      </p>
+      <p>
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+      </p>
+      <p>
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+      </p>
+      <p>
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
+        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+      </p>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="content">
       <table class="rj ap mt">
         <tr class="r1 r11">
           <td class="r1-1">Registration No.</td>
@@ -381,15 +465,6 @@
           <a style="color: blue;">https://kms.privahan.gov.in</a> site. In case the URL is different, then receipt could
           be a fake one, please raise a complain.
         </p>
-      </div>
-
-      <!-- BACKGROUND TEXT (REGN / DATE) -->
-      <div class="content__back content__back_ap">
-        <% for (let i = 0; i < 16; i++) { %>
-          <p>
-            <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-          </p>
-        <% } %>
       </div>
     </div>
   </div>
