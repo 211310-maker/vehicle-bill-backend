@@ -12,176 +12,186 @@
     <% } %>
 
     <style>
-      * { box-sizing: border-box; }
+  * { box-sizing: border-box; }
 
-      @page { size: A4; margin: 0; }
+  @page { size: A4; margin: 0; }
 
-      body {
-        margin: 0;
-        padding: 0;
-        background: #fff;
-        font-family: "Roboto", Arial, Helvetica, sans-serif;
-        font-size: 13px;
-        font-weight: 500;
-        color: #000;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
+  html, body { width: 100%; height: 100%; }
 
-      /* CENTER PAGE IN BROWSER */
-      .page {
-        width: 100vw;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        background: #fff;
-      }
+  body{
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    font-family: "Roboto", Arial, Helvetica, sans-serif;
+    color: #000;
 
-      /* A4 CANVAS */
-      .main {
-        width: 210mm;
-        min-height: 297mm;
-        padding: 14mm 16mm;
-        position: relative;
-        overflow: hidden;
-        background: #fff;
-      }
+    /* ✅ make the A4 canvas CENTER in browser + PDF */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
 
-      /* BACKGROUND TEXT INSIDE RECEIPT AREA */
-      .bg-repeat {
-        position: absolute;
-        top: 14mm;
-        left: 16mm;
-        right: 16mm;
-        bottom: 14mm;
-        z-index: 0;
-        opacity: 0.10;
-        font-size: 14px;
-        line-height: 1.45;
-        pointer-events: none;
-      }
-      .bg-repeat p {
-        margin: 0;
-        display: flex;
-        justify-content: space-between;
-        white-space: nowrap;
-        font-weight: 600;
-      }
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
 
-      /* WATERMARK - TRUE CENTER (MOVE A LITTLE UP) */
-      .watermark {
-        position: absolute;
-        top: 46%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 380px;
-        opacity: 0.12;
-        z-index: 1;
-        pointer-events: none;
-      }
+    font-size: 14px;     /* ✅ slightly bigger like Daman */
+    font-weight: 500;
+  }
 
-      /* FOREGROUND CONTENT */
-      .content {
-        position: relative;
-        z-index: 3;
-      }
+  /* ✅ A4 canvas (fixed), always centered */
+  .main{
+    width: 210mm;
+    min-height: 297mm;
+    padding: 12mm 15mm;        /* same as Daman/Puducherry */
+    position: relative;
+    overflow: hidden;
+    margin: 0 auto;
+  }
 
-      /* HEADER (LOGO | TITLE | QR) */
-      .header {
-        display: table;
-        width: 100%;
-        margin-bottom: 12px;
-      }
-      .header-cell {
-        display: table-cell;
-        vertical-align: top;
-      }
+  /* ---------- BACKGROUND VEHICLE / DATE (fit inside content area) ---------- */
+  .content__back{
+    position: absolute;
+    top: 12mm;
+    left: 15mm;
+    right: 15mm;
+    bottom: 12mm;
+    z-index: 0;
+    opacity: 0.10;
+    pointer-events: none;
 
-      .header-logo { width: 22%; }
-      .header-logo img { width: 95px; height: auto; display: block; }
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .content__back p{
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    white-space: nowrap;
+    font-weight: 600;
+  }
 
-      .header-center {
-        width: 56%;
-        text-align: center;
-        line-height: 1.35;
-        padding-top: 4px;
-      }
-      .header-center .gov {
-        font-size: 16px;
-        font-weight: 900;
-        text-transform: uppercase;
-        text-decoration: underline;
-      }
-      .header-center .dept,
-      .header-center .title {
-        font-size: 14px;
-        font-weight: 700;
-      }
+  /* ---------- WATERMARK (force center + slightly UP) ---------- */
+  .logo_ap_main{
+    position: absolute;
+    top: 44%;                 /* ✅ move up (tweak 42–46%) */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    opacity: 0.12;
+    pointer-events: none;
 
-      .header-qr { width: 22%; text-align: right; }
-      .header-qr img { width: 130px; height: 130px; object-fit: contain; }
+    /* stop print/layout “nudges” */
+    will-change: transform;
+    transform-origin: center center;
+  }
+  .logo_ap_main img{
+    width: 380px;             /* ✅ bigger watermark like Daman */
+    height: auto;
+    display: block;
+  }
 
-      /* DETAILS TABLE (YOUR EXISTING TABLE) */
-      table.rj.ap.mt {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 6px;
-        font-size: 13px;
-      }
-      table.rj.ap.mt td {
-        padding: 4px 2px;
-        vertical-align: top;
-      }
-      table.rj.ap.mt td.r1-1,
-      table.rj.ap.mt td.r1-3,
-      table.rj.ap.mt td.r1-3-ap {
-        font-weight: 700;
-        white-space: nowrap;
-      }
-      table.rj.ap.mt td.r1-2,
-      table.rj.ap.mt td.r1-4 {
-        font-weight: 800;
-        word-break: break-word;
-      }
+  /* ---------- QR + SMALL LOGO (use mm so they match A4 padding) ---------- */
+  .qr-image-ap{
+    position: absolute;
+    top: 12mm;
+    right: 15mm;
+    width: 34mm;              /* ~128px */
+    height: 34mm;
+    object-fit: contain;
+    z-index: 5;
+  }
 
-      /* TAX TABLE (KEEP YOUR FLEX STYLE BUT MAKE IT LOOK LIKE DAMAN) */
-      .content__money_ap {
-        margin-top: 16px;
-        font-size: 13px;
-      }
+  .logo_ap{
+    position: absolute;
+    top: 12mm;
+    left: 15mm;
+    z-index: 5;
+  }
+  .logo_ap img{
+    width: 26mm;              /* ~98px */
+    height: auto;
+    display: block;
+  }
 
-      .content__money-r-ap {
-        display: flex;
-        width: 100%;
-        border: 1px solid #0070c0;
-        border-bottom: none;
-      }
-      .content__money-r-ap:last-child { border-bottom: 1px solid #0070c0; }
+  /* ---------- TITLE CENTER (no overlap with logo/QR) ---------- */
+  .ap-header{
+    position: absolute;
+    top: 13mm;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 5;
+    line-height: 1.35;
+  }
+  .ap-header h3{
+    margin: 0 0 2px 0;
+    font-size: 16px;
+    font-weight: 900;
+    text-transform: uppercase;
+    text-decoration: underline;
+  }
+  .ap-header p{
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 700;
+  }
 
-      .content__money-r-ap > div {
-        padding: 6px 6px;
-        border-right: 1px solid #0070c0;
-      }
-      .content__money-r-ap > div:last-child { border-right: none; }
+  /* ✅ push details down so NOTHING overlaps header */
+  .content{
+    position: relative;
+    z-index: 6;
+    margin-top: 48mm;         /* adjust if needed (46–52mm) */
+  }
 
-      .m1-ap { width: 58%; font-weight: 700; }
-      .m2-ap, .m3-ap, .m4-ap { width: 14%; text-align: right; font-weight: 800; }
+  /* ---------- DETAILS TABLE (make labels/values bold like Daman) ---------- */
+  table.rj.ap.mt{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  table.rj.ap.mt td{
+    padding: 4px 4px;
+    vertical-align: top;
+  }
+  table.rj.ap.mt td:nth-child(1),
+  table.rj.ap.mt td:nth-child(3){
+    font-weight: 800;         /* labels */
+    white-space: nowrap;
+  }
+  table.rj.ap.mt td:nth-child(2),
+  table.rj.ap.mt td:nth-child(4){
+    font-weight: 900;         /* values */
+    word-break: break-word;
+  }
 
-      .content__money-r-ap.header-row > div {
-        text-align: center;
-        font-weight: 900;
-      }
+  /* ---------- TAX ROWS (keep your existing markup, just make it bolder) ---------- */
+  .content__money_ap{
+    margin-top: 16px;
+    font-size: 13.5px;
+    font-weight: 700;
+  }
+  .content__money-r-ap{
+    display: flex;
+    width: 100%;
+    border-bottom: 1px solid #000;
+    padding: 6px 0;
+  }
+  .content__money-r-ap:last-child{ border-bottom: none; }
+  .m1-ap{ width: 55%; font-weight: 800; }
+  .m2-ap,.m3-ap,.m4-ap{ width: 15%; text-align: center; font-weight: 900; }
 
-      /* BOTTOM */
-      .content__grand {
-        margin-top: 12px;
-        font-size: 13px;
-      }
+  /* ---------- BOTTOM ---------- */
+  .content__grand{
+    margin-top: 16px;
+    font-size: 13.5px;
+  }
+  .content__grand b{ font-weight: 900; }
 
-      @media print {
-        a[href]:after { content: "" !important; }
-      }
-    </style>
+  /* remove auto “(url)” after links */
+  @media print{
+    a[href]:after{ content:"" !important; }
+  }
+</style>
+
   </head>
 
   <body>
