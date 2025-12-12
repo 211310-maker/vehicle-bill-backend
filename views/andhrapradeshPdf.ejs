@@ -1,543 +1,419 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,400;1,500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="<%= data.host %>/css/style.css" />
+    <% if (data.cssFix) { %>
+      <link rel="stylesheet" href="<%= data.host %>/css/cssFix.css" />
+    <% } %>
 
-<head>
-  <meta charset="UTF-8" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,400;1,500&display=swap"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="<%=data.host%>/css/style.css" />
-  <% if(data.cssFix){ %>
-    <link rel="stylesheet" href="<%=data.host%>/css/cssFix.css" />
-  <% } %>
+    <style>
+      * { box-sizing: border-box; }
 
-  <style>
-  * {
-    box-sizing: border-box;
-  }
+      @page { size: A4; margin: 0; }
 
-  /* ---------- PAGE SETUP (CRITICAL) ---------- */
-  @page {
-    size: A4;
-    margin: 0;
-  }
+      body {
+        margin: 0;
+        padding: 0;
+        background: #fff;
+        font-family: "Roboto", Arial, Helvetica, sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: #000;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
 
-  body {
-    margin: 0;
-    padding: 0;
-    background: #fff;
-    font-family: "Roboto", Arial, Helvetica, sans-serif;
-    font-size: 13px;            /* ⬅️ BIGGER like Daman */
-    font-weight: 500;
-    color: #000;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
+      /* CENTER PAGE IN BROWSER */
+      .page {
+        width: 100vw;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        background: #fff;
+      }
 
-  /* Center page in browser */
-  .page {
-    width: 100vw;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    background: #fff;
-  }
+      /* A4 CANVAS */
+      .main {
+        width: 210mm;
+        min-height: 297mm;
+        padding: 14mm 16mm;
+        position: relative;
+        overflow: hidden;
+        background: #fff;
+      }
 
-  /* ---------- A4 CANVAS ---------- */
-  .main {
-    width: 210mm;
-    min-height: 297mm;
-    padding: 14mm 16mm;
-    position: relative;
-    overflow: hidden;
-  }
+      /* BACKGROUND TEXT INSIDE RECEIPT AREA */
+      .bg-repeat {
+        position: absolute;
+        top: 14mm;
+        left: 16mm;
+        right: 16mm;
+        bottom: 14mm;
+        z-index: 0;
+        opacity: 0.10;
+        font-size: 14px;
+        line-height: 1.45;
+        pointer-events: none;
+      }
+      .bg-repeat p {
+        margin: 0;
+        display: flex;
+        justify-content: space-between;
+        white-space: nowrap;
+        font-weight: 600;
+      }
 
-  /* ---------- WATERMARK (FORCED CENTER) ---------- */
-  .watermark {
-    position: absolute;
-    top: 45%;                   /* ⬅️ move slightly UP */
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 380px;               /* ⬅️ BIG like Daman */
-    opacity: 0.12;
-    z-index: 0;
-    pointer-events: none;
-  }
+      /* WATERMARK - TRUE CENTER (MOVE A LITTLE UP) */
+      .watermark {
+        position: absolute;
+        top: 46%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 380px;
+        opacity: 0.12;
+        z-index: 1;
+        pointer-events: none;
+      }
 
-  /* ---------- BACKGROUND VEHICLE / DATE ---------- */
-  .bg-repeat {
-    position: absolute;
-    inset: 14mm 16mm;
-    z-index: 0;
-    opacity: 0.08;
-    font-size: 14px;
-    line-height: 1.45;
-    pointer-events: none;
-  }
+      /* FOREGROUND CONTENT */
+      .content {
+        position: relative;
+        z-index: 3;
+      }
 
-  .bg-repeat p {
-    margin: 0;
-    display: flex;
-    justify-content: space-between;
-    white-space: nowrap;
-    font-weight: 600;
-  }
+      /* HEADER (LOGO | TITLE | QR) */
+      .header {
+        display: table;
+        width: 100%;
+        margin-bottom: 12px;
+      }
+      .header-cell {
+        display: table-cell;
+        vertical-align: top;
+      }
 
-  /* ---------- FOREGROUND ---------- */
-  .content {
-    position: relative;
-    z-index: 3;
-  }
+      .header-logo { width: 22%; }
+      .header-logo img { width: 95px; height: auto; display: block; }
 
-  /* ---------- HEADER ---------- */
-  .header {
-    display: table;
-    width: 100%;
-    margin-bottom: 12px;
-  }
+      .header-center {
+        width: 56%;
+        text-align: center;
+        line-height: 1.35;
+        padding-top: 4px;
+      }
+      .header-center .gov {
+        font-size: 16px;
+        font-weight: 900;
+        text-transform: uppercase;
+        text-decoration: underline;
+      }
+      .header-center .dept,
+      .header-center .title {
+        font-size: 14px;
+        font-weight: 700;
+      }
 
-  .header-cell {
-    display: table-cell;
-    vertical-align: top;
-  }
+      .header-qr { width: 22%; text-align: right; }
+      .header-qr img { width: 130px; height: 130px; object-fit: contain; }
 
-  .header-logo {
-    width: 22%;
-  }
+      /* DETAILS TABLE (YOUR EXISTING TABLE) */
+      table.rj.ap.mt {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 6px;
+        font-size: 13px;
+      }
+      table.rj.ap.mt td {
+        padding: 4px 2px;
+        vertical-align: top;
+      }
+      table.rj.ap.mt td.r1-1,
+      table.rj.ap.mt td.r1-3,
+      table.rj.ap.mt td.r1-3-ap {
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      table.rj.ap.mt td.r1-2,
+      table.rj.ap.mt td.r1-4 {
+        font-weight: 800;
+        word-break: break-word;
+      }
 
-  .header-logo img {
-    width: 95px;
-  }
+      /* TAX TABLE (KEEP YOUR FLEX STYLE BUT MAKE IT LOOK LIKE DAMAN) */
+      .content__money_ap {
+        margin-top: 16px;
+        font-size: 13px;
+      }
 
-  .header-center {
-    width: 56%;
-    text-align: center;
-    line-height: 1.35;
-  }
+      .content__money-r-ap {
+        display: flex;
+        width: 100%;
+        border: 1px solid #0070c0;
+        border-bottom: none;
+      }
+      .content__money-r-ap:last-child { border-bottom: 1px solid #0070c0; }
 
-  .header-center .gov {
-    font-size: 16px;
-    font-weight: 900;
-    text-transform: uppercase;
-    text-decoration: underline;
-  }
+      .content__money-r-ap > div {
+        padding: 6px 6px;
+        border-right: 1px solid #0070c0;
+      }
+      .content__money-r-ap > div:last-child { border-right: none; }
 
-  .header-center .dept {
-    font-size: 14px;
-    font-weight: 700;
-  }
+      .m1-ap { width: 58%; font-weight: 700; }
+      .m2-ap, .m3-ap, .m4-ap { width: 14%; text-align: right; font-weight: 800; }
 
-  .header-center .title {
-    font-size: 14px;
-    font-weight: 700;
-  }
+      .content__money-r-ap.header-row > div {
+        text-align: center;
+        font-weight: 900;
+      }
 
-  .header-qr {
-    width: 22%;
-    text-align: right;
-  }
+      /* BOTTOM */
+      .content__grand {
+        margin-top: 12px;
+        font-size: 13px;
+      }
 
-  .header-qr img {
-    width: 130px;
-    height: 130px;
-  }
+      @media print {
+        a[href]:after { content: "" !important; }
+      }
+    </style>
+  </head>
 
-  /* ---------- DETAILS TABLE (LIKE DAMAN) ---------- */
-  table.kv {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    margin-top: 8px;
-    font-size: 13px;
-  }
-
-  table.kv td {
-    padding: 4px 2px;
-    vertical-align: top;
-  }
-
-  td.label {
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  td.value {
-    font-weight: 800;
-    word-break: break-word;
-  }
-
-  table.kv col.labelL { width: 22%; }
-  table.kv col.valueL { width: 28%; }
-  table.kv col.labelR { width: 22%; }
-  table.kv col.valueR { width: 28%; }
-
-  /* ---------- TAX TABLE ---------- */
-  table.tax {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 16px;
-    font-size: 13px;
-  }
-
-  table.tax th,
-  table.tax td {
-    border: 1px solid #0070c0;
-    padding: 6px;
-  }
-
-  table.tax th {
-    font-weight: 900;
-    text-align: center;
-  }
-
-  table.tax td.num {
-    text-align: right;
-    font-weight: 800;
-  }
-
-  /* ---------- BOTTOM ---------- */
-  .grand {
-    margin-top: 10px;
-    font-size: 13.5px;
-    font-weight: 900;
-  }
-
-  .terms-title {
-    margin-top: 6px;
-    font-weight: 900;
-  }
-
-  .terms-list {
-    margin: 4px 0 0 18px;
-    font-size: 12.5px;
-  }
-
-  .terms-list li {
-    margin-bottom: 3px;
-  }
-
-  .bottom-note {
-    margin-top: 14px;
-    font-size: 22px;
-    font-weight: 900;
-    line-height: 1.25;
-  }
-
-  .bottom-note .url {
-    color: #0b57d0;
-    text-decoration: underline;
-    font-weight: 900;
-  }
-
-  @media print {
-    a[href]:after {
-      content: "" !important;
-    }
-  }
-</style>
-
-
-
-</head>
-
-<body>
-  <div class="main">
-    <!-- QR top-right -->
-    <img class="qr-image-ap" src="<%= data.src %>" alt="" />
-
-    <!-- WATERMARK (CENTER) -->
-    <div class="main__printing logo_ap_main">
-      <img src="<%=data.host%>/images1/andra.png" alt="" />
-    </div>
-
-    <!-- SMALL LOGO TOP-LEFT -->
-    <div class="logo_ap">
-      <img src="<%=data.host%>/images1/andra.png" alt="" />
-    </div>
-
-    <!-- 3-LINE TITLE CENTER TOP -->
-    <div class="ap-header">
-      <h3 class="content__heading content__heading_ap">GOVERMENT OF ANDHRA PRADESH</h3>
-      <p class="content__title content__heading_kat">Department of Transport</p>
-      <p class="content__desc">Checkpost Tax e-Receipt</p>
-    </div>
-
-    <!-- BACKGROUND TEXT (VEHICLE / DATE) -->
-    <div class="content__back">
-      <p>
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-      </p>
-      <p>
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-      </p>
-      <p>
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-      </p>
-      <p>
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-      </p>
-      <p>
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-      </p>
-      <p>
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-      </p>
-      <p>
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-      </p>
-      <p>
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-      </p>
-      <p>
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-      </p>
-      <p>
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-      </p>
-      <p>
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-      </p>
-      <p>
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-      </p>
-      <p>
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-      </p>
-      <p>
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-      </p>
-      <p>
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-      </p>
-      <p>
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-      </p>
-      <p>
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-        <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-      </p>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div class="content">
-      <table class="rj ap mt">
-        <tr class="r1 r11">
-          <td class="r1-1">Registration No.</td>
-          <td class="r1-2">&nbsp;&nbsp;: <%=data.vehicleNo%></td>
-          <td class="r1-1">Receipt No.</td>
-          <td class="r1-2">&nbsp;&nbsp;: APR<%=data.receiptNo%></td>
-        </tr>
-
-        <tr class="r1 r14">
-          <td class="r1-3">Payment Date</td>
-          <td class="r1-4">&nbsp;&nbsp;: <%=data.paymentDate%></td>
-          <td class="r1-1">Owner Name</td>
-          <td class="r1-2">&nbsp;&nbsp;: <%=data.ownerName%></td>
-        </tr>
-        <tr class="r1 r15">
-          <td class="r1-1">Chassis No.</td>
-          <td class="r1-2">&nbsp;&nbsp;: <%=data.chassisNo%></td>
-          <td class="r1-3">Tax Mode</td>
-          <td class="r1-4">&nbsp;&nbsp;: <%=data.taxMode%></td>
-        </tr>
-        <tr class="r1">
-          <td class="r1-1">Vehicle Type</td>
-          <td class="r1-2"> &nbsp;&nbsp;: <%=data.vehiclePermitType%></td>
-          <td class="r1-3">Vehicle Class</td>
-          <td class="r1-4">&nbsp;&nbsp;: <%=data.vehicleClass%></td>
-        </tr>
-        <tr class="r1 r14">
-          <td class="r1-3-ap">Vehicle Category</td>
-          <td class="r1-4">&nbsp;&nbsp;: <%=data.vehicleCategory%></td>
-          <td class="r1-3">Mobile No.</td>
-          <td class="r1-4">&nbsp;&nbsp;: <%=data.mobileNo%></td>
-        </tr>
-
-        <% if(data.vehiclePermitType!=='TRANSPORT' ){ %>
-          <tr class="r1">
-            <td class="r1-1">Checkpost Name</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.checkpostName%></td>
-            <td class="r1-3">Laden Weight</td>
-            <td class="r1-4">&nbsp;&nbsp;: <%=data.grossVehicleWeight%> Kg</td>
-          </tr>
-        <% } else { %>
-          <tr class="r1">
-            <td class="r1-1">Checkpost Name</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.checkpostName%></td>
-            <td class="r1-3-ap">Seating Capacity</td>
-            <td class="r1-4">&nbsp;&nbsp;: <%=data.seatingCapacityExcludingDriver%></td>
-          </tr>
-        <% } %>
-
-        <% if(data.vehiclePermitType!=='TRANSPORT' ){ %>
-          <tr class="r1">
-            <td class="r1-1">Un Laden Weight</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.unladenWeight%> kg</td>
-            <td class="r1-3">Bank Ref. No.</td>
-            <td class="r1-4">&nbsp;&nbsp;: <%=data.apBankRefNo%></td>
-          </tr>
-        <% } else { %>
-          <tr class="r1">
-            <td class="r1-1">Sleeper Cap</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.sleeperCapacityExcludingDriver%></td>
-            <td class="r1-3">Bank Ref. No.</td>
-            <td class="r1-4">&nbsp;&nbsp;: <%=data.apBankRefNo%></td>
-          </tr>
-        <% } %>
-
-        <tr class="r1">
-          <td class="r1-3">Payment Mode</td>
-          <td class="r1-4">&nbsp;&nbsp;: <%=data.paymentMode%></td>
-          <td class="r1-1">Permit Validity</td>
-          <td class="r1-2">&nbsp;&nbsp;: <%=data.permitUpto%></td>
-        </tr>
-        <tr class="r1">
-          <td class="r1-3">Fitness Validity</td>
-          <td class="r1-4">&nbsp;&nbsp;: <%=data.fitnessValidity%></td>
-          <td class="r1-1">Insurance Validity</td>
-          <td class="r1-2">&nbsp;&nbsp;: <%=data.insuranceValidity%></td>
-        </tr>
-        <tr class="r1">
-          <td class="r1-3">PUCC Validity</td>
-          <td class="r1-4">&nbsp;&nbsp;: <%=data.puccValidity%></td>
-          <td class="r1-1">Service Type</td>
-          <td class="r1-2">&nbsp;&nbsp;: <%=data.serviceType%></td>
-        </tr>
-
-        <tr class="r1">
-          <td class="r1-1">Permit Type</td>
-          <td class="r1-2">&nbsp;&nbsp;: <%=data.permitType%></td>
-          <td class="r1-3">Permit Category</td>
-          <td class="r1-4">&nbsp;&nbsp;: <%=data.permitCategory%></td>
-        </tr>
-        <tr class="r1">
-          <% if (data.vehicleClass==="GOODS CARRIERS" ){ %>
-            <td class="r1-3">Name of Goods</td>
-            <td class="r1-4">&nbsp;&nbsp;: <%=data.goodsName%></td>
+  <body>
+    <div class="page">
+      <div class="main">
+        <!-- BACKGROUND VEHICLE / DATE (FULL RECEIPT AREA) -->
+        <div class="bg-repeat">
+          <% for (let i = 0; i < 18; i++) { %>
+            <p>
+              <span><%= data.vehicleNo %> / <%= data.paymentDate %></span>
+              <span><%= data.vehicleNo %> / <%= data.paymentDate %></span>
+            </p>
           <% } %>
-          <td class="r1-1">Route</td>
-          <td class="r1-2">&nbsp;&nbsp;: <%=data.routeOfTheJourney%></td>
-        </tr>
-      </table>
-
-      <div class="content__money_ap">
-        <div class="content__money-r-ap content__money-r2-border d-flex" style="font-size: 13px; text-align: center;">
-          <div class="m1-ap"><b>Tax/Fee Particular</b></div>
-          <div class="m2-ap"><b>Tax/Fees</b></div>
-          <div class="m3-ap"><b>Fine</b></div>
-          <div class="m4-ap"><b>Total</b></div>
         </div>
 
-        <% if (data.vehiclePermitType==="NON-TRANSPORT" ){ %>
-          <div class="content__money-r-ap content__money-r2-border d-flex">
-            <div class="m1-ap">
-              MV Tax ( <%=data.taxFrom_raj%> to <%=data.taxTo_raj%> )
-            </div>
-            <div class="m2-ap"><%=data.mvTax%></div>
-            <div class="m3-ap">0</div>
-            <div class="m4-ap"><%=data.mvTax%></div>
-          </div>
-          <div class="content__money-r-ap content__money-r2-border d-flex">
-            <div class="m1-ap">
-              Service/User Charge ( <%=data.taxFrom_raj%> to <%=data.taxTo_raj%> )
-            </div>
-            <div class="m2-ap"><%=data.userCharge%></div>
-            <div class="m3-ap">0</div>
-            <div class="m4-ap"><%=data.userCharge%></div>
-          </div>
-          <div class="content__money-r-ap d-flex">
-            <div class="m1-ap">
-              Tax Token Fee ( <%=data.taxFrom_raj%> to <%=data.taxTo_raj%> )
-            </div>
-            <div class="m2-ap"><%=data.surChargeFee%></div>
-            <div class="m3-ap">0</div>
-            <div class="m4-ap"><%=data.surChargeFee%></div>
-          </div>
-        <% } else { %>
-          <div class="content__money-r-ap content__money-r2-border d-flex">
-            <div class="m1-ap">
-              Permit Fee ( <%=data.taxFrom_raj%> to <%=data.taxTo_raj%> )
-            </div>
-            <div class="m2-ap"><%=data.permitFee%></div>
-            <div class="m3-ap">0</div>
-            <div class="m4-ap"><%=data.permitFee%></div>
-          </div>
-          <div class="content__money-r-ap content__money-r2-border d-flex">
-            <div class="m1-ap">
-              MV Tax ( <%=data.taxFrom_raj%> to <%=data.taxTo_raj%> )
-            </div>
-            <div class="m2-ap"><%=data.mvTax%></div>
-            <div class="m3-ap">0</div>
-            <div class="m4-ap"><%=data.mvTax%></div>
-          </div>
-          <div class="content__money-r-ap content__money-r2-border d-flex">
-            <div class="m1-ap">
-              Service/User Charge ( <%=data.taxFrom_raj%> to <%=data.taxTo_raj%> )
-            </div>
-            <div class="m2-ap"><%=data.userCharge%></div>
-            <div class="m3-ap">0</div>
-            <div class="m4-ap"><%=data.userCharge%></div>
-          </div>
-          <div class="content__money-r-ap d-flex">
-            <div class="m1-ap">
-              Tax Token Fee ( <%=data.taxFrom_raj%> to <%=data.taxTo_raj%> )
-            </div>
-            <div class="m2-ap"><%=data.surChargeFee%></div>
-            <div class="m3-ap">0</div>
-            <div class="m4-ap"><%=data.surChargeFee%></div>
-          </div>
-        <% } %>
-      </div>
+        <!-- WATERMARK -->
+        <img
+          src="<%= data.host %>/images1/andra.png"
+          class="watermark"
+          alt="Watermark"
+        />
 
-      <div class="content__grand content__grand--hr">
-        <p style="text-transform:capitalize !important; margin-bottom: 4px;">
-          <span><b>Grand Total :</b></span>
-          <b> <%=data.totalAmount%>/- <%=data.totalAmountInWordLowerCase%></b>
-        </p>
-        <p style="text-transform:capitalize !important; margin-bottom: 4px;">
-          <span><b>Note :</b></span>
-        </p>
-        <p style="margin-bottom: 4px;">
-          <span><b>Terms and Conditions:</b></span>
-        </p>
-        <p style="margin-left: 16px !important;">
-          <i>1) This is a computer generated printout and no signature is required.</i>
-        </p>
-        <p style="margin-left: 16px !important;">
-          <i>2) Should not carry unlawful/unaccompanied goods.</i>
-        </p>
-        <p style="margin-left: 16px !important;">
-          <i>
-            3) If any false information/discrepancies are found at later, necessary action will be taken<br>
-            against the vehicle owner/driver.
-          </i>
-        </p>
-        <br />
-        <br />
-        <p class="main__warning" style="font-size: 14px; line-height: 20px; margin-top: -10px;">
-          Scan the QR code for genuinity of the receipt, It should land at
-          <a style="color: blue;">https://kms.privahan.gov.in</a> site. In case the URL is different, then receipt could
-          be a fake one, please raise a complain.
-        </p>
+        <div class="content">
+          <!-- HEADER -->
+          <div class="header">
+            <div class="header-cell header-logo">
+              <img src="<%= data.host %>/images1/andra.png" alt="Logo" />
+            </div>
+
+            <div class="header-cell header-center">
+              <div class="gov">GOVERNMENT OF ANDHRA PRADESH</div>
+              <div class="dept">Department of Transport</div>
+              <div class="title">Checkpost Tax e-Receipt</div>
+            </div>
+
+            <div class="header-cell header-qr">
+              <% if (data.src) { %>
+                <img src="<%= data.src %>" alt="QR" />
+              <% } %>
+            </div>
+          </div>
+
+          <!-- DETAILS (YOUR EXISTING TABLE, UNCHANGED DATA) -->
+          <table class="rj ap mt">
+            <tr class="r1 r11">
+              <td class="r1-1">Registration No.</td>
+              <td class="r1-2">&nbsp;&nbsp;: <%=data.vehicleNo%></td>
+              <td class="r1-1">Receipt No.</td>
+              <td class="r1-2">&nbsp;&nbsp;: APR<%=data.receiptNo%></td>
+            </tr>
+
+            <tr class="r1 r14">
+              <td class="r1-3">Payment Date</td>
+              <td class="r1-4">&nbsp;&nbsp;: <%=data.paymentDate%></td>
+              <td class="r1-1">Owner Name</td>
+              <td class="r1-2">&nbsp;&nbsp;: <%=data.ownerName%></td>
+            </tr>
+
+            <tr class="r1 r15">
+              <td class="r1-1">Chassis No.</td>
+              <td class="r1-2">&nbsp;&nbsp;: <%=data.chassisNo%></td>
+              <td class="r1-3">Tax Mode</td>
+              <td class="r1-4">&nbsp;&nbsp;: <%=data.taxMode%></td>
+            </tr>
+
+            <tr class="r1">
+              <td class="r1-1">Vehicle Type</td>
+              <td class="r1-2">&nbsp;&nbsp;: <%=data.vehiclePermitType%></td>
+              <td class="r1-3">Vehicle Class</td>
+              <td class="r1-4">&nbsp;&nbsp;: <%=data.vehicleClass%></td>
+            </tr>
+
+            <tr class="r1 r14">
+              <td class="r1-3-ap">Vehicle Category</td>
+              <td class="r1-4">&nbsp;&nbsp;: <%=data.vehicleCategory%></td>
+              <td class="r1-3">Mobile No.</td>
+              <td class="r1-4">&nbsp;&nbsp;: <%=data.mobileNo%></td>
+            </tr>
+
+            <% if(data.vehiclePermitType!=='TRANSPORT' ){ %>
+              <tr class="r1">
+                <td class="r1-1">Checkpost Name</td>
+                <td class="r1-2">&nbsp;&nbsp;: <%=data.checkpostName%></td>
+                <td class="r1-3">Laden Weight</td>
+                <td class="r1-4">&nbsp;&nbsp;: <%=data.grossVehicleWeight%> Kg</td>
+              </tr>
+            <% } else { %>
+              <tr class="r1">
+                <td class="r1-1">Checkpost Name</td>
+                <td class="r1-2">&nbsp;&nbsp;: <%=data.checkpostName%></td>
+                <td class="r1-3-ap">Seating Capacity</td>
+                <td class="r1-4">&nbsp;&nbsp;: <%=data.seatingCapacityExcludingDriver%></td>
+              </tr>
+            <% } %>
+
+            <% if(data.vehiclePermitType!=='TRANSPORT' ){ %>
+              <tr class="r1">
+                <td class="r1-1">Un Laden Weight</td>
+                <td class="r1-2">&nbsp;&nbsp;: <%=data.unladenWeight%> kg</td>
+                <td class="r1-3">Bank Ref. No.</td>
+                <td class="r1-4">&nbsp;&nbsp;: <%=data.apBankRefNo%></td>
+              </tr>
+            <% } else { %>
+              <tr class="r1">
+                <td class="r1-1">Sleeper Cap</td>
+                <td class="r1-2">&nbsp;&nbsp;: <%=data.sleeperCapacityExcludingDriver%></td>
+                <td class="r1-3">Bank Ref. No.</td>
+                <td class="r1-4">&nbsp;&nbsp;: <%=data.apBankRefNo%></td>
+              </tr>
+            <% } %>
+
+            <tr class="r1">
+              <td class="r1-3">Payment Mode</td>
+              <td class="r1-4">&nbsp;&nbsp;: <%=data.paymentMode%></td>
+              <td class="r1-1">Permit Validity</td>
+              <td class="r1-2">&nbsp;&nbsp;: <%=data.permitUpto%></td>
+            </tr>
+
+            <tr class="r1">
+              <td class="r1-3">Fitness Validity</td>
+              <td class="r1-4">&nbsp;&nbsp;: <%=data.fitnessValidity%></td>
+              <td class="r1-1">Insurance Validity</td>
+              <td class="r1-2">&nbsp;&nbsp;: <%=data.insuranceValidity%></td>
+            </tr>
+
+            <tr class="r1">
+              <td class="r1-3">PUCC Validity</td>
+              <td class="r1-4">&nbsp;&nbsp;: <%=data.puccValidity%></td>
+              <td class="r1-1">Service Type</td>
+              <td class="r1-2">&nbsp;&nbsp;: <%=data.serviceType%></td>
+            </tr>
+
+            <tr class="r1">
+              <td class="r1-1">Permit Type</td>
+              <td class="r1-2">&nbsp;&nbsp;: <%=data.permitType%></td>
+              <td class="r1-3">Permit Category</td>
+              <td class="r1-4">&nbsp;&nbsp;: <%=data.permitCategory%></td>
+            </tr>
+
+            <tr class="r1">
+              <% if (data.vehicleClass==="GOODS CARRIERS" ){ %>
+                <td class="r1-3">Name of Goods</td>
+                <td class="r1-4">&nbsp;&nbsp;: <%=data.goodsName%></td>
+              <% } %>
+              <td class="r1-1">Route</td>
+              <td class="r1-2">&nbsp;&nbsp;: <%=data.routeOfTheJourney%></td>
+            </tr>
+          </table>
+
+          <!-- TAX -->
+          <div class="content__money_ap">
+            <div class="content__money-r-ap header-row">
+              <div class="m1-ap">Tax/Fee Particular</div>
+              <div class="m2-ap">Tax/Fees</div>
+              <div class="m3-ap">Fine</div>
+              <div class="m4-ap">Total</div>
+            </div>
+
+            <% if (data.vehiclePermitType==="NON-TRANSPORT" ){ %>
+              <div class="content__money-r-ap">
+                <div class="m1-ap">MV Tax ( <%=data.taxFrom_raj%> to <%=data.taxTo_raj%> )</div>
+                <div class="m2-ap"><%=data.mvTax%></div>
+                <div class="m3-ap">0</div>
+                <div class="m4-ap"><%=data.mvTax%></div>
+              </div>
+              <div class="content__money-r-ap">
+                <div class="m1-ap">Service/User Charge ( <%=data.taxFrom_raj%> to <%=data.taxTo_raj%> )</div>
+                <div class="m2-ap"><%=data.userCharge%></div>
+                <div class="m3-ap">0</div>
+                <div class="m4-ap"><%=data.userCharge%></div>
+              </div>
+              <div class="content__money-r-ap">
+                <div class="m1-ap">Tax Token Fee ( <%=data.taxFrom_raj%> to <%=data.taxTo_raj%> )</div>
+                <div class="m2-ap"><%=data.surChargeFee%></div>
+                <div class="m3-ap">0</div>
+                <div class="m4-ap"><%=data.surChargeFee%></div>
+              </div>
+            <% } else { %>
+              <div class="content__money-r-ap">
+                <div class="m1-ap">Permit Fee ( <%=data.taxFrom_raj%> to <%=data.taxTo_raj%> )</div>
+                <div class="m2-ap"><%=data.permitFee%></div>
+                <div class="m3-ap">0</div>
+                <div class="m4-ap"><%=data.permitFee%></div>
+              </div>
+              <div class="content__money-r-ap">
+                <div class="m1-ap">MV Tax ( <%=data.taxFrom_raj%> to <%=data.taxTo_raj%> )</div>
+                <div class="m2-ap"><%=data.mvTax%></div>
+                <div class="m3-ap">0</div>
+                <div class="m4-ap"><%=data.mvTax%></div>
+              </div>
+              <div class="content__money-r-ap">
+                <div class="m1-ap">Service/User Charge ( <%=data.taxFrom_raj%> to <%=data.taxTo_raj%> )</div>
+                <div class="m2-ap"><%=data.userCharge%></div>
+                <div class="m3-ap">0</div>
+                <div class="m4-ap"><%=data.userCharge%></div>
+              </div>
+              <div class="content__money-r-ap">
+                <div class="m1-ap">Tax Token Fee ( <%=data.taxFrom_raj%> to <%=data.taxTo_raj%> )</div>
+                <div class="m2-ap"><%=data.surChargeFee%></div>
+                <div class="m3-ap">0</div>
+                <div class="m4-ap"><%=data.surChargeFee%></div>
+              </div>
+            <% } %>
+          </div>
+
+          <div class="content__grand content__grand--hr">
+            <p style="text-transform:capitalize !important; margin-bottom: 6px;">
+              <b>Grand Total :</b> <b><%=data.totalAmount%>/- <%=data.totalAmountInWordLowerCase%></b>
+            </p>
+
+            <p style="margin-bottom: 4px;"><b>Note :</b></p>
+            <p style="margin-bottom: 4px;"><b>Terms and Conditions:</b></p>
+
+            <div style="margin-left: 16px;">
+              <p style="margin: 0 0 4px 0;"><i>1) This is a computer generated printout and no signature is required.</i></p>
+              <p style="margin: 0 0 4px 0;"><i>2) Should not carry unlawful/unaccompanied goods.</i></p>
+              <p style="margin: 0 0 4px 0;">
+                <i>
+                  3) If any false information/discrepancies are found at later, necessary action will be taken
+                  against the vehicle owner/driver.
+                </i>
+              </p>
+            </div>
+
+            <p class="main__warning" style="font-size: 14px; line-height: 20px; margin-top: 10px;">
+              Scan the QR code for genuinity of the receipt, It should land at
+              <a style="color: #0b57d0; text-decoration: underline; font-weight: 900;">https://kms.parivahan.gov.in</a>
+              site. In case the URL is different, then receipt could be a fake one, please raise a complain.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</body>
-
+  </body>
 </html>
