@@ -73,19 +73,20 @@
         height: auto;
       }
 
-      /* BACKGROUND REPEATED TEXT */
+      /* BACKGROUND REPEATED TEXT (VEHICLE NO / DATE) */
       .content__back {
-        position: absolute;
-        top: 0;
-        left: 40px;
-        right: 40px;
-        bottom: 0;
-        z-index: 2;
-        opacity: 0.08;
+        position: absolute !important;
+        top: 110px;        /* start below header */
+        left: 30px;
+        right: 30px;
+        bottom: 60px;
+        z-index: 2;        /* below main content (z=5), above watermark (z=1) */
+        opacity: 0.12;
         pointer-events: none;
         font-size: 11px;
         line-height: 1.4;
         white-space: nowrap;
+        color: #000;
       }
 
       .content__back p {
@@ -111,15 +112,6 @@
       .as-header p {
         margin: 0;
         font-size: 13px;
-      }
-
-      /* RECEIPT DATE (TOP-LEFT UNDER LOGO) */
-      .receipt-date-as {
-        position: absolute;
-        top: 140px;
-        left: 35px;
-        font-size: 11px;
-        z-index: 5;
       }
 
       /* MAIN CONTENT BELOW HEADER */
@@ -213,12 +205,6 @@
       <!-- SMALL TOP-LEFT LOGO -->
       <div class="logo_as">
         <img src="/images1/Assam.png" alt="" />
-      </div>
-
-      <!-- RECEIPT PRINTING DATE -->
-      <div class="receipt-date-as">
-        Receipt Printing Date:<br />
-        <%=data.receiptDate%>
       </div>
 
       <!-- 3-LINE CENTERED HEADER -->
