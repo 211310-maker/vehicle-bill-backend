@@ -9,6 +9,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="<%= data.host %>/css/style.css" />
+    <link rel="stylesheet" href="<%= data.host %>/css/page.css" />
     <% if (data.cssFix) { %>
       <link rel="stylesheet" href="<%= data.host %>/css/cssFix.css" />
     <% } %>
@@ -18,70 +19,81 @@
         box-sizing: border-box;
       }
 
-      /* Full A4 page, no extra print header/footer margin space */
+      /* Full A4 page */
       @page {
         size: A4;
         margin: 0;
       }
 
+      html,
       body {
         margin: 0;
         padding: 0;
+        width: 210mm;
+        height: 297mm;
         background: #fff;
         font-family: "Roboto", Arial, Helvetica, sans-serif;
         color: #000;
-        font-size: 12px;
+        font-size: 13px;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
 
       .main {
-        width: 210mm;              /* same width as Puducherry */
+        width: 210mm;          /* same as Puducherry */
         margin: 0 auto;
-        padding: 12mm 15mm;        /* inner margins like Puducherry */
+        padding: 12mm 15mm;    /* inner margins like Puducherry */
         position: relative;
       }
 
       .content {
         position: relative;
-        z-index: 2;                /* above watermark + bg text */
+        z-index: 2;            /* above watermark + bg text */
       }
 
       /* centered watermark */
       .watermark {
         position: absolute;
-        top: 230px;
+        top: 210px;            /* vertical placement */
         left: 50%;
         transform: translateX(-50%);
-        opacity: 0.07;
+        opacity: 0.08;
         width: 260px;
         z-index: 0;
         pointer-events: none;
       }
 
-      /* BACKGROUND VEHICLE / DATE TEXT (like Assam sample) */
+      /* BACKGROUND VEHICLE / DATE TEXT (Assam-style) */
       .bg-repeat {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
+        top: 85px;             /* start under header */
+        left: 18mm;
+        right: 15mm;
+        bottom: 40mm;
         z-index: 1;
         opacity: 0.07;
-        font-size: 16px;
-        line-height: 1.2;
+        font-size: 12px;
+        line-height: 1.25;
         pointer-events: none;
+        overflow: hidden;
       }
 
-      .bg-repeat p {
-        margin: 0;
-        padding-left: 8px;
+      .bg-repeat-row {
         white-space: nowrap;
+        margin: 0;
+        padding: 0;
+      }
+
+      .bg-repeat-row span {
         font-weight: 500;
+        margin-right: 18px;
       }
 
       /* HEADER LAYOUT (logo left, title center, QR right) */
       .header {
         display: table;
         width: 100%;
-        margin-bottom: 14px;
+        margin-bottom: 10px;
       }
 
       .header-cell {
@@ -94,7 +106,7 @@
       }
 
       .header-logo img {
-        width: 80px;
+        width: 85px;
         height: auto;
       }
 
@@ -106,19 +118,19 @@
       }
 
       .header-center .gov {
-        font-size: 14px;
-        font-weight: bold;
+        font-size: 15px;
+        font-weight: 700;
         text-transform: uppercase;
       }
 
       .header-center .dept {
-        font-size: 12px;
-        font-weight: 500;
+        font-size: 13px;
+        font-weight: 600;
       }
 
       .header-center .title {
-        font-size: 12px;
-        font-weight: 500;
+        font-size: 13px;
+        font-weight: 600;
       }
 
       .header-qr {
@@ -136,8 +148,8 @@
       table.details {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 4px;
-        font-size: 12px;
+        margin-top: 6px;
+        font-size: 13px;
       }
 
       table.details td {
@@ -147,17 +159,18 @@
 
       table.details td.label {
         white-space: nowrap;
+        font-weight: 600;
       }
 
       table.details td.value {
         padding-left: 2px;
-        font-weight: bold;
+        font-weight: 500;
       }
 
-      /* TAX TABLE */
+      /* TAX TABLE (blue border like sample) */
       .content__money {
         margin-top: 14px;
-        font-size: 12px;
+        font-size: 13px;
       }
 
       .content__money-r1,
@@ -175,7 +188,7 @@
       }
 
       .content__money-r1 {
-        font-weight: bold;
+        font-weight: 700;
         text-align: center;
       }
 
@@ -192,7 +205,7 @@
 
       .content__grand {
         margin-top: 10px;
-        font-size: 12px;
+        font-size: 13px;
       }
 
       .content__grand p {
@@ -200,11 +213,11 @@
       }
 
       .content__grand b {
-        font-weight: 600;
+        font-weight: 700;
       }
 
       .terms-title {
-        font-weight: bold;
+        font-weight: 700;
         margin-top: 4px;
         margin-bottom: 2px;
       }
@@ -220,8 +233,8 @@
 
       .bottom-note {
         margin-top: 10px;
-        font-size: 12px;
-        font-weight: bold;
+        font-size: 13px;
+        font-weight: 600;
       }
 
       .bottom-note a {
@@ -229,7 +242,8 @@
         text-decoration: underline;
       }
 
-      /* Try to avoid browser appending URL text after links on print */
+      /* Try to hide Chrome's link-text decoration on print.
+         (Browser header/footer with URL + page number must be turned off in the print dialog.) */
       @media print {
         a[href]:after {
           content: "" !important;
@@ -249,8 +263,12 @@
 
       <!-- Repeated background vehicleNo / paymentDate -->
       <div class="bg-repeat">
-        <% for (let i = 0; i < 18; i++) { %>
-          <p><%= data.vehicleNo %> / <%= data.paymentDate %></p>
+        <% for (let row = 0; row < 14; row++) { %>
+          <p class="bg-repeat-row">
+            <% for (let col = 0; col < 6; col++) { %>
+              <span><%= data.vehicleNo %> / <%= data.paymentDate %></span>
+            <% } %>
+          </p>
         <% } %>
       </div>
 
@@ -277,7 +295,7 @@
           </div>
         </div>
 
-        <!-- MAIN DETAILS (same fields as your original file) -->
+        <!-- MAIN DETAILS -->
         <table class="details">
           <tr class="r1 r11">
             <td class="label">Registration No.</td>
@@ -303,40 +321,40 @@
           </tr>
           <tr class="r1 r16">
             <td class="label">Vehicle Type</td>
-            <td class="value">
-              : <%= data.vehiclePermitType %>
-            </td>
+            <td class="value">: <%= data.vehiclePermitType %></td>
             <td class="label">Vehicle Class</td>
             <td class="value">: <%= data.vehicleClass %></td>
           </tr>
           <tr class="r1 r17">
+            <td class="label">Vehicle Category</td>
+            <td class="value">: <%= data.vehicleCategory || '' %></td>
             <td class="label">Mobile No.</td>
             <td class="value">: <%= data.mobileNo %></td>
-            <td class="label">Checkpost Name</td>
-            <td class="value">: <%= data.borderBarrier %></td>
           </tr>
           <tr class="r1 r18">
+            <td class="label">CheckPost Name</td>
+            <td class="value">: <%= data.borderBarrier %></td>
             <td class="label">Sleeper Cap.</td>
             <td class="value">
               : <%= data.sleeperCapacityExcludingDriver %>
             </td>
+          </tr>
+          <tr class="r1 r18b">
             <% if (data.vehiclePermitType === 'GOODS VEHICLE') { %>
               <td class="label">Gross Weight</td>
               <td class="value">: <%= data.grossVehicleWeight %> KG.</td>
+              <td class="label">Payment Mode</td>
+              <td class="value">: <%= data.paymentMode %></td>
             <% } else { %>
-              <td class="label">
-                Seating Cap(Ex. Driver)
-              </td>
+              <td class="label">Seating Cap(Ex. Driver)</td>
               <td class="value">: <%= data.seatingCapacityExcludingDriver %></td>
+              <td class="label">Payment Mode</td>
+              <td class="value">: <%= data.paymentMode %></td>
             <% } %>
           </tr>
           <tr class="r1 r19">
             <td class="label">Bank Ref. No.</td>
             <td class="value">: NA</td>
-            <td class="label">Payment Mode</td>
-            <td class="value">: <%= data.paymentMode %></td>
-          </tr>
-          <tr class="r1 r20">
             <td class="label">Service Type</td>
             <td class="value">: NOT APPLICABLE</td>
           </tr>
@@ -348,13 +366,13 @@
           </tr>
         </table>
 
-        <!-- TAX TABLE (same as original MV tax only) -->
+        <!-- TAX TABLE -->
         <div class="content__money">
           <div class="content__money-r1">
-            <div class="m1"><b>Tax/Fee Particular</b></div>
-            <div class="m2"><b>Tax/Fees</b></div>
-            <div class="m3"><b>Fine</b></div>
-            <div class="m4"><b>Total</b></div>
+            <div class="m1">Tax/Fee Particular</div>
+            <div class="m2">Tax/Fees</div>
+            <div class="m3">Fine</div>
+            <div class="m4">Total</div>
           </div>
           <div class="content__money-r2">
             <div class="m1">
@@ -370,8 +388,8 @@
         <div class="content__grand content__grand--hr">
           <p>
             <b>
-              Grand Total : ₹ <%= data.totalAmount %>/- (
-              <%= data.totalAmountInWord %> )
+              Grand Total : <%= data.totalAmount %>/- 
+              <%= data.totalAmountInWord %> Only
             </b>
           </p>
 
@@ -383,15 +401,17 @@
               required.
             </li>
             <li>
-              Incorrect mentioning of vehicle class or seating capacity may
-              lead to tax evasion and defaulter shall be liable for penal
-              action.
+              Should not carry unlawful/unaccompanied goods.
+            </li>
+            <li>
+              If any false information/discrepancies are found at later,
+              necessary action will be taken against the vehicle owner/driver.
             </li>
           </ol>
 
           <div class="bottom-note">
             Scan the QR code for genuinity of the receipt, It should land at
-            <a href="https://kms.privahan.gov.in">https://kms.privahan.gov.in</a>
+            <a href="https://kms.parivahan.gov.in">https://kms.parivahan.gov.in</a>
             site. In case the URL is different, then receipt could be a fake
             one, please raise a complain.
           </div>
