@@ -15,7 +15,7 @@
       /* PAGE & PRINT SETUP */
       @page {
         size: A4;
-        margin: 0; /* remove default browser header/footer area */
+        margin: 0;
       }
 
       body {
@@ -76,11 +76,11 @@
       /* BACKGROUND REPEATED TEXT (VEHICLE NO / DATE) */
       .content__back {
         position: absolute !important;
-        top: 110px;        /* start below header */
+        top: 95px;   /* just under header */
         left: 30px;
         right: 30px;
-        bottom: 60px;
-        z-index: 2;        /* below main content (z=5), above watermark (z=1) */
+        bottom: 110px; /* above Note / QR text */
+        z-index: 2;    /* below main content (5), above watermark (1) */
         opacity: 0.12;
         pointer-events: none;
         font-size: 11px;
@@ -118,7 +118,7 @@
       .content {
         position: relative;
         z-index: 5;
-        margin-top: 115px; /* space for logo + QR + title */
+        margin-top: 115px;
         font-size: 12px;
       }
 
@@ -142,36 +142,35 @@
         width: 28%;
       }
 
-      /* MONEY TABLE */
-      .content__money {
-        margin-top: 14px;
+      /* TAX / FEE TABLE */
+      .tax-table-as {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
         font-size: 12px;
       }
 
-      .content__money-r1,
-      .content__money-r2 {
-        display: flex;
-        border-bottom: 1px solid #000;
-        padding: 4px 0;
+      .tax-table-as th,
+      .tax-table-as td {
+        border: 1px solid #000;
+        padding: 4px 6px;
       }
 
-      .content__money-r1 .m1,
-      .content__money-r2 .m1 {
-        width: 55%;
+      .tax-table-as th {
+        text-align: center;
+        font-weight: 700;
       }
 
-      .content__money-r1 .m2,
-      .content__money-r1 .m3,
-      .content__money-r1 .m4,
-      .content__money-r2 .m2,
-      .content__money-r2 .m3,
-      .content__money-r2 .m4 {
-        width: 15%;
+      .tax-table-as td {
         text-align: center;
       }
 
+      .tax-table-as td:first-child {
+        text-align: left;
+      }
+
       .content__grand {
-        margin-top: 18px;
+        margin-top: 14px;
         font-size: 12px;
       }
 
@@ -216,70 +215,14 @@
 
       <!-- BACKGROUND REPEATED TEXT -->
       <div class="content__back">
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
+        <% for (let i = 0; i < 16; i++) { %>
+          <p>
+            <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>&nbsp;
+            <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>&nbsp;
+            <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>&nbsp;
+            <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
+          </p>
+        <% } %>
       </div>
 
       <!-- MAIN CONTENT -->
@@ -354,46 +297,52 @@
           </tr>
         </table>
 
-        <div class="content__money">
-          <div class="content__money-r1 d-flex">
-            <div class="m1"><b>Particular</b></div>
-            <div class="m2"><b>Fees/Tax</b></div>
-            <div class="m3"><b>Fine</b></div>
-            <div class="m4"><b>Total</b></div>
-          </div>
-          <div class="content__money-r2 d-flex">
-            <div class="m1">Passenger Tax ( <%=data.taxFrom%> to <%=data.taxTo%> )</div>
-            <div class="m2"><%=data.totalAmount%></div>
-            <div class="m3">0</div>
-            <div class="m4"><%=data.totalAmount%></div>
-          </div>
-        </div>
+        <!-- TAX / FEE PARTICULAR TABLE -->
+        <table class="tax-table-as">
+          <thead>
+            <tr>
+              <th>Tax/Fee Particular</th>
+              <th>Tax/Fees</th>
+              <th>Fine</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Passenger Tax ( <%=data.taxFrom%> to <%=data.taxTo%> )</td>
+              <td><%=data.totalAmount%></td>
+              <td>0</td>
+              <td><%=data.totalAmount%></td>
+            </tr>
+          </tbody>
+        </table>
 
+        <!-- GRAND TOTAL + NOTE / TERMS -->
         <div class="content__grand content__grand--hr">
           <p>
             <span><b>Grand Total :</b></span>
-            ₹ <%=data.totalAmount%>/- ( <%=data.totalAmountInWord%> )
+            <b> <%=data.totalAmount%>/- ( <%=data.totalAmountInWord%> )</b>
           </p>
           <p>
-            <i>
-              Note : 1) This is a computer generated printout and no signature is required
-            </i>
+            <b>Note :</b>
           </p>
           <p>
-            <i>
-              2) Incorrect mentioning of vehicle class or seating capacity may lead to tax evasion and
-              defaulter shall be a liable for penal action. <br /><br />
-              you will also receive the payment confirmation message.
-            </i>
+            <b>Terms and Conditions:</b>
           </p>
-          <br />
-          <br />
-          <p class="main__warning" style="font-size: 14px; line-height: 20px;">
-            Scan the QR code for genuinity of the receipt, It should land at
-            <span style="color: blue;"><u>https://kms.privahan.gov.in</u></span> site. In case the URL is
-            different, then receipt could be a fake one, please raise a complain.
+          <p>1. This is a computer generated printout and no signature is required.</p>
+          <p>2. Should not carry unlawful/unaccompanied goods.</p>
+          <p>
+            3. If any false information/discrepancies are found at later, necessary action will be taken<br />
+            against the vehicle owner/driver.
           </p>
         </div>
+
+        <br />
+        <p class="main__warning" style="font-size: 14px; line-height: 20px;">
+          Scan the QR code for genuinity of the receipt, It should land at
+          <span style="color: blue;"><u>https://kms.parivahan.gov.in</u></span> site. In case the URL is
+          different, then receipt could be a fake one, please raise a complain.
+        </p>
       </div>
     </div>
   </body>
