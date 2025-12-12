@@ -13,31 +13,7 @@
 
     <!-- ✅ PRINT CSS (added) -->
     <style>
-      /* A4 + remove browser-added margins around the page content area */
-      @page {
-        size: A4;
-        margin: 0;
-      }
-
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-        font-family: "Roboto", Arial, Helvetica, sans-serif;
-      }
-
-      /* Print specific fixes */
-      @media print {
-        /* Keep layout stable in PDF */
-        html,
-        body {
-          width: 210mm;
-          height: 297mm;
-          background: #fff;
-        }
-
+      
         /* ✅ This removes the extra "(https://...)" that Chrome may append to links */
         a[href]:after {
           content: "" !important;
