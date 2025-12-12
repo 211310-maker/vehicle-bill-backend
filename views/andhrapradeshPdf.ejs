@@ -12,8 +12,11 @@
   <% } %>
 
   <style>
-  * { box-sizing: border-box; }
+  * {
+    box-sizing: border-box;
+  }
 
+  /* ---------- PAGE SETUP (CRITICAL) ---------- */
   @page {
     size: A4;
     margin: 0;
@@ -24,13 +27,14 @@
     padding: 0;
     background: #fff;
     font-family: "Roboto", Arial, Helvetica, sans-serif;
-    font-size: 12.5px;
+    font-size: 13px;            /* ⬅️ BIGGER like Daman */
+    font-weight: 500;
     color: #000;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  /* Center A4 in browser */
+  /* Center page in browser */
   .page {
     width: 100vw;
     min-height: 100vh;
@@ -39,108 +43,116 @@
     background: #fff;
   }
 
-  /* A4 canvas */
+  /* ---------- A4 CANVAS ---------- */
   .main {
     width: 210mm;
     min-height: 297mm;
-    padding: 12mm 15mm;
+    padding: 14mm 16mm;
     position: relative;
     overflow: hidden;
   }
 
-  /* ---------- WATERMARK ---------- */
-  .logo_ap_main {
+  /* ---------- WATERMARK (FORCED CENTER) ---------- */
+  .watermark {
     position: absolute;
+    top: 45%;                   /* ⬅️ move slightly UP */
     left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) translateY(-18mm);
-    width: 340px;
+    transform: translate(-50%, -50%);
+    width: 380px;               /* ⬅️ BIG like Daman */
     opacity: 0.12;
-    z-index: 1;
+    z-index: 0;
     pointer-events: none;
   }
 
   /* ---------- BACKGROUND VEHICLE / DATE ---------- */
-  .content__back {
+  .bg-repeat {
     position: absolute;
-    top: 12mm;
-    left: 15mm;
-    right: 15mm;
-    bottom: 12mm;
+    inset: 14mm 16mm;
     z-index: 0;
-    opacity: 0.10;
+    opacity: 0.08;
     font-size: 14px;
     line-height: 1.45;
     pointer-events: none;
   }
 
-  .content__back p {
+  .bg-repeat p {
     margin: 0;
     display: flex;
     justify-content: space-between;
     white-space: nowrap;
-    font-weight: 500;
+    font-weight: 600;
   }
 
-  /* ---------- FOREGROUND CONTENT ---------- */
+  /* ---------- FOREGROUND ---------- */
   .content {
     position: relative;
-    z-index: 5;
+    z-index: 3;
   }
 
   /* ---------- HEADER ---------- */
-  .ap-header {
-    text-align: center;
-    margin-bottom: 10px;
+  .header {
+    display: table;
+    width: 100%;
+    margin-bottom: 12px;
   }
 
-  .ap-header h3 {
-    margin: 0;
-    font-size: 15px;
+  .header-cell {
+    display: table-cell;
+    vertical-align: top;
+  }
+
+  .header-logo {
+    width: 22%;
+  }
+
+  .header-logo img {
+    width: 95px;
+  }
+
+  .header-center {
+    width: 56%;
+    text-align: center;
+    line-height: 1.35;
+  }
+
+  .header-center .gov {
+    font-size: 16px;
     font-weight: 900;
     text-transform: uppercase;
     text-decoration: underline;
   }
 
-  .ap-header p {
-    margin: 2px 0;
-    font-size: 13px;
+  .header-center .dept {
+    font-size: 14px;
     font-weight: 700;
   }
 
-  /* ---------- LOGO & QR ---------- */
-  .logo_ap {
-    position: absolute;
-    top: 12mm;
-    left: 15mm;
-    z-index: 10;
+  .header-center .title {
+    font-size: 14px;
+    font-weight: 700;
   }
 
-  .logo_ap img {
-    width: 95px;
-    height: auto;
+  .header-qr {
+    width: 22%;
+    text-align: right;
   }
 
-  .qr-image-ap {
-    position: absolute;
-    top: 12mm;
-    right: 15mm;
+  .header-qr img {
     width: 130px;
     height: 130px;
-    object-fit: contain;
-    z-index: 10;
   }
 
-  /* ---------- DETAILS TABLE ---------- */
-  table {
+  /* ---------- DETAILS TABLE (LIKE DAMAN) ---------- */
+  table.kv {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 6px;
-    font-size: 12.5px;
+    table-layout: fixed;
+    margin-top: 8px;
+    font-size: 13px;
   }
 
-  td {
-    padding: 3px 4px;
+  table.kv td {
+    padding: 4px 2px;
     vertical-align: top;
   }
 
@@ -151,77 +163,79 @@
 
   td.value {
     font-weight: 800;
-    white-space: normal;
+    word-break: break-word;
   }
+
+  table.kv col.labelL { width: 22%; }
+  table.kv col.valueL { width: 28%; }
+  table.kv col.labelR { width: 22%; }
+  table.kv col.valueR { width: 28%; }
 
   /* ---------- TAX TABLE ---------- */
-  .content__money_ap {
-    margin-top: 14px;
-    font-size: 12.5px;
-  }
-
-  .content__money-r-ap {
-    display: flex;
+  table.tax {
     width: 100%;
-    border-bottom: 1px solid #000;
-    padding: 5px 0;
+    border-collapse: collapse;
+    margin-top: 16px;
+    font-size: 13px;
   }
 
-  .content__money-r-ap b {
+  table.tax th,
+  table.tax td {
+    border: 1px solid #0070c0;
+    padding: 6px;
+  }
+
+  table.tax th {
     font-weight: 900;
+    text-align: center;
   }
 
-  .m1-ap { width: 55%; font-weight: 700; }
-  .m2-ap, .m3-ap, .m4-ap {
-    width: 15%;
+  table.tax td.num {
     text-align: right;
     font-weight: 800;
   }
 
-  /* ---------- GRAND TOTAL ---------- */
-  .content__grand {
+  /* ---------- BOTTOM ---------- */
+  .grand {
     margin-top: 10px;
-    font-size: 12.5px;
-  }
-
-  .content__grand b {
+    font-size: 13.5px;
     font-weight: 900;
   }
 
-  /* ---------- TERMS ---------- */
   .terms-title {
     margin-top: 6px;
     font-weight: 900;
   }
 
   .terms-list {
-    margin: 2px 0 0 18px;
-    font-size: 12px;
+    margin: 4px 0 0 18px;
+    font-size: 12.5px;
   }
 
   .terms-list li {
-    margin-bottom: 2px;
+    margin-bottom: 3px;
   }
 
-  /* ---------- BOTTOM NOTE ---------- */
   .bottom-note {
-    margin-top: 12px;
+    margin-top: 14px;
     font-size: 22px;
     font-weight: 900;
     line-height: 1.25;
   }
 
-  .bottom-note a {
+  .bottom-note .url {
     color: #0b57d0;
-    font-weight: 900;
     text-decoration: underline;
+    font-weight: 900;
   }
 
-  /* Prevent URL text in print */
   @media print {
-    a[href]:after { content: "" !important; }
+    a[href]:after {
+      content: "" !important;
+    }
   }
 </style>
+
 
 
 </head>
