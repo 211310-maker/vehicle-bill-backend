@@ -7,233 +7,205 @@
       rel="stylesheet"
     />
 
-
     <style>
-     * {
-  box-sizing: border-box;
-}
+      * { box-sizing: border-box; }
 
-/* ✅ Force TRUE A4 with ZERO margins */
-@page {
-  size: A4;
-  margin: 0;
-}
+      /* A4 page */
+      @page { size: A4; margin: 0; }
 
-/* ===============================
-   BASE
-================================ */
-html, body {
-  width: 210mm;
-  height: 297mm;
-  margin: 0;
-  padding: 0;
-  background: #fff;
-  font-family: "Roboto", Arial, Helvetica, sans-serif;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-  color: #000;
-  font-size: 14.5px;
-  font-weight: 500;
-  overflow: hidden;
-}
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: #fff;
+        font-family: "Roboto", Arial, Helvetica, sans-serif;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        color: #000;
+        font-size: 15px;
+        font-weight: 500;
+      }
 
-/* ===============================
-   SCREEN PREVIEW ONLY
-================================ */
-@media screen {
-  .page {
-    width: 100vw;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    background: #eee;
-  }
-}
+      /* Screen preview center ONLY */
+      @media screen {
+        .page {
+          width: 100vw;
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          background: #fff;
+        }
+      }
 
-/* ===============================
-   PRINT / PDF (CRITICAL FIX)
-================================ */
-@media print {
-  html, body {
-    width: 210mm;
-    height: 297mm;
-  }
+      /* Print/PDF: do NOT use flex, do NOT force html/body width */
+      @media print {
+        .page { display: block !important; }
+      }
 
-  .page {
-    display: block !important;
-  }
+      /* A4 canvas */
+      .main {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto;          /* center in PDF */
+        padding: 6mm 8mm;        /* ✅ smaller padding = bigger receipt */
+        position: relative;
+        background: #fff;
+        overflow: hidden;
+      }
 
-  /* 🚨 THIS IS THE MAIN FIX */
-  .main {
-    transform: scale(1.08);   /* fills page vertically */
-    transform-origin: top center;
-  }
+      /* avoid any accidental cropping in print */
+      @media print {
+        .main { overflow: visible; }
+      }
 
-  a[href]:after {
-    content: "" !important;
-  }
-}
+      /* Background vehicle/date pattern (match padding) */
+      .bg-repeat {
+        position: absolute;
+        top: 6mm;
+        left: 8mm;
+        right: 8mm;
+        bottom: 6mm;
+        z-index: 0;
+        opacity: 0.10;
+        pointer-events: none;
+        font-size: 13px;
+        line-height: 1.45;
+      }
+      .bg-repeat p {
+        margin: 0;
+        display: flex;
+        justify-content: space-between;
+        white-space: nowrap;
+        font-weight: 600;
+      }
 
-/* ===============================
-   A4 CANVAS
-================================ */
-.main {
-  width: 210mm;
-  height: 297mm;              /* 🔥 fixed height */
-  margin: 0 auto;
-  padding: 6mm 8mm;           /* 🔥 tighter padding = bigger content */
-  position: relative;
-  background: #fff;
-  overflow: hidden;
-}
+      /* Watermark */
+      .watermark {
+        position: absolute;
+        top: 45%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 460px;           /* slightly bigger */
+        height: auto;
+        opacity: 0.12;
+        z-index: 1;
+        pointer-events: none;
+      }
 
-/* ===============================
-   BACKGROUND TEXT
-================================ */
-.bg-repeat {
-  position: absolute;
-  top: 6mm;
-  left: 8mm;
-  right: 8mm;
-  bottom: 6mm;
-  z-index: 0;
-  opacity: 0.10;
-  pointer-events: none;
-  font-size: 13px;
-  line-height: 1.45;
-}
-.bg-repeat p {
-  margin: 0;
-  display: flex;
-  justify-content: space-between;
-  white-space: nowrap;
-  font-weight: 600;
-}
+      /* Foreground */
+      .content {
+        position: relative;
+        z-index: 5;
+      }
 
-/* ===============================
-   WATERMARK
-================================ */
-.watermark {
-  position: absolute;
-  top: 46%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 460px;
-  opacity: 0.12;
-  z-index: 1;
-  pointer-events: none;
-}
+      /* HEADER */
+      .header {
+        display: table;
+        width: 100%;
+        margin-bottom: 8px;
+      }
+      .header-cell {
+        display: table-cell;
+        vertical-align: top;
+      }
 
-/* ===============================
-   FOREGROUND
-================================ */
-.content {
-  position: relative;
-  z-index: 5;
-}
+      .header-logo { width: 22%; }
+      .header-logo img {
+        width: 105px;           /* slightly bigger */
+        height: auto;
+        display: block;
+      }
 
-/* ===============================
-   HEADER
-================================ */
-.header {
-  display: table;
-  width: 100%;
-  margin-bottom: 8px;
-}
-.header-cell {
-  display: table-cell;
-  vertical-align: top;
-}
+      .header-center {
+        width: 56%;
+        text-align: center;
+        line-height: 1.35;
+        padding-top: 4px;
+      }
+      .header-center .gov {
+        font-size: 16px;
+        font-weight: 900;
+        text-transform: uppercase;
+        text-decoration: underline;
+      }
+      .header-center .dept,
+      .header-center .title {
+        font-size: 14px;
+        font-weight: 700;
+      }
 
-.header-logo { width: 22%; }
-.header-logo img {
-  width: 95px;
-}
+      .header-qr { width: 22%; text-align: right; }
+      .header-qr img {
+        width: 140px;           /* slightly bigger */
+        height: 140px;
+        object-fit: contain;
+        display: inline-block;
+      }
 
-.header-center {
-  width: 56%;
-  text-align: center;
-  line-height: 1.35;
-}
-.header-center .gov {
-  font-size: 16px;
-  font-weight: 900;
-  text-decoration: underline;
-}
-.header-center .dept,
-.header-center .title {
-  font-size: 14px;
-  font-weight: 700;
-}
+      /* DETAILS TABLE */
+      table.rj.ap.mt {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 15px;        /* ✅ bigger */
+        margin-top: 6px;
+      }
+      table.rj.ap.mt td {
+        padding: 4px 4px;
+        vertical-align: top;
+      }
+      table.rj.ap.mt td:nth-child(1),
+      table.rj.ap.mt td:nth-child(3) {
+        font-weight: 800;
+        white-space: nowrap;
+      }
+      table.rj.ap.mt td:nth-child(2),
+      table.rj.ap.mt td:nth-child(4) {
+        font-weight: 900;
+        word-break: break-word;
+      }
 
-.header-qr {
-  width: 22%;
-  text-align: right;
-}
-.header-qr img {
-  width: 130px;
-}
+      /* TAX TABLE */
+      .content__money_ap {
+        margin-top: 12px;
+        font-size: 14px;
+      }
 
-/* ===============================
-   DETAILS TABLE
-================================ */
-table.rj.ap.mt {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14.5px;
-}
-table.rj.ap.mt td {
-  padding: 3px 4px;
-}
-table.rj.ap.mt td:nth-child(1),
-table.rj.ap.mt td:nth-child(3) {
-  font-weight: 800;
-}
-table.rj.ap.mt td:nth-child(2),
-table.rj.ap.mt td:nth-child(4) {
-  font-weight: 900;
-}
+      .content__money-r-ap {
+        display: flex;
+        width: 100%;
+      }
 
-/* ===============================
-   TAX TABLE
-================================ */
-.content__money_ap {
-  margin-top: 12px;
-  font-size: 13.5px;
-}
-.content__money-r-ap {
-  display: flex;
-}
-.content__money-r-ap > div {
-  border: 1px solid #0070c0;
-  padding: 5px;
-  font-weight: 800;
-}
-.content__money-r-ap.header-row > div {
-  font-weight: 900;
-  text-align: center;
-}
-.m1-ap { width: 58%; }
-.m2-ap, .m3-ap, .m4-ap {
-  width: 14%;
-  text-align: right;
-}
+      .content__money-r-ap > div {
+        border: 1px solid #0070c0;
+        padding: 6px 6px;
+        font-weight: 800;
+      }
 
-/* ===============================
-   FOOTER
-================================ */
-.content__grand {
-  margin-top: 8px;
-  font-size: 13.5px;
-}
-.main__warning {
-  margin-top: 8px;
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 700;
-}
+      .content__money-r-ap.header-row > div {
+        font-weight: 900;
+        text-align: center;
+      }
 
+      .m1-ap { width: 58%; }
+      .m2-ap, .m3-ap, .m4-ap { width: 14%; text-align: right; }
 
+      /* Bottom content */
+      .content__grand {
+        margin-top: 10px;
+        font-size: 14px;
+      }
+
+      .main__warning {
+        margin-top: 10px;
+        font-size: 14px;
+        line-height: 20px;
+        font-weight: 700;
+      }
+
+      /* Print: remove link suffix */
+      @media print {
+        a[href]:after { content: "" !important; }
+      }
     </style>
   </head>
 
