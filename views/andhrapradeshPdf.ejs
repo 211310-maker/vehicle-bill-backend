@@ -12,174 +12,233 @@
   <% } %>
 
   <style>
-    /* FORCE FULL-PAGE WIDTH FOR PDF */
-    @page {
-      size: A4;
-      margin: 0; /* no auto header/footer space */
-    }
+  * { box-sizing: border-box; }
 
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Roboto', sans-serif;
-    }
+  /* A4 page */
+  @page { size: A4; margin: 0; }
 
-    /* Make the content fill entire printable width */
-    .main {
-      position: relative;
-      width: 100%;
-      max-width: 100%;
-      margin: 0;
-      padding: 20px 25px 40px 25px; /* adjust as needed */
-      box-sizing: border-box;
-    }
+  body {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    font-family: "Roboto", Arial, Helvetica, sans-serif;
+    color: #000;
+    font-size: 12px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 
-    /* QR CODE – TOP RIGHT */
-    .qr-image-ap {
-      position: absolute;
-      top: 20px;
-      right: 35px;
-      width: 135px;
-      height: 135px;
-      object-fit: contain;
-      z-index: 10;
-    }
+  /* Center the A4 sheet in browser preview */
+  .page {
+    width: 100vw;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    background: #fff;
+  }
 
-    /* TOP-LEFT SMALL LOGO */
-    .logo_ap {
-      position: absolute;
-      top: 20px;
-      left: 40px;
-      z-index: 10;
-    }
+  /* A4 canvas */
+  .main {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 12mm 15mm;
+    position: relative;
+    overflow: hidden;
+  }
 
-    .logo_ap img {
-      width: 115px;
-      height: auto;
-      display: block;
-    }
+  /* ---------- BACKGROUND TEXT (vehicle/payment) ---------- */
+  /* confined to same inner padding area as content */
+  .content__back,
+  .bg-repeat {
+    position: absolute;
+    top: 12mm;
+    left: 15mm;
+    right: 15mm;
+    bottom: 12mm;
+    z-index: 0;
+    opacity: 0.10;
+    font-size: 14px;
+    line-height: 1.45;
+    pointer-events: none;
+  }
 
-    /* BIG WATERMARK – EXACT CENTER */
-    .logo_ap_main {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      opacity: 0.13;
-      z-index: 0;
-      pointer-events: none;
-    }
+  .content__back p,
+  .bg-repeat p {
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    white-space: nowrap;
+    font-weight: 500;
+  }
 
-    .logo_ap_main img {
-      width: 320px;
-      height: auto;
-    }
+  /* ---------- WATERMARK (FORCE CENTER + PUSH UP) ---------- */
+  .logo_ap_main,
+  .watermark {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    /* Push watermark UP: change -18mm to -25mm etc */
+    transform: translate(-50%, -50%) translateY(-18mm);
+    width: 360px;
+    opacity: 0.12;
+    z-index: 1;
+    pointer-events: none;
+    will-change: transform;
+  }
 
-    /* BACKGROUND TEXT (VEHICLE / DATE) */
-    .content__back {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 0;
-      opacity: 0.07;
-      pointer-events: none;
-      font-size: 11px;
-    }
+  /* foreground content always above bg */
+  .content {
+    position: relative;
+    z-index: 5;
+    margin-top: 0;
+  }
 
-    .content__back p {
-      margin: 0;
-      line-height: 1.4;
-      white-space: nowrap;
-    }
+  /* ---------- HEADER (logo | title | QR) ---------- */
+  .header,
+  .ap-header {
+    display: table;
+    width: 100%;
+    margin-bottom: 10px;
+  }
 
-    /* TITLE BLOCK – CENTER TOP BETWEEN LOGO AND QR */
-    .ap-header {
-      position: absolute;
-      top: 35px;
-      left: 0;
-      right: 0;
-      text-align: center;
-      z-index: 5;
-    }
+  .header-cell {
+    display: table-cell;
+    vertical-align: top;
+  }
 
-    .ap-header h3 {
-      margin: 0 0 2px 0;
-      font-size: 16px;
-    }
+  /* logo left */
+  .header-logo { width: 22%; }
+  .header-logo img { width: 95px; height: auto; }
 
-    .ap-header p {
-      margin: 0;
-      font-size: 13px;
-    }
+  /* title center */
+  .header-center {
+    width: 56%;
+    text-align: center;
+    line-height: 1.35;
+    padding-top: 4px;
+  }
 
-    /* MAIN CONTENT BELOW HEADER */
-    .content {
-      position: relative;
-      z-index: 5;
-      margin-top: 115px; /* space for logo + QR + 3-line title */
-    }
+  .header-center .gov {
+    font-size: 15px;
+    font-weight: 900;
+    text-transform: uppercase;
+    text-decoration: underline;
+  }
 
-    table.rj.ap.mt {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-      margin-top: 10px;
-    }
+  .header-center .dept {
+    font-size: 13px;
+    font-weight: 700;
+  }
 
-    table.rj.ap.mt td {
-      padding: 2px 4px;
-    }
+  .header-center .title {
+    font-size: 13px;
+    font-weight: 700;
+  }
 
-    /* MONEY TABLE */
-    .content__money_ap {
-      margin-top: 14px;
-      font-size: 12px;
-    }
+  /* qr right */
+  .header-qr { width: 22%; text-align: right; }
+  .header-qr img { width: 130px; height: 130px; object-fit: contain; }
 
-    .content__money-r-ap {
-      display: flex;
-      width: 100%;
-      border-bottom: 1px solid #000;
-      padding: 4px 0;
-    }
+  /* ---------- DETAILS (2-column fixed layout like Puducherry) ---------- */
+  table.kv,
+  table.rj.ap.mt,
+  table.details {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin-top: 6px;
+    font-size: 12.5px;
+  }
 
-    .content__money-r-ap:last-child {
-      border-bottom: none;
-    }
+  table.kv td,
+  table.rj.ap.mt td,
+  table.details td {
+    padding: 3px 2px;
+    vertical-align: top;
+  }
 
-    .m1-ap {
-      width: 55%;
-    }
+  td.label {
+    white-space: nowrap;
+    font-weight: 700;
+  }
 
-    .m2-ap,
-    .m3-ap,
-    .m4-ap {
-      width: 15%;
-      text-align: center;
-    }
+  td.value {
+    font-weight: 800;
+    white-space: normal;
+    word-wrap: break-word;
+  }
 
-    .content__grand {
-      margin-top: 18px;
-      font-size: 12px;
-    }
+  /* optional fixed widths (recommended) */
+  table.kv col.labelL { width: 22%; }
+  table.kv col.valueL { width: 28%; }
+  table.kv col.labelR { width: 22%; }
+  table.kv col.valueR { width: 28%; }
 
-    .content__grand p {
-      margin: 2px 0;
-    }
+  /* ---------- TAX TABLE (blue bordered like screenshot) ---------- */
+  table.tax {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 14px;
+    font-size: 12px;
+  }
 
-    /* PRINT SETTINGS: remove URL suffix on links */
-    @media print {
-      a[href]:after {
-        content: "" !important;
-      }
-      body {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-    }
-  </style>
+  table.tax th, table.tax td {
+    border: 1px solid #0070c0;
+    padding: 5px 6px;
+  }
+
+  table.tax th {
+    text-align: center;
+    font-weight: 900;
+  }
+
+  table.tax td.num {
+    text-align: right;
+    font-weight: 800;
+    width: 12%;
+  }
+
+  /* ---------- BOTTOM TEXT ---------- */
+  .grand {
+    margin-top: 8px;
+    font-size: 12.5px;
+  }
+
+  .grand .gt { font-weight: 900; }
+
+  .note-title,
+  .terms-title {
+    margin-top: 4px;
+    font-weight: 900;
+  }
+
+  .terms-list {
+    margin: 2px 0 0 18px;
+    padding: 0;
+    font-size: 12px;
+  }
+
+  .terms-list li { margin-bottom: 2px; }
+
+  .bottom-note {
+    margin-top: 12px;
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.25;
+  }
+
+  .bottom-note .url {
+    color: #0b57d0;
+    text-decoration: underline;
+    font-weight: 900;
+  }
+
+  /* Prevent browser adding URL text after links */
+  @media print {
+    a[href]:after { content: "" !important; }
+  }
+</style>
+
 </head>
 
 <body>
