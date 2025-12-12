@@ -6,66 +6,85 @@
     href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,400;1,500&display=swap"
     rel="stylesheet"
   />
-
   <link rel="stylesheet" href="/css/style.css" />
-  <% if(data.cssFix){ %>
+  <% if (data.cssFix) { %>
   <link rel="stylesheet" href="/css/cssFix.css" />
   <% } %>
 
-  <!-- REMOVE PDF URL + PAGE NUMBER + HEADER FOOTER SPACE -->
   <style>
+    /* Full-page A4 and remove browser header/footer space */
     @page {
+      size: A4;
       margin: 0 !important;
     }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Roboto", sans-serif;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* Prevent :after URL on links when printing */
     @media print {
       a[href]:after {
         content: "" !important;
       }
-      body {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
     }
 
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: "Roboto", sans-serif;
-    }
-
-    .main {
+    /* MAIN PAGE WRAPPER */
+    .page-daman {
       position: relative;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 25px 30px 40px 30px;
+      width: 100%;
       box-sizing: border-box;
+      padding: 25px 40px 40px 40px;
     }
 
     /* QR TOP-RIGHT */
-    .qr-image {
-      position: absolute;
-      top: 20px;
-      right: 35px;
-      width: 130px;
-      height: 130px;
-      object-fit: contain;
-      z-index: 10;
-    }
-
-    /* NEW SMALL LOGO TOP-LEFT */
-    .logo__daman {
+    .qr-image-daman {
       position: absolute;
       top: 22px;
-      left: 40px;
-      z-index: 12;
+      right: 55px;
+      width: 135px;
+      height: 135px;
+      object-fit: contain;
+      z-index: 15;
     }
-    .logo__daman img {
+
+    /* SMALL LOGO TOP-LEFT */
+    .logo-daman-small {
+      position: absolute;
+      top: 22px;
+      left: 45px;
+      z-index: 15;
+    }
+    .logo-daman-small img {
       width: 110px;
       height: auto;
       display: block;
     }
 
-    /* BACKGROUND VEHICLE NO + DATE */
+    /* BIG CENTER WATERMARK */
+    .logo-daman-watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.13;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .logo-daman-watermark img {
+      width: 320px;   /* make slightly bigger / adjust if needed */
+      height: auto;
+    }
+
+    /* BACKGROUND VEHICLE + DATE TEXT */
     .content__back {
       position: absolute;
       top: 0;
@@ -79,217 +98,242 @@
     }
     .content__back p {
       margin: 0;
-      padding: 0;
       line-height: 1.4;
       white-space: nowrap;
     }
 
-    /* MAIN CONTENT ABOVE BACKGROUND */
-    .content,
-    .content__top,
-    table,
-    .content__grand {
+    /* MAIN CONTENT ABOVE BACKGROUND & WATERMARK */
+    .content-daman,
+    .content-daman * {
       position: relative;
       z-index: 5;
     }
 
-    /* CONTENT START BELOW LOGO + QR */
-    .content {
-      margin-top: 105px;
+    .content-daman {
+      margin-top: 110px; /* leave space for logo + QR + title */
+      font-size: 12px;
     }
 
-    .content__top {
+    .daman-header {
       text-align: center;
       margin-bottom: 12px;
     }
-    .content__top h3 {
+    .daman-header h3 {
       margin: 0 0 3px 0;
-      font-size: 17px;
-      letter-spacing: 0.5px;
+      font-size: 16px;
       font-weight: 700;
+      letter-spacing: 0.4px;
     }
-    .content__top p {
+    .daman-header p {
       margin: 0;
       font-size: 13px;
     }
 
-    table {
+    /* INFO TABLE (top details) */
+    .info-table-daman {
       width: 100%;
       border-collapse: collapse;
       font-size: 12px;
-      margin-top: 12px;
+      margin-top: 8px;
     }
-    table td {
+    .info-table-daman td {
       padding: 2px 4px;
+      vertical-align: top;
     }
 
-    /* MONEY TABLE */
-    .content__money {
-      margin-top: 18px;
-      font-size: 12px;
-    }
-    .content__money-r1,
-    .content__money-r2 {
-      display: flex;
+    /* TAX / FEE TABLE */
+    .money-table-daman {
       width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 16px;
+      border-top: 1px solid #000;
+      border-left: 1px solid #000;
+      border-right: 1px solid #000;
+    }
+    .money-table-daman th,
+    .money-table-daman td {
       border-bottom: 1px solid #000;
-      padding: 4px 0;
+      border-right: 1px solid #000;
+      padding: 4px 6px;
+      text-align: center;
     }
-    .content__money-r2:last-child {
-      border-bottom: none;
+    .money-table-daman th:first-child,
+    .money-table-daman td:first-child {
+      text-align: left;
     }
 
-    .m1 { width: 55%; }
-    .m2, .m3, .m4 { width: 15%; text-align: center; }
-
-    .content__grand {
-      margin-top: 20px;
+    /* GRAND TOTAL + NOTES */
+    .grand-daman {
+      margin-top: 14px;
       font-size: 12px;
       line-height: 18px;
     }
-    .content__grand p {
-      margin: 4px 0;
+    .grand-daman p {
+      margin: 3px 0;
+    }
+
+    .grand-daman .note-label {
+      font-weight: 700;
+    }
+
+    .grand-daman .terms-label {
+      font-weight: 700;
+    }
+
+    .grand-daman-terms {
+      margin-left: 16px;
+      font-style: italic;
+    }
+
+    .grand-daman-terms p {
+      margin: 2px 0;
+    }
+
+    .scan-warning {
+      margin-top: 14px;
+      font-size: 13px;
+      line-height: 20px;
     }
   </style>
 </head>
 
 <body>
-  <div class="main">
+  <div class="page-daman">
+    <!-- QR top-right -->
+    <img class="qr-image-daman" src="<%= data.src %>" alt="" />
 
-    <!-- QR TOP RIGHT -->
-    <img class="qr-image" src="<%= data.src %>" alt="" />
-
-    <!-- NEW LOGO TOP LEFT -->
-    <div class="logo logo__daman">
-      <img src="/images1/Daman.jpg" alt="" />
+    <!-- Small logo top-left -->
+    <div class="logo-daman-small">
+      <img src="/images1/Daman.jpg" alt="Daman & Diu Logo" />
     </div>
 
-    <!-- PAGE BACKGROUND (VEHICLE / DATE) -->
+    <!-- Big center watermark -->
+    <div class="logo-daman-watermark">
+      <img src="/images1/Daman.jpg" alt="Daman & Diu Watermark" />
+    </div>
+
+    <!-- Background vehicle + date text -->
     <div class="content__back">
-      <% for(let i=0;i<18;i++){ %>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>&nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
+      <% for (let i = 0; i < 18; i++) { %>
+      <p>
+        <span><%= data.vehicleNo %> / <%= data.paymentDate %>,</span>&nbsp;
+        <span><%= data.vehicleNo %> / <%= data.paymentDate %>,</span>
+      </p>
       <% } %>
     </div>
 
-    <!-- MAIN CONTENT -->
-    <div class="content">
-
-      <div class="content__top">
-        <h3>GOVERNMENT OF DAMAN & DIU</h3>
+    <!-- FOREGROUND CONTENT -->
+    <div class="content-daman">
+      <!-- Title -->
+      <div class="daman-header">
+        <h3>GOVERNMENT OF DAMAN &amp; DIU</h3>
         <p>Department of Transport</p>
         <p>Checkpost Tax e-Receipt</p>
       </div>
 
-      <table>
+      <!-- Info table (two column layout like reference) -->
+      <table class="info-table-daman">
         <tr>
           <td>Registration No.</td>
-          <td>: <b><%=data.vehicleNo%></b></td>
-        </tr>
-        <tr>
+          <td>: <b><%= data.vehicleNo %></b></td>
           <td>Receipt No.</td>
-          <td>: <%=data.receiptNo%></td>
+          <td>: <%= data.receiptNo %></td>
         </tr>
         <tr>
           <td>Payment Date</td>
-          <td>: <%=data.paymentDate%></td>
-        </tr>
-        <tr>
+          <td>: <%= data.paymentDate %></td>
           <td>Owner Name</td>
-          <td>: <%=data.ownerName%></td>
+          <td>: <%= data.ownerName %></td>
         </tr>
         <tr>
           <td>Chassis No.</td>
-          <td>: <%=data.chassisNo%></td>
+          <td>: <%= data.chassisNo %></td>
           <td>Tax Mode</td>
-          <td>: <%=data.taxMode%></td>
+          <td>: <%= data.taxMode %></td>
         </tr>
         <tr>
           <td>Vehicle Type</td>
-          <td>: <%=data.vehiclePermitType%></td>
+          <td>: <%= data.vehiclePermitType %></td>
           <td>Vehicle Class</td>
-          <td>: <%=data.vehicleClass%></td>
+          <td>: <%= data.vehicleClass %></td>
         </tr>
         <tr>
           <td>Mobile No.</td>
-          <td>: <%=data.mobileNo%></td>
+          <td>: <%= data.mobileNo %></td>
           <td>Checkpost Name</td>
-          <td>: <%=data.borderBarrier%></td>
+          <td>: <%= data.borderBarrier %></td>
         </tr>
-
         <tr>
           <td>Sleeper Cap.</td>
-          <td>: <%=data.sleeperCapacityExcludingDriver%></td>
+          <td>: <%= data.sleeperCapacityExcludingDriver %></td>
 
-          <% if(data.vehiclePermitType === 'GOODS VEHICLE'){ %>
+          <% if (data.vehiclePermitType === 'GOODS VEHICLE') { %>
             <td>Gross Weight</td>
-            <td>: <%=data.grossVehicleWeight%> KG</td>
+            <td>: <%= data.grossVehicleWeight %> KG</td>
           <% } else { %>
-            <td>Seating Cap (Ex. Driver)</td>
-            <td>: <%=data.seatingCapacityExcludingDriver%></td>
+            <td>Seating Capacity</td>
+            <td>: <%= data.seatingCapacityExcludingDriver %></td>
           <% } %>
         </tr>
-
         <tr>
+          <td>Payment Mode</td>
+          <td>: <%= data.paymentMode %></td>
           <td>Bank Ref. No.</td>
           <td>: NA</td>
-          <td>Payment Mode</td>
-          <td>: <%=data.paymentMode%></td>
         </tr>
-
         <tr>
+          <td>Permit Type</td>
+          <td>: <%= data.permitType %></td>
           <td>Service Type</td>
           <td>: NOT APPLICABLE</td>
         </tr>
-
-        <tr>
-          <td>Permit Type</td>
-          <td>: <%=data.permitType%></td>
-          <td>Permit Category</td>
-          <td>:</td>
-        </tr>
       </table>
 
-      <!-- MONEY TABLE -->
-      <div class="content__money">
-        <div class="content__money-r1 d-flex">
-          <div class="m1"><b>Particular</b></div>
-          <div class="m2"><b>Fees/Tax</b></div>
-          <div class="m3"><b>Fine</b></div>
-          <div class="m4"><b>Total</b></div>
-        </div>
+      <!-- Tax/Fee table like reference -->
+      <table class="money-table-daman">
+        <thead>
+          <tr>
+            <th>Tax/Fee Particular</th>
+            <th>Tax/Fees</th>
+            <th>Fine</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>MV Tax ( <%= data.taxFrom %> to <%= data.taxTo %> )</td>
+            <td><%= data.totalAmount %></td>
+            <td>0</td>
+            <td><%= data.totalAmount %></td>
+          </tr>
+        </tbody>
+      </table>
 
-        <div class="content__money-r2 d-flex">
-          <div class="m1">MV Tax ( <%=data.taxFrom%> to <%=data.taxTo%> )</div>
-          <div class="m2"><%=data.totalAmount%></div>
-          <div class="m3">0</div>
-          <div class="m4"><%=data.totalAmount%></div>
-        </div>
-      </div>
-
-      <!-- GRAND TOTAL + NOTES -->
-      <div class="content__grand">
-        <p><b>Grand Total :</b> ₹ <%=data.totalAmount%>/- ( <%=data.totalAmountInWord%> )</p>
-
-        <p><i>Note : 1) This is a computer generated printout and no signature is required.</i></p>
-
-        <p><i>
-          2) Incorrect mentioning of vehicle class or seating capacity may lead to tax evasion and defaulter shall be liable for penal action.
-          <br /><br />
-          you will also receive the payment confirmation message.
-        </i></p>
-
-        <p class="main__warning">
-          Scan the QR code for genuinity of the receipt, It should land at <u>https://kms.privahan.gov.in</u>
+      <!-- Grand Total + Note + Terms exactly style-wise -->
+      <div class="grand-daman">
+        <p>
+          <b>Grand Total : <%= data.totalAmount %>/- <%= data.totalAmountInWord %></b>
         </p>
 
-        <p class="main__warning main__warning-2">
-          If the URL is different, then receipt could be a fake one, please raise a complain.
+        <p class="note-label">Note :</p>
+        <p class="terms-label">Terms and Conditions:</p>
+
+        <div class="grand-daman-terms">
+          <p>1) This is a computer generated printout and no signature is required.</p>
+          <p>2) Should not carry unlawful/unaccompanied goods.</p>
+          <p>
+            3) If any false information/discrepancies are found at later, necessary action will be taken
+            against the vehicle owner/driver.
+          </p>
+        </div>
+
+        <p class="scan-warning">
+          Scan the QR code for genuinity of the receipt, It should land at
+          <a style="color: blue; text-decoration: none;">https://kms.privahan.gov.in</a>
+          site. In case the URL is different, then receipt could be a fake one, please raise a complain.
         </p>
       </div>
-
     </div>
   </div>
 </body>
