@@ -65,24 +65,31 @@
       font-weight: 500;
     }
 
-    /* ---------- WATERMARK (EXACT CENTER BEHIND RECEIPT) ---------- */
-    .watermark {
-      position: absolute;
-      top: calc(50% - 55px);   /* ⬅️ move watermark up */
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 380px;
-      opacity: 0.12;
-      z-index: 1;
-      pointer-events: none;
-    }
-
-
     /* foreground content */
     .content {
       position: relative;
       z-index: 3;
     }
+
+
+    .watermark {
+      position: absolute;
+
+      /* 🔒 FORCE exact page center */
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+
+      width: 360px;            /* adjust size if needed */
+      opacity: 0.12;
+
+      z-index: 0;              /* behind everything */
+      pointer-events: none;
+
+      /* 🧠 prevent browser shifting */
+      will-change: transform;
+    }
+
 
     /* ---------- HEADER (logo | title | QR) ---------- */
     .header {
