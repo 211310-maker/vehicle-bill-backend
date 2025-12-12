@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Daman & Diu - Tax Receipt</title>
+  <title>DNH & DD - Tax Receipt</title>
 
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap"
@@ -12,10 +12,7 @@
   <style>
     * { box-sizing: border-box; }
 
-    @page {
-      size: A4;
-      margin: 0;
-    }
+    @page { size: A4; margin: 0; }
 
     body {
       margin: 0;
@@ -24,9 +21,11 @@
       font-family: "Roboto", Arial, Helvetica, sans-serif;
       color: #000;
       font-size: 12px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
-    /* Browser centering only */
+    /* center the A4 sheet in browser */
     .page {
       width: 100vw;
       min-height: 100vh;
@@ -35,7 +34,7 @@
       background: #fff;
     }
 
-    /* A4 sheet */
+    /* A4 canvas */
     .main {
       width: 210mm;
       min-height: 297mm;
@@ -44,9 +43,7 @@
       overflow: hidden;
     }
 
-    /* ---------- BACKGROUND LAYERS ---------- */
-
-    /* Vehicle / Payment Date background (CONTENT WIDTH ONLY) */
+    /* ---------- BACKGROUND TEXT PATTERN ---------- */
     .bg-repeat {
       position: absolute;
       top: 12mm;
@@ -56,7 +53,7 @@
       z-index: 0;
       opacity: 0.10;
       font-size: 14px;
-      line-height: 1.4;
+      line-height: 1.45;
       pointer-events: none;
     }
 
@@ -68,39 +65,36 @@
       font-weight: 500;
     }
 
-    /* Watermark – slightly ABOVE center */
+    /* ---------- WATERMARK (EXACT CENTER BEHIND RECEIPT) ---------- */
     .watermark {
       position: absolute;
-      top: 45%;                 /* 👈 moved UP */
+      top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 360px;             /* balanced size */
-      opacity: 0.07;
+      width: 380px;
+      opacity: 0.12;
       z-index: 1;
       pointer-events: none;
     }
 
-    /* Content always on top */
+    /* foreground content */
     .content {
       position: relative;
       z-index: 3;
     }
 
-    /* ---------- HEADER ---------- */
-
+    /* ---------- HEADER (logo | title | QR) ---------- */
     .header {
       display: table;
       width: 100%;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
-
     .header-cell {
       display: table-cell;
       vertical-align: top;
     }
-
     .header-logo { width: 22%; }
-    .header-logo img { width: 85px; }
+    .header-logo img { width: 95px; height: auto; }
 
     .header-center {
       width: 56%;
@@ -108,243 +102,275 @@
       line-height: 1.35;
       padding-top: 4px;
     }
-
     .header-center .gov {
       font-size: 15px;
       font-weight: 900;
       text-transform: uppercase;
+      text-decoration: underline; /* matches screenshot */
     }
-
     .header-center .dept {
       font-size: 13px;
       font-weight: 700;
     }
-
     .header-center .title {
       font-size: 13px;
       font-weight: 700;
     }
 
-    .header-qr {
-      width: 22%;
-      text-align: right;
-    }
+    .header-qr { width: 22%; text-align: right; }
+    .header-qr img { width: 130px; height: 130px; object-fit: contain; }
 
-    .header-qr img {
-      width: 120px;
-      height: 120px;
-    }
-
-    /* ---------- DETAILS TABLE ---------- */
-
-    table.details {
+    /* ---------- DETAILS (2 COLUMN KV LIKE IMAGE) ---------- */
+    table.kv {
       width: 100%;
       border-collapse: collapse;
       table-layout: fixed;
+      margin-top: 6px;
       font-size: 12.5px;
     }
-
-    table.details td {
+    table.kv td {
       padding: 3px 2px;
       vertical-align: top;
     }
 
-    table.details td.label {
+    td.label {
       white-space: nowrap;
+      font-weight: 700;
+    }
+    td.value {
+      font-weight: 800;
+      word-wrap: break-word;
+      white-space: normal;
     }
 
-    table.details td.value {
-      font-weight: 800;
-    }
+    /* Give fixed widths like Puducherry */
+    table.kv col.labelL { width: 22%; }
+    table.kv col.valueL { width: 28%; }
+    table.kv col.labelR { width: 22%; }
+    table.kv col.valueR { width: 28%; }
 
     /* ---------- TAX TABLE ---------- */
-
     table.tax {
       width: 100%;
       border-collapse: collapse;
       margin-top: 14px;
       font-size: 12px;
     }
-
-    table.tax th,
-    table.tax td {
+    table.tax th, table.tax td {
       border: 1px solid #0070c0;
       padding: 5px 6px;
     }
-
     table.tax th {
       text-align: center;
-      font-weight: 800;
+      font-weight: 900;
     }
-
     table.tax td.num {
       text-align: right;
-      font-weight: 700;
+      font-weight: 800;
       width: 12%;
     }
 
-    /* ---------- FOOTER TEXT ---------- */
-
+    /* ---------- BOTTOM TEXT ---------- */
     .grand {
       margin-top: 8px;
       font-size: 12.5px;
     }
+    .grand .gt { font-weight: 900; }
 
-    .grand .gt {
-      font-weight: 900;
-    }
-
-    .terms-title {
+    .note-title {
       margin-top: 4px;
       font-weight: 900;
     }
 
-    .terms-list {
-      margin: 2px 0 0 16px;
-      padding: 0;
-    }
-
-    .bottom-note {
-      margin-top: 10px;
-      font-size: 12.5px;
+    .terms-title {
+      margin-top: 2px;
       font-weight: 900;
     }
 
-    .url {
-      color: #0070c0;
+    .terms-list {
+      margin: 2px 0 0 18px;
+      padding: 0;
+      font-size: 12px;
+    }
+    .terms-list li { margin-bottom: 2px; }
+
+    .bottom-note {
+      margin-top: 12px;
+      font-size: 22px;     /* matches your image big bold line */
+      font-weight: 900;
+      line-height: 1.25;
+    }
+    .bottom-note .url {
+      color: #0b57d0;
       text-decoration: underline;
-      font-weight: 800;
+      font-weight: 900;
+    }
+
+    /* IMPORTANT: CSS cannot remove Chrome print header/footer.
+       Must set displayHeaderFooter:false in Puppeteer. */
+    @media print {
+      a[href]:after { content: "" !important; }
     }
   </style>
 </head>
 
 <body>
-<div class="page">
-  <div class="main">
+  <div class="page">
+    <div class="main">
 
-    <!-- CONTENT-ALIGNED BACKGROUND TEXT -->
-    <div class="bg-repeat">
-      <% for (let i = 0; i < 24; i++) { %>
-        <p>
-          <span><%= data.vehicleNo %> / <%= data.paymentDate %></span>
-          <span><%= data.vehicleNo %> / <%= data.paymentDate %></span>
-        </p>
-      <% } %>
-    </div>
-
-    <!-- WATERMARK -->
-    <img
-      src="<%= data.host %>/images1/Daman.jpg"
-      class="watermark"
-      alt="Watermark"
-    />
-
-    <div class="content">
-
-      <!-- HEADER -->
-      <div class="header">
-        <div class="header-cell header-logo">
-          <img src="<%= data.host %>/images1/Daman.jpg" />
-        </div>
-
-        <div class="header-cell header-center">
-          <div class="gov">GOVERNMENT OF DAMAN & DIU</div>
-          <div class="dept">Department of Transport</div>
-          <div class="title">Checkpost Tax e-Receipt</div>
-        </div>
-
-        <div class="header-cell header-qr">
-          <% if (data.src) { %>
-            <img src="<%= data.src %>" />
-          <% } %>
-        </div>
+      <!-- Background vehicle/payment date pattern (fills content area) -->
+      <div class="bg-repeat">
+        <% for (let i = 0; i < 26; i++) { %>
+          <p>
+            <span><%= data.vehicleNo %> / <%= data.paymentDate %></span>
+            <span><%= data.vehicleNo %> / <%= data.paymentDate %></span>
+          </p>
+        <% } %>
       </div>
 
-      <!-- DETAILS -->
-      <table class="details">
-        <colgroup>
-          <col style="width:22%">
-          <col style="width:28%">
-          <col style="width:22%">
-          <col style="width:28%">
-        </colgroup>
+      <!-- Watermark centered behind receipt -->
+      <img
+        src="<%= data.host %>/images1/Daman.jpg"
+        class="watermark"
+        alt="Watermark"
+      />
 
-        <tr>
-          <td class="label">Registration No.</td>
-          <td class="value">: <%= data.vehicleNo %></td>
-          <td class="label">Receipt No.</td>
-          <td class="value">: <%= data.receiptNo %></td>
-        </tr>
+      <div class="content">
+        <!-- Header -->
+        <div class="header">
+          <div class="header-cell header-logo">
+            <img src="<%= data.host %>/images1/Daman.jpg" alt="Logo" />
+          </div>
 
-        <tr>
-          <td class="label">Payment Date</td>
-          <td class="value">: <%= data.paymentDate %></td>
-          <td class="label">Owner Name</td>
-          <td class="value">: <%= data.ownerName %></td>
-        </tr>
+          <div class="header-cell header-center">
+            <div class="gov">GOVERNMENT OF UT of DNH and DD</div>
+            <div class="dept">Department of Transport</div>
+            <div class="title">Checkpost Tax e-Receipt</div>
+          </div>
 
-        <tr>
-          <td class="label">Chassis No.</td>
-          <td class="value">: <%= data.chassisNo %></td>
-          <td class="label">Tax Mode</td>
-          <td class="value">: <%= data.taxMode %></td>
-        </tr>
-
-        <tr>
-          <td class="label">Vehicle Type</td>
-          <td class="value">: <%= data.vehiclePermitType %></td>
-          <td class="label">Vehicle Class</td>
-          <td class="value">: <%= data.vehicleClass %></td>
-        </tr>
-
-        <tr>
-          <td class="label">Mobile No.</td>
-          <td class="value">: <%= data.mobileNo %></td>
-          <td class="label">Checkpost Name</td>
-          <td class="value">: <%= data.borderBarrier %></td>
-        </tr>
-      </table>
-
-      <!-- TAX -->
-      <table class="tax">
-        <thead>
-          <tr>
-            <th>Tax/Fee Particular</th>
-            <th>Tax/Fees</th>
-            <th>Fine</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><b>MV Tax ( <%= data.taxFrom %> to <%= data.taxTo %> )</b></td>
-            <td class="num"><%= data.totalAmount %></td>
-            <td class="num">0</td>
-            <td class="num"><%= data.totalAmount %></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <!-- FOOTER -->
-      <div class="grand">
-        <div class="gt">
-          Grand Total : <%= data.totalAmount %> /- ( <%= data.totalAmountInWord %> )
+          <div class="header-cell header-qr">
+            <% if (data.src) { %>
+              <img src="<%= data.src %>" alt="QR Code" />
+            <% } %>
+          </div>
         </div>
 
-        <div class="terms-title">Terms and Conditions:</div>
-        <ol class="terms-list">
-          <li>This is a computer generated printout and no signature is required.</li>
-          <li>Incorrect mentioning of vehicle class or seating capacity may lead to penal action.</li>
-        </ol>
+        <!-- Details in 2-column layout -->
+        <table class="kv">
+          <colgroup>
+            <col class="labelL" />
+            <col class="valueL" />
+            <col class="labelR" />
+            <col class="valueR" />
+          </colgroup>
 
-        <div class="bottom-note">
-          Scan the QR code for genuinity of the receipt, It should land at
-          <span class="url">https://kms.parivahan.gov.in</span>
+          <tr>
+            <td class="label">Registration No.</td>
+            <td class="value">: <%= data.vehicleNo || '' %></td>
+            <td class="label">Receipt No.</td>
+            <td class="value">: <%= data.receiptNo || '' %></td>
+          </tr>
+
+          <tr>
+            <td class="label">Payment Date</td>
+            <td class="value">: <%= data.paymentDate || '' %></td>
+            <td class="label">Owner Name</td>
+            <td class="value">: <%= data.ownerName || '' %></td>
+          </tr>
+
+          <tr>
+            <td class="label">Chassis No.</td>
+            <td class="value">: <%= data.chassisNo || '' %></td>
+            <td class="label">Tax Mode</td>
+            <td class="value">: <%= data.taxMode || '' %></td>
+          </tr>
+
+          <tr>
+            <td class="label">Vehicle Type</td>
+            <td class="value">: <%= data.vehiclePermitType || '' %></td>
+            <td class="label">Vehicle Class</td>
+            <td class="value">: <%= data.vehicleClass || '' %></td>
+          </tr>
+
+          <tr>
+            <td class="label">Vehicle Category</td>
+            <td class="value">: <%= data.vehicleCategory || '' %></td>
+            <td class="label">Mobile No.</td>
+            <td class="value">: <%= data.mobileNo || '' %></td>
+          </tr>
+
+          <tr>
+            <td class="label">Checkpost Name</td>
+            <td class="value">: <%= data.checkpostName || data.borderBarrier || '' %></td>
+            <td class="label">Seating Capacity</td>
+            <td class="value">: <%= data.seatingCapacityExcludingDriver || data.seatingCapacity || '' %></td>
+          </tr>
+
+          <tr>
+            <td class="label">Sleeper Cap</td>
+            <td class="value">: <%= data.sleeperCap || data.sleeperCapacityExcludingDriver || '' %></td>
+            <td class="label">Bank Ref. No.</td>
+            <td class="value">: <%= data.bankRefNo || data.apBankRefNo || data.rjBankRefNo || 'NA' %></td>
+          </tr>
+
+          <tr>
+            <td class="label">Payment Mode</td>
+            <td class="value">: <%= data.paymentMode || '' %></td>
+            <td class="label">Service Type</td>
+            <td class="value">: <%= data.serviceType || 'NOT APPLICABLE' %></td>
+          </tr>
+
+          <tr>
+            <td class="label">Permit Type</td>
+            <td class="value">: <%= data.permitType || '' %></td>
+            <td class="label">Permit Category</td>
+            <td class="value">: <%= data.permitCategory || '' %></td>
+          </tr>
+        </table>
+
+        <!-- Tax table -->
+        <table class="tax">
+          <thead>
+            <tr>
+              <th>Tax/Fee Particular</th>
+              <th>Tax/Fees</th>
+              <th>Fine</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>MV Tax ( <%= data.taxFrom %> to <%= data.taxTo %> )</b></td>
+              <td class="num"><%= data.totalAmount %></td>
+              <td class="num">0</td>
+              <td class="num"><%= data.totalAmount %></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Grand Total + Terms exactly like image -->
+        <div class="grand">
+          <div class="gt">
+            Grand Total : <%= data.totalAmount %>/- <%= (data.totalAmountInWord || '') %> Only
+          </div>
+
+          <div class="note-title">Note :</div>
+          <div class="terms-title">Terms and Conditions:</div>
+          <ol class="terms-list">
+            <li>This is a computer generated printout and no signature is required.</li>
+            <li>Should not carry unlawful/unaccompanied goods.</li>
+            <li>If any false information/discrepancies are found at later, necessary action will be taken against the vehicle owner/driver.</li>
+          </ol>
+
+          <div class="bottom-note">
+            Scan the QR code for genuinity of the receipt, It should land at
+            <span class="url">https://kms.parivahan.gov.in</span>
+            site. In case the URL is different, then receipt could be a fake one, please raise a complain.
+          </div>
         </div>
+
       </div>
-
     </div>
   </div>
-</div>
 </body>
 </html>
