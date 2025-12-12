@@ -12,194 +12,174 @@
     <% } %>
 
     <style>
-      * { box-sizing: border-box; }
+  * { box-sizing: border-box; }
 
-      @page { size: A4; margin: 0; }
+  @page { size: A4; margin: 0; }
 
-      html, body {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        background: #fff;
-        font-family: "Roboto", Arial, Helvetica, sans-serif;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-        color: #000;
-      }
+  html, body {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    font-family: "Roboto", Arial, Helvetica, sans-serif !important;
 
-      /* Center in browser preview */
-      .page {
-        width: 100vw;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        background: #fff;
-      }
+    /* make receipt look bigger */
+    font-size: 14.5px !important;
+    font-weight: 500 !important;
+    color: #000 !important;
+  }
 
-      /* A4 Canvas */
-      .main {
-        width: 210mm;
-        min-height: 297mm;
-        margin: 0 auto;
-        padding: 12mm 15mm;
-        position: relative;
-        overflow: hidden;
-        background: #fff;
-      }
+  /* CENTER RECEIPT ON SCREEN */
+  body {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+  }
 
-      /* Background vehicle/date pattern (FULL CONTENT AREA) */
-      .bg-repeat {
-        position: absolute;
-        top: 12mm;
-        left: 15mm;
-        right: 15mm;
-        bottom: 12mm;
-        z-index: 0;
-        opacity: 0.10;
-        pointer-events: none;
-        font-size: 13px;
-        line-height: 1.45;
-      }
-      .bg-repeat p {
-        margin: 0;
-        display: flex;
-        justify-content: space-between;
-        white-space: nowrap;
-        font-weight: 600;
-      }
+  /* CENTER RECEIPT IN PDF/PRINT TOO */
+  @media print {
+    body {
+      display: block !important;
+    }
+    .main {
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+    a[href]:after { content: "" !important; }
+  }
 
-      /* Watermark forced center (slightly up) */
-      .watermark {
-        position: absolute;
-        top: 44%;              /* tweak 42%–46% if needed */
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 380px;
-        height: auto;
-        opacity: 0.12;
-        z-index: 1;
-        pointer-events: none;
-      }
+  /* A4 canvas - fixed mm (not %) */
+  .main {
+    width: 210mm !important;
+    min-height: 297mm !important;
 
-      /* Foreground */
-      .content {
-        position: relative;
-        z-index: 5;
-      }
+    /* less padding = bigger content */
+    padding: 8mm 10mm !important;
 
-      /* HEADER (Daman style) */
-      .header {
-        display: table;
-        width: 100%;
-        margin-bottom: 10px;
-      }
-      .header-cell {
-        display: table-cell;
-        vertical-align: top;
-      }
+    margin: 0 auto !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
 
-      .header-logo { width: 22%; }
-      .header-logo img {
-        width: 95px;
-        height: auto;
-        display: block;
-      }
+  /* ---------- BACKGROUND VEHICLE/DATE (YOU ARE USING .bg-repeat IN HTML) ---------- */
+  .bg-repeat{
+    position: absolute !important;
+    top: 8mm !important;
+    left: 10mm !important;
+    right: 10mm !important;
+    bottom: 8mm !important;
+    z-index: 0 !important;
+    opacity: 0.10 !important;
+    pointer-events: none !important;
+    font-size: 13.5px !important;
+    line-height: 1.45 !important;
+  }
+  .bg-repeat p{
+    margin: 0 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    white-space: nowrap !important;
+    font-weight: 600 !important;
+  }
 
-      .header-center {
-        width: 56%;
-        text-align: center;
-        line-height: 1.35;
-        padding-top: 4px;
-      }
-      .header-center .gov {
-        font-size: 16px;
-        font-weight: 900;
-        text-transform: uppercase;
-        text-decoration: underline;
-      }
-      .header-center .dept {
-        font-size: 14px;
-        font-weight: 700;
-      }
-      .header-center .title {
-        font-size: 14px;
-        font-weight: 700;
-      }
+  /* ---------- WATERMARK (FORCE CENTER + SLIGHT UP) ---------- */
+  .watermark{
+    position: absolute !important;
+    top: 44% !important;      /* move up/down: 42%–46% */
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 420px !important;  /* bigger watermark */
+    height: auto !important;
+    opacity: 0.12 !important;
+    z-index: 1 !important;
+    pointer-events: none !important;
+  }
 
-      .header-qr { width: 22%; text-align: right; }
-      .header-qr img {
-        width: 130px;
-        height: 130px;
-        object-fit: contain;
-        display: inline-block;
-      }
+  /* FOREGROUND */
+  .content{
+    position: relative !important;
+    z-index: 5 !important;
+  }
 
-      /* DETAILS TABLE (bold like Daman) */
-      table.rj.ap.mt {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13.5px;
-        margin-top: 6px;
-      }
-      table.rj.ap.mt td {
-        padding: 4px 4px;
-        vertical-align: top;
-      }
-      table.rj.ap.mt td:nth-child(1),
-      table.rj.ap.mt td:nth-child(3) {
-        font-weight: 800;
-        white-space: nowrap;
-      }
-      table.rj.ap.mt td:nth-child(2),
-      table.rj.ap.mt td:nth-child(4) {
-        font-weight: 900;
-        word-break: break-word;
-      }
+  /* ---------- HEADER (logo | title | QR) ---------- */
+  .header{
+    display: table !important;
+    width: 100% !important;
+    margin-bottom: 12px !important;
+  }
+  .header-cell{
+    display: table-cell !important;
+    vertical-align: top !important;
+  }
+  .header-logo{ width: 22% !important; }
+  .header-logo img{ width: 30mm !important; height: auto !important; }
 
-      /* TAX TABLE (Daman style - blue border) */
-      .content__money_ap {
-        margin-top: 14px;
-        font-size: 13px;
-      }
+  .header-center{
+    width: 56% !important;
+    text-align: center !important;
+    line-height: 1.35 !important;
+  }
+  .header-center .gov{
+    font-size: 16.5px !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    text-decoration: underline !important;
+  }
+  .header-center .dept{
+    font-size: 14px !important;
+    font-weight: 700 !important;
+  }
+  .header-center .title{
+    font-size: 14px !important;
+    font-weight: 700 !important;
+  }
 
-      .content__money-r-ap {
-        display: flex;
-        width: 100%;
-      }
+  .header-qr{ width: 22% !important; text-align: right !important; }
+  .header-qr img{ width: 36mm !important; height: 36mm !important; object-fit: contain !important; }
 
-      .content__money-r-ap > div {
-        border: 1px solid #0070c0;
-        padding: 6px 6px;
-        font-weight: 800;
-      }
+  /* ---------- DETAILS TABLE (YOUR table.rj.ap.mt) ---------- */
+  table.rj.ap.mt{
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 14.5px !important;
+  }
+  table.rj.ap.mt td{
+    padding: 4px 4px !important;
+    vertical-align: top !important;
+  }
+  table.rj.ap.mt td:nth-child(1),
+  table.rj.ap.mt td:nth-child(3){
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+  }
+  table.rj.ap.mt td:nth-child(2),
+  table.rj.ap.mt td:nth-child(4){
+    font-weight: 900 !important;
+    word-break: break-word !important;
+  }
 
-      .content__money-r-ap.header-row > div {
-        font-weight: 900;
-        text-align: center;
-      }
+  /* ---------- MONEY ROWS (YOUR .content__money_ap flex rows) ---------- */
+  .content__money_ap{ margin-top: 14px !important; }
 
-      .m1-ap { width: 58%; }
-      .m2-ap, .m3-ap, .m4-ap { width: 14%; text-align: right; }
+  .content__money-r-ap{
+    display: flex !important;
+    width: 100% !important;
+    border-bottom: 1px solid #000 !important;
+    padding: 6px 0 !important;
+    font-size: 14px !important;
+  }
+  .content__money-r-ap:last-child{ border-bottom: none !important; }
 
-      /* Bottom content */
-      .content__grand {
-        margin-top: 10px;
-        font-size: 13px;
-      }
+  .m1-ap{ width: 55% !important; font-weight: 800 !important; }
+  .m2-ap,.m3-ap,.m4-ap{ width: 15% !important; text-align: center !important; font-weight: 900 !important; }
 
-      .main__warning {
-        margin-top: 10px;
-        font-size: 14px;
-        line-height: 20px;
-        font-weight: 700;
-      }
+  /* ---------- BOTTOM TEXT ---------- */
+  .content__grand{ margin-top: 14px !important; font-size: 14px !important; }
+</style>
 
-      /* print: remove url suffix */
-      @media print {
-        a[href]:after { content: "" !important; }
-      }
-    </style>
   </head>
 
   <body>
