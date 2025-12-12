@@ -11,186 +11,168 @@
       <link rel="stylesheet" href="<%= data.host %>/css/cssFix.css" />
     <% } %>
 
-    <style>
+   <style>
   * { box-sizing: border-box; }
 
   @page { size: A4; margin: 0; }
 
-  html, body { width: 100%; height: 100%; }
-
-  body{
-    margin: 0;
-    padding: 0;
-    background: #fff;
-    font-family: "Roboto", Arial, Helvetica, sans-serif;
-    color: #000;
-
-    /* ✅ make the A4 canvas CENTER in browser + PDF */
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-
+  html, body{
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    transform: none !important;
+    zoom: 1 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-
-    font-size: 14px;     /* ✅ slightly bigger like Daman */
-    font-weight: 500;
+    font-family: "Roboto", Arial, Helvetica, sans-serif !important;
+    font-size: 13.5px !important;     /* big like Daman */
+    font-weight: 500 !important;
+    color: #000 !important;
   }
 
-  /* ✅ A4 canvas (fixed), always centered */
+  /* If you have a wrapper .page, this centers in browser */
+  .page{
+    width: 100vw !important;
+    min-height: 100vh !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    background: #fff !important;
+  }
+
+  /* A4 canvas (MUST be fixed mm, not %) */
   .main{
-    width: 210mm;
-    min-height: 297mm;
-    padding: 12mm 15mm;        /* same as Daman/Puducherry */
-    position: relative;
-    overflow: hidden;
-    margin: 0 auto;
+    width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 auto !important;
+    padding: 12mm 15mm !important;
+    position: relative !important;
+    overflow: hidden !important;
+    transform: none !important;
+    zoom: 1 !important;
   }
 
-  /* ---------- BACKGROUND VEHICLE / DATE (fit inside content area) ---------- */
+  /* ---------- BACKGROUND VEHICLE/DATE (inside content area) ---------- */
   .content__back{
-    position: absolute;
-    top: 12mm;
-    left: 15mm;
-    right: 15mm;
-    bottom: 12mm;
-    z-index: 0;
-    opacity: 0.10;
-    pointer-events: none;
-
-    font-size: 13px;
-    line-height: 1.45;
+    position: absolute !important;
+    top: 12mm !important;
+    left: 15mm !important;
+    right: 15mm !important;
+    bottom: 12mm !important;
+    z-index: 0 !important;
+    opacity: 0.10 !important;
+    pointer-events: none !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
   }
   .content__back p{
-    margin: 0;
-    display: flex;
-    justify-content: space-between;
-    white-space: nowrap;
-    font-weight: 600;
+    margin: 0 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    white-space: nowrap !important;
+    font-weight: 600 !important;
   }
 
-  /* ---------- WATERMARK (force center + slightly UP) ---------- */
+  /* ---------- WATERMARK (CENTER + SLIGHT UP) ---------- */
   .logo_ap_main{
-    position: absolute;
-    top: 44%;                 /* ✅ move up (tweak 42–46%) */
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1;
-    opacity: 0.12;
-    pointer-events: none;
-
-    /* stop print/layout “nudges” */
-    will-change: transform;
-    transform-origin: center center;
+    position: absolute !important;
+    top: 44% !important;              /* move UP (try 42%–46%) */
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 1 !important;
+    opacity: 0.12 !important;
+    pointer-events: none !important;
+    display: block !important;
   }
   .logo_ap_main img{
-    width: 380px;             /* ✅ bigger watermark like Daman */
-    height: auto;
-    display: block;
+    width: 380px !important;
+    height: auto !important;
+    display: block !important;
   }
 
-  /* ---------- QR + SMALL LOGO (use mm so they match A4 padding) ---------- */
+  /* ---------- QR TOP-RIGHT ---------- */
   .qr-image-ap{
-    position: absolute;
-    top: 12mm;
-    right: 15mm;
-    width: 34mm;              /* ~128px */
-    height: 34mm;
-    object-fit: contain;
-    z-index: 5;
+    position: absolute !important;
+    top: 12mm !important;
+    right: 15mm !important;
+    width: 34mm !important;
+    height: 34mm !important;
+    object-fit: contain !important;
+    z-index: 5 !important;
   }
 
+  /* ---------- SMALL LOGO TOP-LEFT ---------- */
   .logo_ap{
-    position: absolute;
-    top: 12mm;
-    left: 15mm;
-    z-index: 5;
+    position: absolute !important;
+    top: 12mm !important;
+    left: 15mm !important;
+    z-index: 5 !important;
   }
   .logo_ap img{
-    width: 26mm;              /* ~98px */
-    height: auto;
-    display: block;
+    width: 26mm !important;
+    height: auto !important;
+    display: block !important;
   }
 
-  /* ---------- TITLE CENTER (no overlap with logo/QR) ---------- */
+  /* ---------- HEADER CENTER (NO OVERLAP) ---------- */
   .ap-header{
-    position: absolute;
-    top: 13mm;
-    left: 0;
-    right: 0;
-    text-align: center;
-    z-index: 5;
-    line-height: 1.35;
+    position: absolute !important;
+    top: 13mm !important;
+    left: 0 !important;
+    right: 0 !important;
+    text-align: center !important;
+    z-index: 5 !important;
+    line-height: 1.35 !important;
   }
   .ap-header h3{
-    margin: 0 0 2px 0;
-    font-size: 16px;
-    font-weight: 900;
-    text-transform: uppercase;
-    text-decoration: underline;
+    margin: 0 0 2px 0 !important;
+    font-size: 16px !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    text-decoration: underline !important;
   }
   .ap-header p{
-    margin: 0;
-    font-size: 13.5px;
-    font-weight: 700;
+    margin: 0 !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
   }
 
-  /* ✅ push details down so NOTHING overlaps header */
+  /* Push content down below logo/title/QR */
   .content{
-    position: relative;
-    z-index: 6;
-    margin-top: 48mm;         /* adjust if needed (46–52mm) */
+    position: relative !important;
+    z-index: 6 !important;
+    margin-top: 48mm !important;      /* increase if still touching header */
   }
 
-  /* ---------- DETAILS TABLE (make labels/values bold like Daman) ---------- */
+  /* DETAILS TABLE: bold like Daman */
   table.rj.ap.mt{
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13.5px;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 13.5px !important;
   }
   table.rj.ap.mt td{
-    padding: 4px 4px;
-    vertical-align: top;
+    padding: 4px 4px !important;
+    vertical-align: top !important;
   }
   table.rj.ap.mt td:nth-child(1),
   table.rj.ap.mt td:nth-child(3){
-    font-weight: 800;         /* labels */
-    white-space: nowrap;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
   }
   table.rj.ap.mt td:nth-child(2),
   table.rj.ap.mt td:nth-child(4){
-    font-weight: 900;         /* values */
-    word-break: break-word;
+    font-weight: 900 !important;
+    word-break: break-word !important;
   }
 
-  /* ---------- TAX ROWS (keep your existing markup, just make it bolder) ---------- */
-  .content__money_ap{
-    margin-top: 16px;
-    font-size: 13.5px;
-    font-weight: 700;
-  }
-  .content__money-r-ap{
-    display: flex;
-    width: 100%;
-    border-bottom: 1px solid #000;
-    padding: 6px 0;
-  }
-  .content__money-r-ap:last-child{ border-bottom: none; }
-  .m1-ap{ width: 55%; font-weight: 800; }
-  .m2-ap,.m3-ap,.m4-ap{ width: 15%; text-align: center; font-weight: 900; }
-
-  /* ---------- BOTTOM ---------- */
-  .content__grand{
-    margin-top: 16px;
-    font-size: 13.5px;
-  }
-  .content__grand b{ font-weight: 900; }
-
-  /* remove auto “(url)” after links */
+  /* remove link suffix */
   @media print{
     a[href]:after{ content:"" !important; }
   }
 </style>
+
 
   </head>
 
