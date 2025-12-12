@@ -8,7 +8,7 @@
     />
     <link rel="stylesheet" href="<%= data.host %>/css/style.css" />
     <% if (data.cssFix) { %>
-    <link rel="stylesheet" href="<%= data.host %>/css/cssFix.css" />
+      <link rel="stylesheet" href="<%= data.host %>/css/cssFix.css" />
     <% } %>
 
     <style>
@@ -17,6 +17,8 @@
       @page { size: A4; margin: 0; }
 
       html, body {
+        width: 100%;
+        height: 100%;
         margin: 0;
         padding: 0;
         background: #fff;
@@ -24,37 +26,37 @@
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         color: #000;
-        font-size: 14px;           /* ✅ slightly bigger */
+        font-size: 15px; /* ✅ bigger like Daman */
         font-weight: 500;
       }
 
-      /* ✅ IMPORTANT:
-         Do NOT use flex centering wrapper for print/PDF.
-         It causes left shift / scaling issues in Chrome print. */
+      /* Center in browser preview */
       .page {
-        width: auto;
-        height: auto;
+        width: 100vw;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
         background: #fff;
       }
 
-      /* A4 Canvas (fixed mm - print safe) */
+      /* ✅ A4 Canvas (bigger usable area) */
       .main {
         width: 210mm;
         min-height: 297mm;
-        margin: 0 auto;            /* ✅ real PDF centering */
-        padding: 12mm 15mm;
+        margin: 0 auto;
+        padding: 8mm 10mm; /* ✅ was 12mm 15mm */
         position: relative;
         overflow: hidden;
         background: #fff;
       }
 
-      /* Background vehicle/date pattern (FULL CONTENT AREA) */
+      /* ✅ Background vehicle/date pattern (match new padding) */
       .bg-repeat {
         position: absolute;
-        top: 12mm;
-        left: 15mm;
-        right: 15mm;
-        bottom: 12mm;
+        top: 8mm;
+        left: 10mm;
+        right: 10mm;
+        bottom: 8mm;
         z-index: 0;
         opacity: 0.10;
         pointer-events: none;
@@ -69,13 +71,13 @@
         font-weight: 600;
       }
 
-      /* Watermark forced center (slightly up) */
+      /* ✅ Watermark forced center (slightly up + bigger) */
       .watermark {
         position: absolute;
-        top: 44%;
+        top: 45%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 420px;              /* ✅ a bit bigger */
+        width: 460px; /* ✅ bigger */
         height: auto;
         opacity: 0.12;
         z-index: 1;
@@ -135,11 +137,11 @@
         display: inline-block;
       }
 
-      /* DETAILS TABLE (bold like Daman) */
+      /* ✅ DETAILS TABLE (slightly bigger) */
       table.rj.ap.mt {
         width: 100%;
         border-collapse: collapse;
-        font-size: 14px;          /* ✅ bigger */
+        font-size: 14.5px; /* ✅ was 13.5px */
         margin-top: 6px;
       }
       table.rj.ap.mt td {
@@ -160,7 +162,7 @@
       /* TAX TABLE (blue border) */
       .content__money_ap {
         margin-top: 14px;
-        font-size: 13.5px;
+        font-size: 13px;
       }
 
       .content__money-r-ap {
@@ -185,7 +187,7 @@
       /* Bottom content */
       .content__grand {
         margin-top: 10px;
-        font-size: 13.5px;
+        font-size: 13px;
       }
 
       .main__warning {
@@ -195,16 +197,14 @@
         font-weight: 700;
       }
 
-      /* ✅ PRINT FIXES (PDF alignment + fill page) */
+      /* ✅ PRINT: remove url suffix + scale to fill A4 */
       @media print {
         a[href]:after { content: "" !important; }
 
-        /* Force body to not add any extra layout shifts */
         html, body { width: 210mm; }
 
-        /* Slightly scale up so it fills page like Daman */
-        .main {
-          transform: scale(1.05);
+        .main{
+          transform: scale(1.12);     /* ✅ fill page more */
           transform-origin: top center;
         }
       }
