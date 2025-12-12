@@ -8,12 +8,13 @@
     />
     <link rel="stylesheet" href="<%= data.host %>/css/style.css" />
     <% if (data.cssFix) { %>
-    <link rel="stylesheet" href="<%= data.host %>/css/cssFix.css" />
+      <link rel="stylesheet" href="<%= data.host %>/css/cssFix.css" />
     <% } %>
 
     <style>
       * { box-sizing: border-box; }
 
+      /* ✅ A4 with no margins */
       @page { size: A4; margin: 0; }
 
       html, body {
@@ -24,37 +25,46 @@
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         color: #000;
-        font-size: 14px;           /* ✅ slightly bigger */
+        font-size: 15px;     /* ✅ bigger */
         font-weight: 500;
       }
 
-      /* ✅ IMPORTANT:
-         Do NOT use flex centering wrapper for print/PDF.
-         It causes left shift / scaling issues in Chrome print. */
-      .page {
-        width: auto;
-        height: auto;
-        background: #fff;
+      /* ✅ Screen preview center ONLY (not print) */
+      @media screen {
+        .page {
+          width: 100vw;
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          background: #fff;
+        }
       }
 
-      /* A4 Canvas (fixed mm - print safe) */
+      /* ✅ Print/PDF: DO NOT use flex (causes left shift) */
+      @media print {
+        .page { display: block !important; }
+        html, body { width: 210mm; }
+      }
+
+      /* ✅ A4 Canvas */
       .main {
         width: 210mm;
         min-height: 297mm;
-        margin: 0 auto;            /* ✅ real PDF centering */
-        padding: 12mm 15mm;
+        margin: 0 auto;          /* ✅ PDF center */
+        padding: 8mm 10mm;       /* ✅ less padding = bigger receipt */
         position: relative;
         overflow: hidden;
         background: #fff;
       }
 
-      /* Background vehicle/date pattern (FULL CONTENT AREA) */
+      /* Background vehicle/date pattern (match padding) */
       .bg-repeat {
         position: absolute;
-        top: 12mm;
-        left: 15mm;
-        right: 15mm;
-        bottom: 12mm;
+        top: 8mm;
+        left: 10mm;
+        right: 10mm;
+        bottom: 8mm;
         z-index: 0;
         opacity: 0.10;
         pointer-events: none;
@@ -69,13 +79,13 @@
         font-weight: 600;
       }
 
-      /* Watermark forced center (slightly up) */
+      /* Watermark */
       .watermark {
         position: absolute;
-        top: 44%;
+        top: 45%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 420px;              /* ✅ a bit bigger */
+        width: 440px;           /* ✅ bigger watermark */
         height: auto;
         opacity: 0.12;
         z-index: 1;
@@ -88,7 +98,7 @@
         z-index: 5;
       }
 
-      /* HEADER (Daman style) */
+      /* HEADER */
       .header {
         display: table;
         width: 100%;
@@ -135,11 +145,11 @@
         display: inline-block;
       }
 
-      /* DETAILS TABLE (bold like Daman) */
+      /* DETAILS TABLE */
       table.rj.ap.mt {
         width: 100%;
         border-collapse: collapse;
-        font-size: 14px;          /* ✅ bigger */
+        font-size: 14.5px;     /* ✅ bigger */
         margin-top: 6px;
       }
       table.rj.ap.mt td {
@@ -157,7 +167,7 @@
         word-break: break-word;
       }
 
-      /* TAX TABLE (blue border) */
+      /* TAX TABLE */
       .content__money_ap {
         margin-top: 14px;
         font-size: 13.5px;
@@ -195,18 +205,9 @@
         font-weight: 700;
       }
 
-      /* ✅ PRINT FIXES (PDF alignment + fill page) */
+      /* Print: remove link suffix */
       @media print {
         a[href]:after { content: "" !important; }
-
-        /* Force body to not add any extra layout shifts */
-        html, body { width: 210mm; }
-
-        /* Slightly scale up so it fills page like Daman */
-        .main {
-          transform: scale(1.05);
-          transform-origin: top center;
-        }
       }
     </style>
   </head>
