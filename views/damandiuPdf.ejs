@@ -68,7 +68,7 @@
     /* ---------- WATERMARK (EXACT CENTER BEHIND RECEIPT) ---------- */
     .watermark {
       position: absolute;
-      top: 50%;
+      top: calc(50% - 35px);   /* ⬅️ move watermark up */
       left: 50%;
       transform: translate(-50%, -50%);
       width: 380px;
@@ -76,6 +76,7 @@
       z-index: 1;
       pointer-events: none;
     }
+
 
     /* foreground content */
     .content {
