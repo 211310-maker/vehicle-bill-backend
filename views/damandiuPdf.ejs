@@ -9,217 +9,228 @@
     rel="stylesheet"
   />
 
-  <style>
-    * { box-sizing: border-box; }
+<style>
+  * { box-sizing: border-box; }
 
-    @page { size: A4; margin: 0; }
+  @page {
+    size: A4;
+    margin: 0;
+  }
 
-    body {
-      margin: 0;
-      padding: 0;
-      background: #fff;
-      font-family: "Roboto", Arial, Helvetica, sans-serif;
-      color: #000;
-      font-size: 12px;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
+  body {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    font-family: "Roboto", Arial, Helvetica, sans-serif;
+    color: #000;
+    font-size: 12px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 
-    /* center the A4 sheet in browser */
-    .page {
-      width: 100vw;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      background: #fff;
-    }
+  /* center page in browser */
+  .page {
+    width: 100vw;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    background: #fff;
+  }
 
-    /* A4 canvas */
-    .main {
-      width: 210mm;
-      min-height: 297mm;
-      padding: 12mm 15mm;
-      position: relative;
-      overflow: hidden;
-    }
+  /* ---------- A4 CANVAS ---------- */
+  .main {
+    width: 210mm;
+    height: 297mm;                 /* 🔒 force exact A4 height */
+    position: relative;
+    overflow: hidden;
+  }
 
-    /* ---------- BACKGROUND TEXT PATTERN ---------- */
-    .bg-repeat {
-      position: absolute;
-      top: 12mm;
-      left: 15mm;
-      right: 15mm;
-      bottom: 12mm;
-      z-index: 0;
-      opacity: 0.10;
-      font-size: 14px;
-      line-height: 1.45;
-      pointer-events: none;
-    }
+  /* ---------- BACKGROUND VEHICLE / DATE TEXT ---------- */
+  .bg-repeat {
+    position: absolute;
+    inset: 0;                      /* 🔒 full page */
+    padding: 12mm 15mm;            /* safe area */
+    z-index: 0;
+    opacity: 0.10;
+    font-size: 14px;
+    line-height: 1.45;
+    pointer-events: none;
+  }
 
-    .bg-repeat p {
-      margin: 0;
-      display: flex;
-      justify-content: space-between;
-      white-space: nowrap;
-      font-weight: 500;
-    }
+  .bg-repeat p {
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    white-space: nowrap;
+    font-weight: 500;
+  }
 
-    /* foreground content */
-    .content {
-      position: relative;
-      z-index: 3;
-    }
+  /* ---------- WATERMARK (FORCED CENTER + UP) ---------- */
+  .watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -65%); /* 🔒 push UP */
+    width: 360px;
+    opacity: 0.12;
+    z-index: 0;
+    pointer-events: none;
+    will-change: transform;
+  }
 
+  /* ---------- FOREGROUND CONTENT ---------- */
+  .content {
+    position: relative;
+    z-index: 3;
+    padding: 12mm 15mm;            /* moved padding here */
+  }
 
-    .watermark {
-      position: absolute;
+  /* ---------- HEADER ---------- */
+  .header {
+    display: table;
+    width: 100%;
+    margin-bottom: 10px;
+  }
 
-      /* 🔒 FORCE exact page center */
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+  .header-cell {
+    display: table-cell;
+    vertical-align: top;
+  }
 
-      width: 360px;            /* adjust size if needed */
-      opacity: 0.12;
+  .header-logo { width: 22%; }
+  .header-logo img { width: 95px; height: auto; }
 
-      z-index: 0;              /* behind everything */
-      pointer-events: none;
+  .header-center {
+    width: 56%;
+    text-align: center;
+    line-height: 1.35;
+    padding-top: 4px;
+  }
 
-      /* 🧠 prevent browser shifting */
-      will-change: transform;
-    }
+  .header-center .gov {
+    font-size: 15px;
+    font-weight: 900;
+    text-transform: uppercase;
+    text-decoration: underline;
+  }
 
+  .header-center .dept,
+  .header-center .title {
+    font-size: 13px;
+    font-weight: 700;
+  }
 
-    /* ---------- HEADER (logo | title | QR) ---------- */
-    .header {
-      display: table;
-      width: 100%;
-      margin-bottom: 10px;
-    }
-    .header-cell {
-      display: table-cell;
-      vertical-align: top;
-    }
-    .header-logo { width: 22%; }
-    .header-logo img { width: 95px; height: auto; }
+  .header-qr {
+    width: 22%;
+    text-align: right;
+  }
 
-    .header-center {
-      width: 56%;
-      text-align: center;
-      line-height: 1.35;
-      padding-top: 4px;
-    }
-    .header-center .gov {
-      font-size: 15px;
-      font-weight: 900;
-      text-transform: uppercase;
-      text-decoration: underline; /* matches screenshot */
-    }
-    .header-center .dept {
-      font-size: 13px;
-      font-weight: 700;
-    }
-    .header-center .title {
-      font-size: 13px;
-      font-weight: 700;
-    }
+  .header-qr img {
+    width: 130px;
+    height: 130px;
+    object-fit: contain;
+  }
 
-    .header-qr { width: 22%; text-align: right; }
-    .header-qr img { width: 130px; height: 130px; object-fit: contain; }
+  /* ---------- DETAILS TABLE ---------- */
+  table.kv {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin-top: 6px;
+    font-size: 12.5px;
+  }
 
-    /* ---------- DETAILS (2 COLUMN KV LIKE IMAGE) ---------- */
-    table.kv {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-      margin-top: 6px;
-      font-size: 12.5px;
-    }
-    table.kv td {
-      padding: 3px 2px;
-      vertical-align: top;
-    }
+  table.kv td {
+    padding: 3px 2px;
+    vertical-align: top;
+  }
 
-    td.label {
-      white-space: nowrap;
-      font-weight: 700;
-    }
-    td.value {
-      font-weight: 800;
-      word-wrap: break-word;
-      white-space: normal;
-    }
+  td.label {
+    white-space: nowrap;
+    font-weight: 700;
+  }
 
-    /* Give fixed widths like Puducherry */
-    table.kv col.labelL { width: 22%; }
-    table.kv col.valueL { width: 28%; }
-    table.kv col.labelR { width: 22%; }
-    table.kv col.valueR { width: 28%; }
+  td.value {
+    font-weight: 800;
+    white-space: normal;
+    word-wrap: break-word;
+  }
 
-    /* ---------- TAX TABLE ---------- */
-    table.tax {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 14px;
-      font-size: 12px;
-    }
-    table.tax th, table.tax td {
-      border: 1px solid #0070c0;
-      padding: 5px 6px;
-    }
-    table.tax th {
-      text-align: center;
-      font-weight: 900;
-    }
-    table.tax td.num {
-      text-align: right;
-      font-weight: 800;
-      width: 12%;
-    }
+  table.kv col.labelL { width: 22%; }
+  table.kv col.valueL { width: 28%; }
+  table.kv col.labelR { width: 22%; }
+  table.kv col.valueR { width: 28%; }
 
-    /* ---------- BOTTOM TEXT ---------- */
-    .grand {
-      margin-top: 8px;
-      font-size: 12.5px;
-    }
-    .grand .gt { font-weight: 900; }
+  /* ---------- TAX TABLE ---------- */
+  table.tax {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 14px;
+    font-size: 12px;
+  }
 
-    .note-title {
-      margin-top: 4px;
-      font-weight: 900;
-    }
+  table.tax th,
+  table.tax td {
+    border: 1px solid #0070c0;
+    padding: 5px 6px;
+  }
 
-    .terms-title {
-      margin-top: 2px;
-      font-weight: 900;
-    }
+  table.tax th {
+    text-align: center;
+    font-weight: 900;
+  }
 
-    .terms-list {
-      margin: 2px 0 0 18px;
-      padding: 0;
-      font-size: 12px;
-    }
-    .terms-list li { margin-bottom: 2px; }
+  table.tax td.num {
+    text-align: right;
+    font-weight: 800;
+    width: 12%;
+  }
 
-    .bottom-note {
-      margin-top: 12px;
-      font-size: 22px;     /* matches your image big bold line */
-      font-weight: 900;
-      line-height: 1.25;
-    }
-    .bottom-note .url {
-      color: #0b57d0;
-      text-decoration: underline;
-      font-weight: 900;
-    }
+  /* ---------- FOOTER TEXT ---------- */
+  .grand {
+    margin-top: 8px;
+    font-size: 12.5px;
+  }
 
-    /* IMPORTANT: CSS cannot remove Chrome print header/footer.
-       Must set displayHeaderFooter:false in Puppeteer. */
-    @media print {
-      a[href]:after { content: "" !important; }
+  .grand .gt { font-weight: 900; }
+
+  .note-title,
+  .terms-title {
+    margin-top: 4px;
+    font-weight: 900;
+  }
+
+  .terms-list {
+    margin: 2px 0 0 18px;
+    padding: 0;
+    font-size: 12px;
+  }
+
+  .terms-list li {
+    margin-bottom: 2px;
+  }
+
+  .bottom-note {
+    margin-top: 12px;
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.25;
+  }
+
+  .bottom-note .url {
+    color: #0b57d0;
+    text-decoration: underline;
+    font-weight: 900;
+  }
+
+  /* ---------- PRINT FIX ---------- */
+  @media print {
+    a[href]:after {
+      content: "" !important;
     }
-  </style>
+  }
+</style>
+
 </head>
 
 <body>
