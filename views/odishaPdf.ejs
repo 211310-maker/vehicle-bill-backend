@@ -65,8 +65,8 @@
     }
 
     .main .logo_od_main img {
-      width: 520px;               /* bigger watermark */
-      max-width: 70%;
+      width: 650px;  !important;              /* bigger watermark */
+      max-width: 80%; !important;
       height: auto;
     }
 
@@ -88,6 +88,22 @@
     .content__top {
       text-align: center;
     }
+
+     @page {
+    margin: 0 !important;        /* removes header/footer space */
+  }
+
+  @media print {
+    a[href]:after {
+      content: "" !important;    /* removes printed link URLs */
+    }
+
+    body {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+  }
+    
   </style>
 </head>
 
