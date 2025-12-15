@@ -397,7 +397,7 @@
 
           const svcFrom = data.serviceFrom || mvTaxFrom;
           const svcTo   = data.serviceTo   || mvTaxTo;
-          const svcAmount = toNumber(data.serviceAmount);
+          const svcAmount = toNumber(data.serviceAmount || data.serviceUserChargeAmount);
           const svcFine   = toNumber(data.serviceFine);
           const svcTotal  = (data.serviceTotal != null && data.serviceTotal !== '')
             ? toNumber(data.serviceTotal)
