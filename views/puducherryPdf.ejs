@@ -45,11 +45,11 @@
       /* ✅ centered watermark (MORE VISIBLE) */
       .watermark {
         position: absolute;
-        top: 220px;        /* was 230px */
+        top: 220px; /* was 230px */
         left: 50%;
         transform: translateX(-50%);
-        opacity: 0.12;     /* was 0.06 */
-        width: 320px;      /* was 260px */
+        opacity: 0.12; /* was 0.06 */
+        width: 320px; /* was 260px */
         z-index: 0;
       }
 
@@ -117,7 +117,7 @@
         width: 100%;
         border-collapse: collapse;
         margin-bottom: 6px;
-        table-layout: fixed;
+        table-layout: fixed; /* keep the 4 columns fixed */
       }
 
       table.kv td {
@@ -127,13 +127,13 @@
 
       table.kv td.label {
         font-weight: normal;
-        white-space: nowrap;
+        white-space: nowrap; /* label stays on one line */
       }
 
       table.kv td.value {
         font-weight: bold;
         padding-left: 2px;
-        white-space: normal;
+        white-space: normal; /* allow long values (like Vehicle Type) to wrap */
       }
 
       .body-text {
@@ -270,35 +270,21 @@
 
           <div class="header-cell header-qr">
             <% if (data.src) { %>
-              <img src="<%= data.src %>" alt="QR Code" />
+            <img src="<%= data.src %>" alt="QR Code" />
             <% } %>
           </div>
         </div>
 
-        <%
-          const isGoodsVehicle = (data.vehiclePermitType || '') === 'GOODS VEHICLE';
-
-          // ✅ Ensure Sleeper Cap always resolves
-          const sleeperCapValue =
-            data.sleeperCap ||
-            data.sleeperCapacityExcludingDriver ||
-            data.sleeperCapacity ||
-            '';
-
-          // ✅ Permit Validity fallback (new + old keys)
-          const permitValidityValue =
-            data.permitUpto ||
-            data.permitValidity ||
-            '';
-        %>
+        <% const isGoodsVehicle = (data.vehiclePermitType || '') === 'GOODS
+        VEHICLE'; %>
 
         <!-- MAIN DETAILS -->
         <table class="kv">
           <colgroup>
-            <col style="width:22%">
-            <col style="width:28%">
-            <col style="width:22%">
-            <col style="width:28%">
+            <col style="width: 22%" />
+            <col style="width: 28%" />
+            <col style="width: 22%" />
+            <col style="width: 28%" />
           </colgroup>
 
           <tr>
@@ -310,9 +296,7 @@
 
           <tr>
             <td class="label">Payment Date</td>
-            <td class="value">
-              : <%= data.paymentDate || data.receiptDate || '' %>
-            </td>
+            <td class="value">: <%= data.paymentDate || data.receiptDate || '' %></td>
             <td class="label">Owner Name.</td>
             <td class="value">: <%= data.ownerName || '' %></td>
           </tr>
@@ -338,7 +322,7 @@
             <td class="value">: <%= data.mobileNo || '' %></td>
           </tr>
 
-          <!-- ✅ District + Checkpost separately -->
+          <!-- ✅ UPDATED: District + Checkpost separately -->
           <tr>
             <td class="label">District</td>
             <td class="value">
@@ -352,21 +336,23 @@
 
           <!-- ✅ Passenger vs Goods fields -->
           <% if (!isGoodsVehicle) { %>
-            <tr>
-              <td class="label">Seating Capacity</td>
-              <td class="value">
-                : <%= data.seatingCapacityExcludingDriver || data.seatingCapacity || '' %>
-              </td>
-              <td class="label">Sleeper Cap</td>
-              <td class="value">: <%= sleeperCapValue %></td>
-            </tr>
+          <tr>
+            <td class="label">Seating Capacity</td>
+            <td class="value">
+              : <%= data.seatingCapacityExcludingDriver || data.seatingCapacity || '' %>
+            </td>
+            <td class="label">Sleeper Cap</td>
+            <td class="value">
+              : <%= data.sleeperCap || data.sleeperCapacityExcludingDriver || '' %>
+            </td>
+          </tr>
           <% } else { %>
-            <tr>
-              <td class="label">Gross Vehicle Wt.</td>
-              <td class="value">: <%= data.grossVehicleWeight || '' %></td>
-              <td class="label">Unladen Wt.</td>
-              <td class="value">: <%= data.unladenWeight || '' %></td>
-            </tr>
+          <tr>
+            <td class="label">Gross Vehicle Wt.</td>
+            <td class="value">: <%= data.grossVehicleWeight || '' %></td>
+            <td class="label">Unladen Wt.</td>
+            <td class="value">: <%= data.unladenWeight || '' %></td>
+          </tr>
           <% } %>
 
           <tr>
@@ -386,11 +372,9 @@
         <table class="mini">
           <tr>
             <td class="label">Bank Ref. No.</td>
-            <td class="value">
-              : <%= data.upBankRefNo || data.bankRefNo || '' %>
-            </td>
+            <td class="value">: <%= data.upBankRefNo || data.bankRefNo || '' %></td>
             <td class="label">Permit Validity</td>
-            <td class="value">: <%= permitValidityValue %></td>
+            <td class="value">: <%= data.permitUpto || data.permitValidity || '' %></td>
           </tr>
 
           <tr>
@@ -403,11 +387,11 @@
           <tr>
             <!-- ✅ hide serviceType for GOODS VEHICLE -->
             <% if (!isGoodsVehicle) { %>
-              <td class="label">Service Type</td>
-              <td class="value">: <%= data.serviceType || '' %></td>
+            <td class="label">Service Type</td>
+            <td class="value">: <%= data.serviceType || '' %></td>
             <% } else { %>
-              <td class="label">Service Type</td>
-              <td class="value">: </td>
+            <td class="label">Service Type</td>
+            <td class="value">:</td>
             <% } %>
 
             <td class="label">Permit Type</td>
@@ -433,32 +417,27 @@
           const mvTaxFrom = data.mvTaxFrom || data.taxFrom_up || data.taxFrom || '';
           const mvTaxTo   = data.mvTaxTo   || data.taxTo_up   || data.taxTo   || '';
 
-          const mvBaseAmountRaw =
-            (data.mvTaxAmount != null && data.mvTaxAmount !== '')
-              ? data.mvTaxAmount
-              : data.totalAmount;
+          const mvBaseAmountRaw = (data.mvTaxAmount != null && data.mvTaxAmount !== '')
+            ? data.mvTaxAmount
+            : data.totalAmount;
 
           const mvAmount = toNumber(mvBaseAmountRaw);
           const mvFine   = toNumber(data.mvTaxFine);
-          const mvTotal  =
-            (data.mvTaxTotal != null && data.mvTaxTotal !== '')
-              ? toNumber(data.mvTaxTotal)
-              : mvAmount + mvFine;
+          const mvTotal  = (data.mvTaxTotal != null && data.mvTaxTotal !== '')
+            ? toNumber(data.mvTaxTotal)
+            : mvAmount + mvFine;
 
           const svcFrom = data.serviceFrom || mvTaxFrom;
           const svcTo   = data.serviceTo   || mvTaxTo;
-
           const svcAmount = toNumber(data.serviceAmount || data.serviceUserChargeAmount);
           const svcFine   = toNumber(data.serviceFine);
-          const svcTotal  =
-            (data.serviceTotal != null && data.serviceTotal !== '')
-              ? toNumber(data.serviceTotal)
-              : svcAmount + svcFine;
+          const svcTotal  = (data.serviceTotal != null && data.serviceTotal !== '')
+            ? toNumber(data.serviceTotal)
+            : svcAmount + svcFine;
 
-          const grandTotal =
-            (data.grandTotal != null && data.grandTotal !== '')
-              ? toNumber(data.grandTotal)
-              : mvTotal + svcTotal;
+          const grandTotal = (data.grandTotal != null && data.grandTotal !== '')
+            ? toNumber(data.grandTotal)
+            : mvTotal + svcTotal;
 
           const grandWords = data.grandTotalWords || data.totalAmountInWord || '';
         %>
@@ -475,17 +454,13 @@
           </thead>
           <tbody>
             <tr>
-              <td>
-                MV Tax ( <%= mvTaxFrom %> To <%= mvTaxTo %> )
-              </td>
+              <td>MV Tax ( <%= mvTaxFrom %> To <%= mvTaxTo %> )</td>
               <td class="num"><%= mvAmount %></td>
               <td class="num"><%= mvFine %></td>
               <td class="num"><%= mvTotal %></td>
             </tr>
             <tr>
-              <td>
-                Service/User Charge ( <%= svcFrom %> To <%= svcTo %> )
-              </td>
+              <td>Service/User Charge ( <%= svcFrom %> To <%= svcTo %> )</td>
               <td class="num"><%= svcAmount %></td>
               <td class="num"><%= svcFine %></td>
               <td class="num"><%= svcTotal %></td>
@@ -503,10 +478,7 @@
         <div class="note-small">
           <span class="terms-title">Terms and Conditions:</span>
           <ol class="terms-list">
-            <li>
-              This is a computer generated printout and no signature is
-              required.
-            </li>
+            <li>This is a computer generated printout and no signature is required.</li>
             <li>
               Incorrect mentioning of vehicle class or seating capacity may lead
               to tax evasion and defaulter shall be liable for penal action.
