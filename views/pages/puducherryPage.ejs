@@ -1,455 +1,252 @@
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Puducherry - Tax Receipt</title>
+<head>
+<meta charset="UTF-8" />
+<title>Puducherry - Tax Receipt</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,400;1,500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="<%= data.host %>/css/style.css" />
+<link rel="stylesheet" href="<%= data.host %>/css/page.css" />
+<style>
+* { box-sizing: border-box; }
+@page { size: A4; margin: 0; }
+body { margin: 0; padding: 0; background: #fff; font-family: "Roboto", Arial, Helvetica, sans-serif; color: #000; font-size: 12px; }
+.main { width: 210mm; margin: 0 auto; padding: 12mm 15mm; position: relative; }
+.content { position: relative; z-index: 1; }
+/* ✅ centered watermark (MORE VISIBLE) */
+.watermark { position: absolute; top: 220px; /* was 230px */ left: 50%; transform: translateX(-50%); opacity: 0.12; /* was 0.06 */ width: 320px; /* was 260px */ z-index: 0; }
+.header { display: table; width: 100%; margin-bottom: 14px; }
+.header-cell { display: table-cell; vertical-align: top; }
+.header-logo { width: 22%; }
+.header-logo img { width: 90px; height: auto; }
+.header-center { width: 56%; text-align: center; line-height: 1.3; }
+.header-center .gov { font-size: 14px; font-weight: bold; text-transform: uppercase; }
+.header-center .form { font-size: 12px; font-weight: bold; }
+.header-center .rule { font-size: 11px; margin-top: 2px; }
+.header-center .auth { font-size: 12px; font-weight: bold; margin-top: 2px; }
+.header-qr { width: 22%; text-align: right; }
+.header-qr img { width: 120px; height: 120px; object-fit: contain; }
+/* Main kv table */
+table.kv { width: 100%; border-collapse: collapse; margin-bottom: 6px; table-layout: fixed; /* keep the 4 columns fixed */ }
+table.kv td { padding: 2px 2px; vertical-align: top; }
+table.kv td.label { font-weight: normal; white-space: nowrap; /* label stays on one line */ }
+table.kv td.value { font-weight: bold; padding-left: 2px; white-space: normal; /* allow long values (like Vehicle Type) to wrap */ }
+.body-text { margin-top: 4px; font-size: 11px; text-align: justify; }
+table.mini { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 11px; }
+table.mini td { padding: 2px 2px; vertical-align: top; }
+table.mini td.label { width: 20%; white-space: nowrap; }
+table.mini td.value { width: 30%; font-weight: bold; }
+.small-text { margin-top: 6px; font-size: 10px; text-align: justify; }
+table.tax { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 11px; }
+table.tax th, table.tax td { border: 1px solid #0070c0; padding: 4px 6px; }
+table.tax th { text-align: center; font-weight: bold; }
+table.tax td { text-align: left; }
+table.tax td.num { text-align: right; width: 10%; }
+.grand-total { margin-top: 6px; font-size: 11px; font-weight: bold; }
+.note-small { margin-top: 6px; font-size: 10px; }
+.terms-title { font-weight: bold; margin-top: 4px; margin-bottom: 2px; }
+.terms-list { margin: 0 0 0 16px; padding: 0; }
+.terms-list li { margin-bottom: 2px; }
+.bottom-note { margin-top: 10px; font-size: 12px; font-weight: bold; }
+.bottom-note-url { font-size: 12px; font-weight: normal; margin-top: 2px; }
+.bottom-note-url a { color: #0070c0; text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="main">
+<!-- background emblem -->
+<img src="<%= data.host %>/images1/Pudu.png" class="watermark" alt="Watermark" />
+<div class="content">
+<!-- HEADER -->
+<div class="header">
+<div class="header-cell header-logo">
+<img src="<%= data.logoSrc || (data.host + '/images1/Pudu.png') %>" alt="Logo" />
+</div>
+<div class="header-cell header-center">
+<div class="gov">GOVERNMENT OF PUDUCHERRY</div>
+<div class="form">FORM P.Temp</div>
+<div class="rule">[See rule 61(1)(iv)]</div>
+<div class="auth">THE STATE TRANSPORT AUTHORITY, PUDUCHERRY</div>
+</div>
+<div class="header-cell header-qr">
+<% if (data.src) { %>
+<img src="<%= data.src %>" alt="QR Code" />
+<% } %>
+</div>
+</div>
+<% const isGoodsVehicle = (data.vehiclePermitType || '') === 'GOODS VEHICLE'; %>
+<!-- MAIN DETAILS -->
+<table class="kv">
+<colgroup>
+<col style="width:22%">
+<col style="width:28%">
+<col style="width:22%">
+<col style="width:28%">
+</colgroup>
+<tr>
+<td class="label">Registration No.</td>
+<td class="value">: <%= data.vehicleNo || '' %></td>
+<td class="label">Receipt No.</td>
+<td class="value">: <%= data.receiptNo || '' %></td>
+</tr>
+<tr>
+<td class="label">Payment Date</td>
+<td class="value"> : <%= data.paymentDate || data.receiptDate || '' %> </td>
+<td class="label">Owner Name.</td>
+<td class="value">: <%= data.ownerName || '' %></td>
+</tr>
+<tr>
+<td class="label">Chassis No.</td>
+<td class="value">: <%= data.chassisNo || '' %></td>
+<td class="label">TaxMode</td>
+<td class="value">: <%= data.taxMode || '' %></td>
+</tr>
+<tr>
+<td class="label">Vehicle Type</td>
+<td class="value">: <%= data.vehiclePermitType || '' %></td>
+<td class="label">Vehicle Class</td>
+<td class="value">: <%= data.vehicleClass || '' %></td>
+</tr>
+<tr>
+<td class="label">Vehicle Category</td>
+<td class="value">: <%= data.vehicleCategory || '' %></td>
+<td class="label">Mobile No.</td>
+<td class="value">: <%= data.mobileNo || '' %></td>
+</tr>
+<!-- ✅ UPDATED: District + Checkpost separately -->
+<tr>
+<td class="label">District</td>
+<td class="value"> : <%= data.borderBarrier || data.districtName || data.district || '' %> </td>
+<td class="label">CheckPost Name</td>
+<td class="value"> : <%= data.checkpostName || data.checkPostName || '' %> </td>
+</tr>
+<!-- ✅ Passenger vs Goods fields -->
+<% if (!isGoodsVehicle) { %>
+<tr>
+<td class="label">Seating Capacity</td>
+<td class="value"> : <%= data.seatingCapacityExcludingDriver || data.seatingCapacity || '' %> </td>
+<td class="label">Sleeper Cap</td>
+<td class="value"> : <%= data.sleeperCap || data.sleeperCapacityExcludingDriver || '' %> </td>
+</tr>
+<% } else { %>
+<tr>
+<td class="label">Gross Vehicle Wt.</td>
+<td class="value">: <%= data.grossVehicleWeight || '' %></td>
+<td class="label">Unladen Wt.</td>
+<td class="value">: <%= data.unladenWeight || '' %></td>
+</tr>
+<% } %>
+<tr>
+<td class="label">Payment Mode</td>
+<td class="value">: <%= data.paymentMode || '' %></td>
+<td class="label"></td>
+<td class="value"></td>
+</tr>
+</table>
+<div class="body-text">
+This permit shall be subject to all rules relating to Permits made under the Motor Vehicles Act, 1988 and in force for the time being.
+</div>
+<!-- SECONDARY DETAILS -->
+<table class="mini">
+<tr>
+<td class="label">Bank Ref. No.</td>
+<td class="value"> : <%= data.upBankRefNo || data.bankRefNo || '' %> </td>
+<td class="label">Permit Validity</td>
+<td class="value"> : <%= data.permitUpto || data.permitValidity || '' %> </td>
+</tr>
+<tr>
+<td class="label">Fitness Validity</td>
+<td class="value">: <%= data.fitnessValidity || '' %></td>
+<td class="label">Insurance Validity</td>
+<td class="value">: <%= data.insuranceValidity || '' %></td>
+</tr>
+<tr>
+<!-- ✅ hide serviceType for GOODS VEHICLE -->
+<% if (!isGoodsVehicle) { %>
+<td class="label">Service Type</td>
+<td class="value">: <%= data.serviceType || '' %></td>
+<% } else { %>
+<td class="label">Service Type</td>
+<td class="value">: </td>
+<% } %>
+<td class="label">Permit Type</td>
+<td class="value">: <%= data.permitType || '' %></td>
+</tr>
+</table>
+<div class="small-text">
+Under the provision of sub-section(4) of section 89 of Act and with the particular consent of the Transport Authority concerned. This Permit is valid for -- <%= data.validDays || data.permitValidDays || data.noOfDays || '' %> Days only.
+</div>
+<%
+// ---- TAX / GRAND TOTAL CALC FALLBACKS (force numbers to avoid "extra 0") ----
+const toNumber = (v) => { const n = Number(v); return isNaN(n) ? 0 : n; };
+const mvTaxFrom = data.mvTaxFrom || data.taxFrom_up || data.taxFrom || '';
+const mvTaxTo = data.mvTaxTo || data.taxTo_up || data.taxTo || '';
+const mvBaseAmountRaw = (data.mvTaxAmount != null && data.mvTaxAmount !== '') ? data.mvTaxAmount : data.totalAmount;
+const mvAmount = toNumber(mvBaseAmountRaw);
+const mvFine = toNumber(data.mvTaxFine);
+const mvTotal = (data.mvTaxTotal != null && data.mvTaxTotal !== '') ? toNumber(data.mvTaxTotal) : mvAmount + mvFine;
+const svcFrom = data.serviceFrom || mvTaxFrom;
+const svcTo = data.serviceTo || mvTaxTo;
+const svcAmount = toNumber(data.serviceAmount || data.serviceUserChargeAmount);
+const svcFine = toNumber(data.serviceFine);
+const svcTotal = (data.serviceTotal != null && data.serviceTotal !== '') ? toNumber(data.serviceTotal) : svcAmount + svcFine;
+const grandTotal = (data.grandTotal != null && data.grandTotal !== '') ? toNumber(data.grandTotal) : mvTotal + svcTotal;
+const grandWords = data.grandTotalWords || data.totalAmountInWord || '';
+%>
+<!-- TAX TABLE -->
+<table class="tax">
+<thead>
+<tr>
+<th>Tax/Fee Particular</th>
+<th>Tax/Fees</th>
+<th>Fine</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+MV Tax ( <%= mvTaxFrom %> To <%= mvTaxTo %> )
+</td>
+<td class="num"><%= mvAmount %></td>
+<td class="num"><%= mvFine %></td>
+<td class="num"><%= mvTotal %></td>
+</tr>
+<tr>
+<td>
+Service/User Charge ( <%= svcFrom %> To <%= svcTo %> )
+</td>
+<td class="num"><%= svcAmount %></td>
+<td class="num"><%= svcFine %></td>
+<td class="num"><%= svcTotal %></td>
+</tr>
+</tbody>
+</table>
+<div class="grand-total">
+Grand Total : <%= grandTotal %>/- <%= grandWords %> Only
+</div>
+<div class="note-small">
+<b>Note :</b>
+</div>
+<div class="note-small">
+<span class="terms-title">Terms and Conditions:</span>
+<ol class="terms-list">
+<li>
+This is a computer generated printout and no signature is required.
+</li>
+<li>
+Incorrect mentioning of vehicle class or seating capacity may lead to tax evasion and defaulter shall be liable for penal action.
+</li>
+</ol>
+</div>
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,400;1,500&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="<%= data.host %>/css/style.css" />
-    <link rel="stylesheet" href="<%= data.host %>/css/page.css" />
-
-    <style>
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        margin: 0;
-        padding: 0;
-        background: #fff;
-        font-family: "Roboto", Arial, Helvetica, sans-serif;
-        color: #000;
-        font-size: 12px;
-      }
-
-      /* A4-like canvas so print→PDF matches sample */
-      .main {
-        width: 794px;          /* A4 width @96dpi */
-        min-height: 1123px;    /* A4 height */
-        margin: 0 auto;
-        padding: 28px 36px;
-        position: relative;
-      }
-
-      .content {
-        position: relative;
-        z-index: 1;
-      }
-
-      /* Watermark in centre (optional) */
-      .watermark {
-        position: absolute;
-        top: 230px;
-        left: 50%;
-        transform: translateX(-50%);
-        opacity: 0.06;
-        width: 260px;
-        z-index: 0;
-      }
-
-      .printing-date {
-        text-align: right;
-        font-size: 10px;
-        margin-bottom: 4px;
-      }
-
-      /* Header row */
-      .header {
-        display: table;
-        width: 100%;
-        margin-bottom: 14px;
-      }
-
-      .header-cell {
-        display: table-cell;
-        vertical-align: top;
-      }
-
-      .header-logo {
-        width: 22%;
-      }
-
-      .header-logo img {
-        width: 90px;
-        height: auto;
-      }
-
-      .header-center {
-        width: 56%;
-        text-align: center;
-        line-height: 1.3;
-      }
-
-      .header-center .gov {
-        font-size: 14px;
-        font-weight: bold;
-        text-transform: uppercase;
-      }
-
-      .header-center .form {
-        font-size: 12px;
-        font-weight: bold;
-      }
-
-      .header-center .rule {
-        font-size: 11px;
-        margin-top: 2px;
-      }
-
-      .header-center .auth {
-        font-size: 12px;
-        font-weight: bold;
-        margin-top: 2px;
-      }
-
-      .header-qr {
-        width: 22%;
-        text-align: right;
-      }
-
-      .header-qr img {
-        width: 120px;
-        height: 120px;
-        object-fit: contain;
-      }
-
-      /* Main kv table */
-      table.kv {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 6px;
-      }
-
-      table.kv td {
-        padding: 2px 2px;
-        vertical-align: top;
-      }
-
-      table.kv td.label {
-        width: 18%;
-        white-space: nowrap;
-      }
-
-      table.kv td.value {
-        width: 32%;
-        font-weight: bold;
-      }
-
-      .body-text {
-        margin-top: 4px;
-        font-size: 11px;
-        text-align: justify;
-      }
-
-      /* Secondary info */
-      table.mini {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 6px;
-        font-size: 11px;
-      }
-
-      table.mini td {
-        padding: 2px 2px;
-        vertical-align: top;
-      }
-
-      table.mini td.label {
-        width: 18%;
-        white-space: nowrap;
-      }
-
-      table.mini td.value {
-        width: 32%;
-        font-weight: bold;
-      }
-
-      .small-text {
-        margin-top: 6px;
-        font-size: 10px;
-        text-align: justify;
-      }
-
-      /* Tax table – blue border like sample */
-      table.tax {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 14px;
-        font-size: 11px;
-      }
-
-      table.tax th,
-      table.tax td {
-        border: 1px solid #0070c0;
-        padding: 4px 6px;
-      }
-
-      table.tax th {
-        text-align: center;
-        font-weight: bold;
-      }
-
-      table.tax td {
-        text-align: left;
-      }
-
-      table.tax td.num {
-        text-align: right;
-        width: 10%;
-      }
-
-      .grand-total {
-        margin-top: 6px;
-        font-size: 11px;
-        font-weight: bold;
-      }
-
-      .note-small {
-        margin-top: 6px;
-        font-size: 10px;
-      }
-
-      .terms-title {
-        font-weight: bold;
-        margin-top: 4px;
-        margin-bottom: 2px;
-      }
-
-      .terms-list {
-        margin: 0 0 0 16px;
-        padding: 0;
-      }
-
-      .terms-list li {
-        margin-bottom: 2px;
-      }
-
-      .bottom-note {
-        margin-top: 10px;
-        font-size: 12px;
-        font-weight: bold;
-      }
-
-      .bottom-note-url {
-        font-size: 12px;
-        font-weight: normal;
-        margin-top: 2px;
-      }
-
-      .bottom-note-url a {
-        color: #0070c0;
-        text-decoration: underline;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="main">
-      <% if (data.watermarkSrc) { %>
-        <img src="<%= data.watermarkSrc %>" class="watermark" alt="Watermark" />
-      <% } %>
-
-      <div class="content">
-        <% if (data.receiptDate || data.paymentDate) { %>
-          <div class="printing-date">
-            Receipt Printing Date:
-            <br />
-            <%= data.paymentDate || data.receiptDate %>
-          </div>
-        <% } %>
-
-        <!-- HEADER -->
-        <div class="header">
-          <div class="header-cell header-logo">
-            <img
-              src="<%= data.logoSrc || (data.host + '/images1/Pudu.png') %>"
-              alt="Logo"
-            />
-          </div>
-
-          <div class="header-cell header-center">
-            <div class="gov">GOVERNMENT OF PUDUCHERRY</div>
-            <div class="form">FORM P.Temp</div>
-            <div class="rule">[See rule 61(1)(iv)]</div>
-            <div class="auth">THE STATE TRANSPORT AUTHORITY, PUDUCHERRY</div>
-          </div>
-
-          <div class="header-cell header-qr">
-            <% if (data.src) { %>
-              <img src="<%= data.src %>" alt="QR Code" />
-            <% } %>
-          </div>
-        </div>
-
-        <!-- MAIN DETAILS -->
-        <table class="kv">
-          <tr>
-            <td class="label">Registration No.</td>
-            <td class="value">: <%= data.vehicleNo || '' %></td>
-            <td class="label">Receipt No.</td>
-            <td class="value">: <%= data.receiptNo || '' %></td>
-          </tr>
-          <tr>
-            <td class="label">Payment Date</td>
-            <td class="value">
-              : <%= data.paymentDate || data.receiptDate || '' %>
-            </td>
-            <td class="label">Owner Name.</td>
-            <td class="value">: <%= data.ownerName || '' %></td>
-          </tr>
-          <tr>
-            <td class="label">Chassis No.</td>
-            <td class="value">: <%= data.chassisNo || '' %></td>
-            <td class="label">TaxMode</td>
-            <td class="value">: <%= data.taxMode || '' %></td>
-          </tr>
-          <tr>
-            <td class="label">Vehicle Type</td>
-            <td class="value">: <%= data.vehiclePermitType || '' %></td>
-            <td class="label">Vehicle Class</td>
-            <td class="value">: <%= data.vehicleClass || '' %></td>
-          </tr>
-          <tr>
-            <td class="label">Vehicle Category</td>
-            <td class="value">: <%= data.vehicleCategory || '' %></td>
-            <td class="label">Mobile No.</td>
-            <td class="value">: <%= data.mobileNo || '' %></td>
-          </tr>
-          <tr>
-            <td class="label">CheckPost Name</td>
-            <td class="value">
-              : <%= data.checkpostName || data.checkPostName || data.borderBarrier || data.districtName || '' %>
-            </td>
-            <td class="label">Seating Capacity</td>
-            <td class="value">
-              : <%= data.seatingCapacityExcludingDriver || data.seatingCapacity || '' %>
-            </td>
-          </tr>
-          <tr>
-            <td class="label">Sleeper Cap</td>
-            <td class="value">
-              : <%= data.sleeperCap || data.sleeperCapacityExcludingDriver || '' %>
-            </td>
-            <td class="label">Payment Mode</td>
-            <td class="value">: <%= data.paymentMode || '' %></td>
-          </tr>
-        </table>
-
-        <div class="body-text">
-          This permit shall be subject to all rules relating to Permits made
-          under the Motor Vehicles Act, 1988 and in force for the time being.
-        </div>
-
-        <!-- SECONDARY DETAILS -->
-        <table class="mini">
-          <tr>
-            <td class="label">Bank Ref. No.</td>
-            <td class="value">
-              : <%= data.upBankRefNo || data.bankRefNo || '' %>
-            </td>
-            <td class="label">Permit Validity</td>
-            <td class="value">
-              : <%= data.permitUpto || data.permitValidity || '' %>
-            </td>
-          </tr>
-          <tr>
-            <td class="label">Fitness Validity</td>
-            <td class="value">: <%= data.fitnessValidity || '' %></td>
-            <td class="label">Insurance Validity</td>
-            <td class="value">: <%= data.insuranceValidity || '' %></td>
-          </tr>
-          <tr>
-            <td class="label">Service Type</td>
-            <td class="value">: <%= data.serviceType || '' %></td>
-            <td class="label">Permit Type</td>
-            <td class="value">: <%= data.permitType || '' %></td>
-          </tr>
-        </table>
-
-        <div class="small-text">
-          Under the provision of sub-section(4) of section 89 of Act and with
-          the particular consent of the Transport Authority concerned. This
-          Permit is valid for --
-          <%= data.validDays || data.permitValidDays || '7' %>
-          Days only.
-        </div>
-
-        <!-- TAX TABLE -->
-        <table class="tax">
-          <thead>
-            <tr>
-              <th>Tax/Fee Particular</th>
-              <th>Tax/Fees</th>
-              <th>Fine</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                MV Tax (
-                <%= data.mvTaxFrom || data.taxFrom_up || data.taxFrom || '' %>
-                To
-                <%= data.mvTaxTo || data.taxTo_up || data.taxTo || '' %> )
-              </td>
-              <td class="num">
-                <%= data.mvTaxAmount || data.totalAmount || 0 %>
-              </td>
-              <td class="num"><%= data.mvTaxFine || 0 %></td>
-              <td class="num">
-                <%= data.mvTaxTotal || data.totalAmount || 0 %>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                Service/User Charge (
-                <%= data.serviceFrom || data.taxFrom_up || data.taxFrom || '' %>
-                To
-                <%= data.serviceTo || data.taxTo_up || data.taxTo || '' %> )
-              </td>
-              <td class="num"><%= data.serviceAmount || 0 %></td>
-              <td class="num"><%= data.serviceFine || 0 %></td>
-              <td class="num">
-                <%= data.serviceTotal || data.serviceAmount || 0 %>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="grand-total">
-          Grand Total :
-          <%= data.grandTotal || data.totalAmount || 0 %>/- 
-          <%= data.totalAmountInWord || '' %> Only
-        </div>
-
-        <div class="note-small">
-          <b>Note :</b>
-        </div>
-        <div class="note-small">
-          <span class="terms-title">Terms and Conditions:</span>
-          <ol class="terms-list">
-            <li>
-              This is a computer generated printout and no signature is
-              required.
-            </li>
-            <li>
-              Incorrect mentioning of vehicle class or seating capacity may lead
-              to tax evasion and defaulter shall be liable for penal action.
-            </li>
-          </ol>
-        </div>
-
-        <div class="bottom-note-url">
-          Scan the QR code for genuinity of the receipt, It should land at
-          <a href="https://kms.parivahan.gov.in">https://kms.parivahan.gov.in</a>
-          site. In case the URL is different, then receipt could be a fake one,
-          please raise a complain.
-        </div>
-      </div>
-    </div>
-  </body>
+<div class="bottom-note-url">
+Scan the QR code for genuinity of the receipt, It should land at
+<a href="https://kms.parivahan.gov.in">https://kms.parivahan.gov.in</a>
+site. In case the URL is different, then receipt could be a fake one,
+please raise a complain.
+</div>
+</div>
+</div>
+</body>
 </html>
