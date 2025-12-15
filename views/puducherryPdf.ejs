@@ -42,14 +42,14 @@
         z-index: 1;
       }
 
-      /* centered watermark */
+      /* ✅ centered watermark (MORE VISIBLE) */
       .watermark {
         position: absolute;
-        top: 230px;
+        top: 220px;        /* was 230px */
         left: 50%;
         transform: translateX(-50%);
-        opacity: 0.06;
-        width: 260px;
+        opacity: 0.12;     /* was 0.06 */
+        width: 320px;      /* was 260px */
         z-index: 0;
       }
 
@@ -113,29 +113,28 @@
       }
 
       /* Main kv table */
-       table.kv {
-          width: 100%;
-          border-collapse: collapse;
-          margin-bottom: 6px;
-          table-layout: fixed;       /* keep the 4 columns fixed */
+      table.kv {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 6px;
+        table-layout: fixed; /* keep the 4 columns fixed */
       }
 
-       table.kv td {
-         padding: 2px 2px;
-         vertical-align: top;
+      table.kv td {
+        padding: 2px 2px;
+        vertical-align: top;
       }
 
-       table.kv td.label {
+      table.kv td.label {
         font-weight: normal;
-        white-space: nowrap;       /* label stays on one line */
+        white-space: nowrap; /* label stays on one line */
       }
 
-        table.kv td.value {
-         font-weight: bold;
-         padding-left: 2px;
-         white-space: normal;       /* allow long values (like Vehicle Type) to wrap */
+      table.kv td.value {
+        font-weight: bold;
+        padding-left: 2px;
+        white-space: normal; /* allow long values (like Vehicle Type) to wrap */
       }
-
 
       .body-text {
         margin-top: 4px;
@@ -276,20 +275,26 @@
           </div>
         </div>
 
+        <% 
+          const isGoodsVehicle = (data.vehiclePermitType || '') === 'GOODS VEHICLE';
+        %>
+
         <!-- MAIN DETAILS -->
         <table class="kv">
-           <colgroup>
-           <col style="width:22%">
-           <col style="width:28%">
-           <col style="width:22%">
-           <col style="width:28%">
+          <colgroup>
+            <col style="width:22%">
+            <col style="width:28%">
+            <col style="width:22%">
+            <col style="width:28%">
           </colgroup>
+
           <tr>
             <td class="label">Registration No.</td>
             <td class="value">: <%= data.vehicleNo || '' %></td>
             <td class="label">Receipt No.</td>
             <td class="value">: <%= data.receiptNo || '' %></td>
           </tr>
+
           <tr>
             <td class="label">Payment Date</td>
             <td class="value">
@@ -298,41 +303,66 @@
             <td class="label">Owner Name.</td>
             <td class="value">: <%= data.ownerName || '' %></td>
           </tr>
+
           <tr>
             <td class="label">Chassis No.</td>
             <td class="value">: <%= data.chassisNo || '' %></td>
             <td class="label">TaxMode</td>
             <td class="value">: <%= data.taxMode || '' %></td>
           </tr>
+
           <tr>
             <td class="label">Vehicle Type</td>
             <td class="value">: <%= data.vehiclePermitType || '' %></td>
             <td class="label">Vehicle Class</td>
             <td class="value">: <%= data.vehicleClass || '' %></td>
           </tr>
+
           <tr>
             <td class="label">Vehicle Category</td>
             <td class="value">: <%= data.vehicleCategory || '' %></td>
             <td class="label">Mobile No.</td>
             <td class="value">: <%= data.mobileNo || '' %></td>
           </tr>
+
+          <!-- ✅ UPDATED: District + Checkpost separately -->
           <tr>
+            <td class="label">District</td>
+            <td class="value">
+              : <%= data.borderBarrier || data.districtName || data.district || '' %>
+            </td>
             <td class="label">CheckPost Name</td>
             <td class="value">
-              : <%= data.checkpostName || data.checkPostName || data.borderBarrier || data.districtName || '' %>
-            </td>
-            <td class="label">Seating Capacity</td>
-            <td class="value">
-              : <%= data.seatingCapacityExcludingDriver || data.seatingCapacity || '' %>
+              : <%= data.checkpostName || data.checkPostName || '' %>
             </td>
           </tr>
+
+          <!-- ✅ Passenger vs Goods fields -->
+          <% if (!isGoodsVehicle) { %>
+            <tr>
+              <td class="label">Seating Capacity</td>
+              <td class="value">
+                : <%= data.seatingCapacityExcludingDriver || data.seatingCapacity || '' %>
+              </td>
+              <td class="label">Sleeper Cap</td>
+              <td class="value">
+                : <%= data.sleeperCap || data.sleeperCapacityExcludingDriver || '' %>
+              </td>
+            </tr>
+          <% } else { %>
+            <tr>
+              <td class="label">Gross Vehicle Wt.</td>
+              <td class="value">: <%= data.grossVehicleWeight || '' %></td>
+              <td class="label">Unladen Wt.</td>
+              <td class="value">: <%= data.unladenWeight || '' %></td>
+            </tr>
+          <% } %>
+
           <tr>
-            <td class="label">Sleeper Cap</td>
-            <td class="value">
-              : <%= data.sleeperCap || data.sleeperCapacityExcludingDriver || '' %>
-            </td>
             <td class="label">Payment Mode</td>
             <td class="value">: <%= data.paymentMode || '' %></td>
+            <td class="label"></td>
+            <td class="value"></td>
           </tr>
         </table>
 
@@ -353,15 +383,24 @@
               : <%= data.permitUpto || data.permitValidity || '' %>
             </td>
           </tr>
+
           <tr>
             <td class="label">Fitness Validity</td>
             <td class="value">: <%= data.fitnessValidity || '' %></td>
             <td class="label">Insurance Validity</td>
             <td class="value">: <%= data.insuranceValidity || '' %></td>
           </tr>
+
           <tr>
-            <td class="label">Service Type</td>
-            <td class="value">: <%= data.serviceType || '' %></td>
+            <!-- ✅ hide serviceType for GOODS VEHICLE -->
+            <% if (!isGoodsVehicle) { %>
+              <td class="label">Service Type</td>
+              <td class="value">: <%= data.serviceType || '' %></td>
+            <% } else { %>
+              <td class="label">Service Type</td>
+              <td class="value">: </td>
+            <% } %>
+
             <td class="label">Permit Type</td>
             <td class="value">: <%= data.permitType || '' %></td>
           </tr>
@@ -475,3 +514,4 @@
     </div>
   </body>
 </html>
+
