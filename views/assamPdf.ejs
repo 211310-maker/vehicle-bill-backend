@@ -9,7 +9,6 @@
     />
 
     <style>
-      /* PAGE & PRINT SETUP */
       @page {
         size: A4;
         margin: 0;
@@ -31,7 +30,7 @@
         box-sizing: border-box;
       }
 
-      /* QR TOP-RIGHT */
+      /* QR */
       .qr-image-as {
         position: absolute;
         top: 18px;
@@ -41,7 +40,7 @@
         z-index: 10;
       }
 
-      /* SMALL LOGO TOP-LEFT */
+      /* Logos */
       .logo_as {
         position: absolute;
         top: 18px;
@@ -54,7 +53,6 @@
         display: block;
       }
 
-      /* BIG WATERMARK (CENTER) */
       .logo_as_main {
         position: absolute;
         top: 50%;
@@ -69,26 +67,7 @@
         width: 330px;
       }
 
-      /* BACKGROUND REPEATED TEXT */
-      .content__back {
-        position: absolute;
-        top: 115px;
-        left: 30px;
-        right: 30px;
-        bottom: 120px;
-        z-index: 2;
-        opacity: 0.12;
-        pointer-events: none;
-        font-size: 10px;
-        line-height: 1.3;
-        white-space: nowrap;
-      }
-
-      .content__back p {
-        margin: 0;
-      }
-
-      /* HEADER */
+      /* Header */
       .as-header {
         position: absolute;
         top: 44px;
@@ -109,12 +88,30 @@
         font-size: 11px;
       }
 
-      /* MAIN CONTENT */
+      /* Background watermark text */
+      .content__back {
+        position: absolute;
+        top: 115px;
+        left: 30px;
+        right: 30px;
+        bottom: 120px;
+        opacity: 0.12;
+        font-size: 10px;
+        line-height: 1.3;
+        white-space: nowrap;
+        z-index: 2;
+        pointer-events: none;
+      }
+
+      .content__back p {
+        margin: 0;
+      }
+
+      /* Main content */
       .content {
         position: relative;
         z-index: 5;
         margin-top: 120px;
-        font-size: 11px;
       }
 
       table {
@@ -124,26 +121,27 @@
       }
 
       table td {
-        padding: 1px 3px;
-        vertical-align: top;
+        padding: 2px 4px;
+        vertical-align: middle;
         line-height: 1.2;
       }
 
       .r1-1 {
         width: 22%;
         font-weight: 500;
+        white-space: nowrap;
       }
 
       .r1-2 {
         width: 28%;
+        padding-left: 6px;
       }
 
-      /* TAX / FEE TABLE */
+      /* Tax table */
       .tax-table-as {
         width: 100%;
-        border-collapse: collapse;
         margin-top: 8px;
-        font-size: 11px;
+        border-collapse: collapse;
       }
 
       .tax-table-as th,
@@ -153,17 +151,8 @@
         text-align: center;
       }
 
-      .tax-table-as th {
-        font-weight: 600;
-      }
-
       .tax-table-as td:first-child {
         text-align: left;
-      }
-
-      .content__grand {
-        margin-top: 10px;
-        font-size: 11px;
       }
 
       .content__grand p {
@@ -174,17 +163,6 @@
         font-size: 11px;
         line-height: 15px;
         margin-top: 8px;
-      }
-
-      @media print {
-        body {
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-        }
-
-        a[href]:after {
-          content: "";
-        }
       }
     </style>
   </head>
@@ -211,104 +189,83 @@
         <% for (let i = 0; i < 16; i++) { %>
           <p>
             <%= data.vehicleNo %> / <%= data.paymentDate %>,
-            <%= data.vehicleNo %> / <%= data.paymentDate %>,
             <%= data.vehicleNo %> / <%= data.paymentDate %>
           </p>
         <% } %>
       </div>
 
-      <!-- MAIN CONTENT -->
       <div class="content">
         <table>
-          <tr class="r1 r11">
+          <tr>
             <td class="r1-1">Registration No.</td>
             <td class="r1-2">: <b><%= data.vehicleNo %></b></td>
             <td class="r1-1">Receipt No.</td>
             <td class="r1-2">: <%= data.receiptNo %></td>
           </tr>
 
-          <tr class="r1 r12">
+          <tr>
             <td class="r1-1">Payment Date</td>
             <td class="r1-2">: <%= data.paymentDate %></td>
             <td class="r1-1">Owner Name</td>
             <td class="r1-2">: <%= data.ownerName %></td>
           </tr>
 
-          <tr class="r1 r13">
+          <tr>
             <td class="r1-1">Chassis No.</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%= data.chassisNo %></td>
-            <td>Tax Mode</td>
-            <td>&nbsp;&nbsp;: <%= data.taxMode %></td>
+            <td class="r1-2">: <%= data.chassisNo %></td>
+            <td class="r1-1">Tax Mode</td>
+            <td class="r1-2">: <%= data.taxMode %></td>
           </tr>
 
-          <tr class="r1 r16">
+          <tr>
             <td class="r1-1">Vehicle Type</td>
-            <td class="r1-2">
-              &nbsp;&nbsp;:
-              <div class="r16-3"><%= data.vehiclePermitType %></div>
-            </td>
-            <td>Vehicle Class</td>
-            <td>&nbsp;&nbsp;: <%= data.vehicleClass %></td>
+            <td class="r1-2">: <%= data.vehiclePermitType %></td>
+            <td class="r1-1">Vehicle Class</td>
+            <td class="r1-2">: <%= data.vehicleClass %></td>
           </tr>
 
-          <tr class="r1 r17">
+          <tr>
             <td class="r1-1">Vehicle Category</td>
-            <td class="r1-2">
-              &nbsp;&nbsp;: <%= data.vehicleCategory || "" %>
-            </td>
-            <td>Mobile No.</td>
-            <td>&nbsp;&nbsp;: <%= data.mobileNo %></td>
+            <td class="r1-2">: <%= data.vehicleCategory || "NA" %></td>
+            <td class="r1-1">Mobile No.</td>
+            <td class="r1-2">: <%= data.mobileNo %></td>
           </tr>
 
-          <tr class="r1 r18">
-            <td class="r1-1">Checkpost Name</td>
-            <td class="r1-2">
-              &nbsp;&nbsp;: <%= data.borderBarrier %>
-            </td>
+          <tr>
+            <td class="r1-1">District</td>
+            <td class="r1-2">: <%= data.borderBarrier %></td>
 
             <% if (data.vehiclePermitType === 'GOODS VEHICLE') { %>
-              <td>Gross Weight</td>
-              <td>&nbsp;&nbsp;: <%= data.grossVehicleWeight %> KG.</td>
+              <td class="r1-1">Gross Weight</td>
+              <td class="r1-2">: <%= data.grossVehicleWeight %> KG</td>
             <% } else { %>
-              <td>
-                Seating Cap (Ex.<br />
-                Driver)
-              </td>
-              <td>
-                &nbsp;&nbsp;: <%= data.seatingCapacityExcludingDriver %>
-              </td>
+              <td class="r1-1">Seating Cap (Ex. Driver)</td>
+              <td class="r1-2">: <%= data.seatingCapacityExcludingDriver %></td>
             <% } %>
           </tr>
 
-          <tr class="r1 r19">
+          <tr>
             <td class="r1-1">Sleeper Cap.</td>
-            <td class="r1-2">
-              &nbsp;&nbsp;: <%= data.sleeperCapacityExcludingDriver %>
-            </td>
-            <td>Bank Ref. No.</td>
-            <td>&nbsp;&nbsp;: NA</td>
+            <td class="r1-2">: <%= data.sleeperCapacityExcludingDriver %></td>
+            <td class="r1-1">Bank Ref. No.</td>
+            <td class="r1-2">: NA</td>
           </tr>
 
-          <tr class="r1 r20">
+          <tr>
             <td class="r1-1">Payment Mode</td>
-            <td class="r1-2">
-              &nbsp;&nbsp;: <%= data.paymentMode %>
-            </td>
-            <td>Service Type</td>
-            <td class="r1-2">&nbsp;&nbsp;: NOT APPLICABLE</td>
+            <td class="r1-2">: <%= data.paymentMode %></td>
+            <td class="r1-1">Service Type</td>
+            <td class="r1-2">: NOT APPLICABLE</td>
           </tr>
 
-          <tr class="r1 r21">
+          <tr>
             <td class="r1-1">Permit Type</td>
-            <td class="r1-2">
-              &nbsp;&nbsp;: <%= data.permitType %>
-            </td>
-            <td>Permit Category</td>
-            <td>&nbsp;&nbsp;:</td>
+            <td class="r1-2">: <%= data.permitType %></td>
+            <td class="r1-1">Permit Category</td>
+            <td class="r1-2">:</td>
           </tr>
         </table>
 
-        <!-- TAX / FEE PARTICULAR TABLE -->
         <table class="tax-table-as">
           <thead>
             <tr>
@@ -318,7 +275,6 @@
               <th>Total</th>
             </tr>
           </thead>
-
           <tbody>
             <tr>
               <td>
@@ -333,39 +289,26 @@
           </tbody>
         </table>
 
-        <!-- GRAND TOTAL + NOTE / TERMS -->
-        <div class="content__grand content__grand--hr">
+        <div class="content__grand">
           <p>
-            <span><b>Grand Total :</b></span>
-            <b>
-              <%= data.totalAmount %>/- (
-              <%= data.totalAmountInWord %> )
-            </b>
+            <b>Grand Total :</b>
+            <%= data.totalAmount %>/- (
+            <%= data.totalAmountInWord %> )
           </p>
 
-          <p><b>Note :</b></p>
           <p><b>Terms and Conditions:</b></p>
-
-          <p>
-            1. This is a computer generated printout and no signature is required.
-          </p>
+          <p>1. This is a computer generated printout and no signature is required.</p>
           <p>2. Should not carry unlawful/unaccompanied goods.</p>
           <p>
-            3. If any false information/discrepancies are found at later, necessary
-            action will be taken<br />
-            against the vehicle owner/driver.
+            3. If any false information/discrepancies are found at later,
+            necessary action will be taken against the vehicle owner/driver.
           </p>
         </div>
 
-        <br />
-
-        <p class="main__warning" style="font-size: 14px; line-height: 20px;">
-          Scan the QR code for genuinity of the receipt, It should land at
-          <span style="color: blue;">
-            <u>https://kms.parivahan.gov.in</u>
-          </span>
-          site. In case the URL is different, then receipt could be a fake one,
-          please raise a complain.
+        <p class="main__warning">
+          Scan the QR code for genuinity of the receipt. It should land at
+          <u>https://kms.parivahan.gov.in</u>. If the URL differs, the receipt
+          could be fake.
         </p>
       </div>
     </div>
