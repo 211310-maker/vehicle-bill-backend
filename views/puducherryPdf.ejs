@@ -117,7 +117,7 @@
         width: 100%;
         border-collapse: collapse;
         margin-bottom: 6px;
-        table-layout: fixed; /* keep the 4 columns fixed */
+        table-layout: fixed;
       }
 
       table.kv td {
@@ -127,13 +127,13 @@
 
       table.kv td.label {
         font-weight: normal;
-        white-space: nowrap; /* label stays on one line */
+        white-space: nowrap;
       }
 
       table.kv td.value {
         font-weight: bold;
         padding-left: 2px;
-        white-space: normal; /* allow long values (like Vehicle Type) to wrap */
+        white-space: normal;
       }
 
       .body-text {
@@ -275,8 +275,21 @@
           </div>
         </div>
 
-        <% 
+        <%
           const isGoodsVehicle = (data.vehiclePermitType || '') === 'GOODS VEHICLE';
+
+          // ✅ Ensure Sleeper Cap always resolves
+          const sleeperCapValue =
+            data.sleeperCap ||
+            data.sleeperCapacityExcludingDriver ||
+            data.sleeperCapacity ||
+            '';
+
+          // ✅ Permit Validity fallback (new + old keys)
+          const permitValidityValue =
+            data.permitUpto ||
+            data.permitValidity ||
+            '';
         %>
 
         <!-- MAIN DETAILS -->
@@ -325,7 +338,7 @@
             <td class="value">: <%= data.mobileNo || '' %></td>
           </tr>
 
-          <!-- ✅ UPDATED: District + Checkpost separately -->
+          <!-- ✅ District + Checkpost separately -->
           <tr>
             <td class="label">District</td>
             <td class="value">
@@ -345,9 +358,7 @@
                 : <%= data.seatingCapacityExcludingDriver || data.seatingCapacity || '' %>
               </td>
               <td class="label">Sleeper Cap</td>
-              <td class="value">
-                : <%= data.sleeperCap || data.sleeperCapacityExcludingDriver || '' %>
-              </td>
+              <td class="value">: <%= sleeperCapValue %></td>
             </tr>
           <% } else { %>
             <tr>
@@ -379,9 +390,7 @@
               : <%= data.upBankRefNo || data.bankRefNo || '' %>
             </td>
             <td class="label">Permit Validity</td>
-            <td class="value">
-              : <%= data.permitUpto || data.permitValidity || '' %>
-            </td>
+            <td class="value">: <%= permitValidityValue %></td>
           </tr>
 
           <tr>
@@ -414,7 +423,7 @@
           Days only.
         </div>
 
-        <% 
+        <%
           // ---- TAX / GRAND TOTAL CALC FALLBACKS (force numbers to avoid "extra 0") ----
           const toNumber = (v) => {
             const n = Number(v);
@@ -424,27 +433,32 @@
           const mvTaxFrom = data.mvTaxFrom || data.taxFrom_up || data.taxFrom || '';
           const mvTaxTo   = data.mvTaxTo   || data.taxTo_up   || data.taxTo   || '';
 
-          const mvBaseAmountRaw = (data.mvTaxAmount != null && data.mvTaxAmount !== '')
-            ? data.mvTaxAmount
-            : data.totalAmount;
+          const mvBaseAmountRaw =
+            (data.mvTaxAmount != null && data.mvTaxAmount !== '')
+              ? data.mvTaxAmount
+              : data.totalAmount;
 
           const mvAmount = toNumber(mvBaseAmountRaw);
           const mvFine   = toNumber(data.mvTaxFine);
-          const mvTotal  = (data.mvTaxTotal != null && data.mvTaxTotal !== '')
-            ? toNumber(data.mvTaxTotal)
-            : mvAmount + mvFine;
+          const mvTotal  =
+            (data.mvTaxTotal != null && data.mvTaxTotal !== '')
+              ? toNumber(data.mvTaxTotal)
+              : mvAmount + mvFine;
 
           const svcFrom = data.serviceFrom || mvTaxFrom;
           const svcTo   = data.serviceTo   || mvTaxTo;
+
           const svcAmount = toNumber(data.serviceAmount || data.serviceUserChargeAmount);
           const svcFine   = toNumber(data.serviceFine);
-          const svcTotal  = (data.serviceTotal != null && data.serviceTotal !== '')
-            ? toNumber(data.serviceTotal)
-            : svcAmount + svcFine;
+          const svcTotal  =
+            (data.serviceTotal != null && data.serviceTotal !== '')
+              ? toNumber(data.serviceTotal)
+              : svcAmount + svcFine;
 
-          const grandTotal = (data.grandTotal != null && data.grandTotal !== '')
-            ? toNumber(data.grandTotal)
-            : mvTotal + svcTotal;
+          const grandTotal =
+            (data.grandTotal != null && data.grandTotal !== '')
+              ? toNumber(data.grandTotal)
+              : mvTotal + svcTotal;
 
           const grandWords = data.grandTotalWords || data.totalAmountInWord || '';
         %>
@@ -500,10 +514,6 @@
           </ol>
         </div>
 
-        <div class="bottom-note">
-          Note : This document is generated from testing Server and has no
-          legal or official value.
-        </div>
         <div class="bottom-note-url">
           Scan the QR code for genuinity of the receipt, It should land at
           <a href="https://kms.parivahan.gov.in">https://kms.parivahan.gov.in</a>
@@ -514,4 +524,3 @@
     </div>
   </body>
 </html>
-
