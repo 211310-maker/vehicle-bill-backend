@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+
 const BillSchema = new mongoose.Schema(
   {
     vehicleNo: {
@@ -29,11 +30,14 @@ const BillSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+
     totalAmount: {
       type: String,
       default: "",
       trim: true,
     },
+
+    // ✅ Existing amounts (kept as-is)
     taxAmount: {
       type: String,
       default: "",
@@ -54,11 +58,25 @@ const BillSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+
+    // ✅ NEW: to match StateTaxForm.jsx + Puducherry PDF table
+    mvTaxAmount: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    serviceUserChargeAmount: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
     permitValidity: {
       type: String,
       default: "",
       trim: true,
     },
+
     // vehicle type
     vehiclePermitType: {
       type: String,
@@ -78,12 +96,15 @@ const BillSchema = new mongoose.Schema(
       trim: true,
       uppercase: true,
     },
+
+    // ✅ Existing field (kept)
     mvTax: {
       type: String,
       default: "",
       trim: true,
     },
-  applicationFee: {
+
+    applicationFee: {
       type: String,
       default: "",
       trim: true,
@@ -94,6 +115,7 @@ const BillSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+
     grossVehicleWeight: {
       type: String,
       default: "",
@@ -104,12 +126,12 @@ const BillSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+
     additionalSeatingCapacity: {
       type: String,
       default: "0",
       trim: true,
     },
-
     additionalSleeperCapacity: {
       type: String,
       default: "0",
@@ -126,12 +148,14 @@ const BillSchema = new mongoose.Schema(
       default: "0",
       trim: true,
     },
+
     serviceType: {
       type: String,
       default: "",
       trim: true,
       uppercase: true,
     },
+
     makerStatus: {
       type: String,
       default: "",
@@ -147,7 +171,6 @@ const BillSchema = new mongoose.Schema(
     distance: {
       type: String,
       default: "",
-
       trim: true,
     },
     taxMode: {
@@ -166,12 +189,15 @@ const BillSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+
+    // District (kept as borderBarrier for compatibility)
     borderBarrier: {
       type: String,
       default: "",
       trim: true,
       uppercase: true,
     },
+
     bankRefNo: {
       type: String,
       default: "NA",
@@ -187,12 +213,14 @@ const BillSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+
     checkpostName: {
       type: String,
       default: "",
       trim: true,
       uppercase: true,
     },
+
     permitNo: {
       type: String,
       default: "",
@@ -214,6 +242,7 @@ const BillSchema = new mongoose.Schema(
       uppercase: true,
       trim: true,
     },
+
     sleeperCap: {
       type: String,
       default: "0",
@@ -224,6 +253,7 @@ const BillSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+
     fitnessValidity: {
       type: String,
       default: "",
@@ -239,6 +269,7 @@ const BillSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+
     permitAuthorizationNo: {
       type: String,
       default: "",
@@ -254,6 +285,7 @@ const BillSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+
     regnDate: {
       type: String,
       default: "",
@@ -288,6 +320,7 @@ const BillSchema = new mongoose.Schema(
       uppercase: true,
       trim: true,
     },
+
     issuingAuthority: {
       type: String,
       default: "",
@@ -303,6 +336,7 @@ const BillSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+
     createdBy: {
       type: mongoose.Schema.ObjectId,
       ref: "User",
@@ -321,5 +355,4 @@ const BillSchema = new mongoose.Schema(
 );
 
 const Bill = mongoose.model("Bill", BillSchema);
-
 module.exports = Bill;
