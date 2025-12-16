@@ -71,6 +71,14 @@ const BillSchema = new mongoose.Schema(
       trim: true,
     },
 
+    vehicleCategory: {
+    type: String,
+    default: "",
+    trim: true,
+    uppercase: true,
+    },
+
+
     permitValidity: {
       type: String,
       default: "",
