@@ -313,23 +313,23 @@
 
           <tr>
             <td class="label">Vehicle Category</td>
-            <td class="value">: <%= data.vehicleCategory || '' %></td>
+            <td class="value">: <%= data.vehicleCategory || data.vehicle_type || data.vehicleType || '' %></td>
             <td class="label">Mobile No.</td>
             <td class="value">: <%= data.mobileNo || '' %></td>
           </tr>
 
           <tr>
             <td class="label">Checkpost Name</td>
-            <td class="value">: <%= data.checkpostName || data.borderBarrier || '' %></td>
+            <td class="value">: <%= data.checkpostName || data.checkPostName || data.borderBarrier || '' %></td>
             <td class="label">Seating Capacity</td>
             <td class="value">: <%= data.seatingCapacityExcludingDriver || data.seatingCapacity || '' %></td>
           </tr>
 
           <tr>
             <td class="label">Sleeper Cap</td>
-            <td class="value">: <%= data.sleeperCap || data.sleeperCapacityExcludingDriver || '' %></td>
+            <td class="value">: <%= data.sleeperCap || data.sleeperCapacityExcludingDriver || data.sleeperCapacityExcludingDriver || '' %></td>
             <td class="label">Bank Ref. No.</td>
-            <td class="value">: <%= data.bankRefNo || data.apBankRefNo || data.rjBankRefNo || 'NA' %></td>
+            <td class="value">: <%= data.upBankRefNo || data.bankRefNo || data.apBankRefNo || data.rjBankRefNo || 'NA' %></td>
           </tr>
 
           <tr>
@@ -342,8 +342,8 @@
           <tr>
             <td class="label">Permit Type</td>
             <td class="value">: <%= data.permitType || '' %></td>
-            <td class="label">Permit Category</td>
-            <td class="value">: <%= data.permitCategory || '' %></td>
+            <td class="label"></td>
+            <td class="value"></td>
           </tr>
         </table>
 
