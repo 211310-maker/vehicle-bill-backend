@@ -2,220 +2,354 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,400;1,500&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="/css/style.css" />
-    <% if(data.cssFix){ %>
-    <link rel="stylesheet" href="/css/cssFix.css" />
-    <% } %>
+    <title>Telangana - Checkpost Tax e-Receipt</title>
+
+    <style>
+      * { box-sizing: border-box; }
+
+      @page { size: A4; margin: 0; }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background: #fff;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #000;
+      }
+
+      /* A4 canvas */
+      .page {
+        width: 210mm;
+        height: 297mm;
+        padding: 14mm 16mm;
+        margin: 0 auto;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* repeated faint background text */
+      .bg-text {
+        position: absolute;
+        inset: 0;
+        padding: 18mm 16mm;
+        opacity: 0.18;
+        color: #6b6b6b;
+        font-size: 12px;
+        line-height: 1.55;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      .bg-text .row {
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      /* center emblem watermark */
+      .bg-emblem {
+        position: absolute;
+        left: 50%;
+        top: 44%;
+        transform: translate(-50%, -50%);
+        width: 150mm;
+        max-width: 520px;
+        opacity: 0.16;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      /* content above bg */
+      .content {
+        position: relative;
+        z-index: 1;
+      }
+
+      /* top header with logo + center title + qr */
+      .top {
+        display: grid;
+        grid-template-columns: 90px 1fr 130px;
+        align-items: start;
+        column-gap: 10px;
+        margin-bottom: 8px;
+      }
+
+      .top .logo {
+        width: 90px;
+        height: 90px;
+        object-fit: contain;
+      }
+
+      .top .qr {
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
+        justify-self: end;
+      }
+
+      .title {
+        text-align: center;
+        margin-top: 10px;
+        line-height: 1.25;
+      }
+
+      .title .t1 { font-weight: 700; font-size: 12px; text-transform: uppercase; text-decoration: underline; }
+      .title .t2 { font-weight: 700; font-size: 12px; margin-top: 2px; }
+      .title .t3 { font-weight: 700; font-size: 11px; margin-top: 2px; }
+
+      /* Key-value section */
+      .kv-wrap {
+        margin-top: 6px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 28px;
+        row-gap: 8px;
+      }
+
+      table.kv {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        font-size: 12px;
+      }
+
+      table.kv td {
+        padding: 2px 0;
+        vertical-align: top;
+      }
+
+      table.kv td.label {
+        width: 42%;
+        white-space: nowrap;
+        font-weight: 600;
+      }
+
+      table.kv td.colon {
+        width: 4%;
+        text-align: center;
+        font-weight: 600;
+      }
+
+      table.kv td.value {
+        width: 54%;
+        font-weight: 700;
+        word-break: break-word;
+      }
+
+      .note-line {
+        margin-top: 8px;
+        font-size: 11px;
+      }
+
+      /* Tax table (blue grid like screenshot) */
+      .tax-table {
+        margin-top: 18px;
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        font-size: 11px;
+      }
+
+      .tax-table th, .tax-table td {
+        border: 1px solid #6fa8ff;
+        padding: 6px 8px;
+      }
+
+      .tax-table th {
+        text-align: center;
+        font-weight: 700;
+      }
+
+      .tax-table td.num {
+        text-align: right;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .tax-table td.part {
+        font-weight: 600;
+      }
+
+      .grand {
+        margin-top: 10px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .section {
+        margin-top: 8px;
+        font-size: 11px;
+      }
+
+      .section .hdr {
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      .section ol {
+        margin: 0;
+        padding-left: 18px;
+      }
+
+      .footer-bold {
+        margin-top: 12px;
+        font-size: 18px;
+        font-weight: 800;
+      }
+    </style>
   </head>
 
   <body>
-    <img class="qr-image" src="<%= data.src %>" alt="" />
-    <div class="main__printing">
-      Receipt Printing Date:
-      <br />
-      <%=data.receiptDate%>
-    </div>
-    <div class="main">
-      <div class="logo logo__up">
-        <img src="/images1/Telangana.jpg" alt="" />
+    <%
+      // ----- helpers -----
+      const safe = (v) => (v === null || v === undefined) ? "" : String(v);
+      const toNum = (v) => {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : 0;
+      };
+
+      // background text line (like screenshot)
+      const bgLine = `${safe(data.vehicleNo)} ${safe(data.receiptDate || data.paymentDate || data.upPaymentDate)}`.trim();
+
+      // tax rows:
+      // Prefer data.taxRows = [{particular, taxFees, fine, total}]
+      // Fallback: build common rows (permit fee / mv tax / service / token)
+      const rows = Array.isArray(data.taxRows) && data.taxRows.length
+        ? data.taxRows
+        : [
+            // you can pass these from backend if available
+            data.permitFeeParticular ? {
+              particular: data.permitFeeParticular,
+              taxFees: data.permitFeeAmount,
+              fine: data.permitFeeFine,
+              total: data.permitFeeTotal
+            } : null,
+            {
+              particular: `MV Tax ( ${safe(data.taxFrom_up || data.taxFrom || "")} To ${safe(data.taxTo_up || data.taxTo || "")} )`,
+              taxFees: data.mvTaxAmount != null ? data.mvTaxAmount : data.totalAmount,
+              fine: data.mvTaxFine,
+              total: data.mvTaxTotal != null ? data.mvTaxTotal : (toNum(data.mvTaxAmount != null ? data.mvTaxAmount : data.totalAmount) + toNum(data.mvTaxFine))
+            },
+            data.serviceAmount != null ? {
+              particular: `Service/User Charge ( ${safe(data.taxFrom_up || data.taxFrom || "")} To ${safe(data.taxTo_up || data.taxTo || "")} )`,
+              taxFees: data.serviceAmount,
+              fine: data.serviceFine,
+              total: data.serviceTotal != null ? data.serviceTotal : (toNum(data.serviceAmount) + toNum(data.serviceFine))
+            } : null,
+            data.tokenFeeAmount != null ? {
+              particular: `Tax Token Fee ( ${safe(data.taxFrom_up || data.taxFrom || "")} To ${safe(data.taxTo_up || data.taxTo || "")} )`,
+              taxFees: data.tokenFeeAmount,
+              fine: data.tokenFeeFine,
+              total: data.tokenFeeTotal != null ? data.tokenFeeTotal : (toNum(data.tokenFeeAmount) + toNum(data.tokenFeeFine))
+            } : null,
+          ].filter(Boolean);
+
+      // grand total (avoid string concat bug)
+      const computedGrand = rows.reduce((s, r) => s + toNum(r.total), 0);
+      const grandTotal = (data.grandTotal != null && data.grandTotal !== "")
+        ? toNum(data.grandTotal)
+        : computedGrand;
+
+      const grandWords = safe(data.grandTotalWords || data.totalAmountInWord || "");
+    %>
+
+    <div class="page">
+      <!-- repeated background text -->
+      <div class="bg-text" aria-hidden="true">
+        <% for (let i = 0; i < 26; i++) { %>
+          <div class="row">
+            <%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>
+          </div>
+        <% } %>
       </div>
+
+      <!-- center watermark emblem (use Telangana.jpg like screenshot seal) -->
+      <img class="bg-emblem" src="/images1/Telangana.jpg" alt="" />
 
       <div class="content">
-        <div class="content__top">
-          <h3 class="content__heading">GOVERNMENT OF TELANGANA</h3>
-          <p class="content__title">Department of Transport</p>
-          <p class="content__desc">Checkpost Tax e-Receipt</p>
+        <!-- TOP -->
+        <div class="top">
+          <img class="logo" src="/images1/Telangana.jpg" alt="Telangana Logo" />
+
+          <div class="title">
+            <div class="t1">GOVERNMENT OF TELANGANA</div>
+            <div class="t2">Department of Transport</div>
+            <div class="t3">Checkpost Tax e-Receipt(Single Journey)</div>
+          </div>
+
+          <% if (data.src) { %>
+            <img class="qr" src="<%= data.src %>" alt="QR Code" />
+          <% } else { %>
+            <div></div>
+          <% } %>
         </div>
 
-        <table>
-          <tr class="r1 r11">
-            <td class="r1-1">Registration No.</td>
-            <td class="r1-2">: <b><%=data.vehicleNo%></b></td>
-          </tr>
-          <tr class="r1 r12">
-            <td class="r1-1">Receipt No.</td>
-            <td class="r1-2">: <%=data.receiptNo%></td>
-          </tr>
-          <tr class="r1 r13">
-            <td class="r1-1">Payment Date</td>
-            <td class="r1-2">: <%=data.upPaymentDate%></td>
-          </tr>
-          <tr class="r1 r14">
-            <td class="r1-1">Owner Name</td>
-            <td class="r1-2">: <%=data.ownerName%></td>
-          </tr>
-          <tr class="r1 r15">
-            <td class="r1-1">Chassis No.</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.chassisNo%></td>
-            <td>Tax Mode</td>
-            <td>&nbsp;&nbsp;: <%=data.taxMode%></td>
-          </tr>
-          <tr class="r1 r16">
-            <td class="r1-1">Vehicle Type.</td>
-            <td class="r1-2">
-              &nbsp;&nbsp;:
-              <div class="r16-3"><%=data.vehiclePermitType%></div>
-            </td>
-            <td>Vehicle Class</td>
-            <td>&nbsp;&nbsp;: <%=data.vehicleClass%></td>
-          </tr>
-          <tr class="r1 r17">
-            <td class="r1-1">Mobile No.</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.mobileNo%></td>
-            <td>Checkpost Name</td>
-            <td>&nbsp;&nbsp;: <%=data.borderBarrier%></td>
-          </tr>
-          <tr class="r1 r18">
-            <td class="r1-1">Sleeper Cap.</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.sleeperCap%></td>
-            <% if(data.vehiclePermitType === 'GOODS VEHICLE'){ %>
-            <td>Gross Weight</td>
-            <td>&nbsp;&nbsp;: <%=data.grossVehicleWeight%> KG.</td>
-            <% }else{ %>
-            <td>
-              Seating Cap(Ex. <br />
-              Driver
-            </td>
-            <td>&nbsp;&nbsp;: <%=data.seatingCapacityExcludingDriver%></td>
-            <% } %>
-          </tr>
-          <tr class="r1 r19">
-            <td class="r1-1">Bank Ref. No.</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.upBankRefNo%></td>
-            <td>Payment Mode</td>
-            <td>&nbsp;&nbsp;: <%=data.paymentMode%></td>
-          </tr>
-          <tr class="r1 r20">
-            <td class="r1-1">Service Type</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.serviceType%></td>
-          </tr>
-          <tr class="r1 r21">
-            <td class="r1-1">Permit Type</td>
-            <td class="r1-2">&nbsp;&nbsp;: <%=data.permitType%></td>
-            <td>Permit Category</td>
-            <td>&nbsp;&nbsp;:</td>
-          </tr>
+        <!-- KEY VALUES (2 blocks like screenshot) -->
+        <div class="kv-wrap">
+          <!-- LEFT block -->
+          <table class="kv">
+            <tr><td class="label">Registration No.</td><td class="colon">:</td><td class="value"><%= safe(data.vehicleNo) %></td></tr>
+            <tr><td class="label">Owner Name</td><td class="colon">:</td><td class="value"><%= safe(data.ownerName) %></td></tr>
+            <tr><td class="label">Tax Mode</td><td class="colon">:</td><td class="value"><%= safe(data.taxMode) %></td></tr>
+            <tr><td class="label">Vehicle Class</td><td class="colon">:</td><td class="value"><%= safe(data.vehicleClass) %></td></tr>
+            <tr><td class="label">Mobile No.</td><td class="colon">:</td><td class="value"><%= safe(data.mobileNo) %></td></tr>
+            <tr><td class="label">Seating Capacity</td><td class="colon">:</td><td class="value"><%= safe(data.seatingCapacityExcludingDriver || data.seatingCapacity) %></td></tr>
+            <tr><td class="label">Bank Ref. No.</td><td class="colon">:</td><td class="value"><%= safe(data.upBankRefNo || data.bankRefNo) %></td></tr>
+            <tr><td class="label">Permit Validity</td><td class="colon">:</td><td class="value"><%= safe(data.permitValidity) %></td></tr>
+            <tr><td class="label">Permit Type</td><td class="colon">:</td><td class="value"><%= safe(data.permitType) %></td></tr>
+            <tr><td class="label">Gross Combination Weight(in kg.)</td><td class="colon">:</td><td class="value"><%= safe(data.grossVehicleWeight || "") %></td></tr>
+          </table>
+
+          <!-- RIGHT block -->
+          <table class="kv">
+            <tr><td class="label">Receipt No.</td><td class="colon">:</td><td class="value"><%= safe(data.receiptNo) %></td></tr>
+            <tr><td class="label">Chassis No.</td><td class="colon">:</td><td class="value"><%= safe(data.chassisNo) %></td></tr>
+            <tr><td class="label">Vehicle Type</td><td class="colon">:</td><td class="value"><%= safe(data.vehiclePermitType) %></td></tr>
+            <tr><td class="label">Vehicle Category</td><td class="colon">:</td><td class="value"><%= safe(data.vehicleCategory) %></td></tr>
+            <tr><td class="label">CheckPost Name</td><td class="colon">:</td><td class="value"><%= safe(data.borderBarrier || data.checkpostName || data.checkPostName) %></td></tr>
+            <tr><td class="label">Sleeper Cap</td><td class="colon">:</td><td class="value"><%= safe(data.sleeperCap) %></td></tr>
+            <tr><td class="label">Payment Mode</td><td class="colon">:</td><td class="value"><%= safe(data.paymentMode) %></td></tr>
+            <tr><td class="label">Service Type</td><td class="colon">:</td><td class="value"><%= safe(data.serviceType) %></td></tr>
+            <tr><td class="label">Route</td><td class="colon">:</td><td class="value"><%= safe(data.route) %></td></tr>
+          </table>
+        </div>
+
+        <!-- TAX TABLE -->
+        <table class="tax-table">
+          <thead>
+            <tr>
+              <th>Tax/Fee Particular</th>
+              <th style="width: 12%;">Tax/Fees</th>
+              <th style="width: 12%;">Fine</th>
+              <th style="width: 12%;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% rows.forEach((r) => { %>
+              <tr>
+                <td class="part"><%= safe(r.particular) %></td>
+                <td class="num"><%= toNum(r.taxFees) %></td>
+                <td class="num"><%= toNum(r.fine) %></td>
+                <td class="num"><%= toNum(r.total) %></td>
+              </tr>
+            <% }) %>
+          </tbody>
         </table>
 
-        <div class="content__money">
-          <div class="content__money-r1 d-flex">
-            <div class="m1"><b>Particular</b></div>
-            <div class="m2"><b>Fees/Tax</b></div>
-            <div class="m3"><b>Fine</b></div>
-            <div class="m4"><b>Total</b></div>
-          </div>
-          <div class="content__money-r2 d-flex">
-            <div class="m1">
-              MV Tax( <%=data.taxFrom_up%> TO <%=data.taxTo_up%> )
-            </div>
-            <div class="m2"><%=data.totalAmount%></div>
-            <div class="m3">0</div>
-            <div class="m4"><%=data.totalAmount%></div>
-          </div>
+        <div class="grand">
+          Grand Total : <%= grandTotal %>/- <%= grandWords ? ("- " + grandWords + " Only") : "" %>
         </div>
 
-        <div class="content__grand">
-          <p>
-            <span><b>Grand Total :</b></span> ₹ <%=data.totalAmount%>/- (
-            <%=data.totalAmountInWord%> )
-          </p>
-          <p>
-            <i
-              >Note : 1) This is a computer generated printout and no signature
-              is required</i
-            >
-          </p>
-          <p>
-            <i>
-              2) Incorrect mentioning of vehicle class or seating capacity may
-              lead to tax evasion and defaulter shall be a liable for panel
-              action. <br /><br />
-              you will also receive the payment confirmation message.
-            </i>
-          </p>
-          <br />
-          <br />
-          <p class="main__warning">
-            Scan the QR code for genuinity of the receipt, It should land at
-            <span><u>https://kms.privahan.gov.in</u></span> <br />
-          </p>
-          <div class="main__warning main__warning-2">
-            site. In case the URL is different, then receipt could be a fake
-            one, please raise a complain.
-          </div>
+        <div class="section">
+          <div class="hdr">Note :</div>
+          <div class="hdr">Terms and Conditions:</div>
+          <ol>
+            <li>This is a computer generated printout and no signature is required.</li>
+            <li>Should not carry unlawful/unaccompanied goods.</li>
+            <li>If any false information/discrepancies are found at later, necessary action will be taken against the vehicle owner/driver.</li>
+          </ol>
         </div>
-        <br />
-      </div>
 
-      <div class="content__back">
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
-        <p>
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span> &nbsp;
-          <span><%=data.vehicleNo%> / <%=data.paymentDate%>,</span>
-        </p>
+        <div class="footer-bold">Scan the QR code for genuinity of the receipt.</div>
       </div>
     </div>
   </body>
