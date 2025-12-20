@@ -46,17 +46,19 @@
       }
 
       /* center emblem watermark */
-      .bg-emblem {
-        position: absolute;
-        left: 50%;
-        top: 44%;
-        transform: translate(-50%, -50%);
-        width: 150mm;
-        max-width: 520px;
-        opacity: 0.16;
-        z-index: 0;
-        pointer-events: none;
-      }
+     /* center watermark emblem (small – slightly bigger than logo) */
+        .bg-emblem {
+            position: absolute;
+            left: 50%;
+            top: 44%;
+            transform: translate(-50%, -50%);
+            width: 120px;     /* logo is ~90px, so this is slightly bigger */
+            height: 120px;
+            opacity: 0.16;
+             z-index: 0;
+              pointer-events: none;
+          }
+
 
       /* content above bg */
       .content {
