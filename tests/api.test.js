@@ -1,5 +1,6 @@
 const assert = require('assert');
 const http = require('http');
+const Bill = require('../model/Bill');
 const app = require('../app');
 
 const REQUIRED_KERALA_ARRAYS = [
@@ -71,6 +72,36 @@ const requestJson = async (method, path, body) => {
   });
 };
 
+function stubBillModel() {
+  const originalFindOne = Bill.findOne;
+  const originalDb = Bill.db;
+
+  Bill.db = { readyState: 1 };
+
+  Bill.findOne = () => ({
+    sort: () => ({
+      lean: async () => ({
+        vehicleNo: 'TEST1234',
+        chassisNo: 'CHASSIS001',
+        mobileNo: '9999999999',
+        ownerName: 'John Doe',
+        borderBarrier: 'BORDER',
+        checkpostName: 'CHECKPOST',
+        permitType: 'PERMIT',
+        vehiclePermitType: 'GOODS VEHICLE',
+        vehicleClass: 'HCV',
+        grossVehicleWeight: '1234',
+        unladenWeight: '567',
+      }),
+    }),
+  });
+
+  return () => {
+    Bill.findOne = originalFindOne;
+    Bill.db = originalDb;
+  };
+}
+
 async function testFieldsEndpoint() {
   const res = await requestJson('GET', '/api/fields');
 
@@ -88,20 +119,25 @@ async function testFieldsEndpoint() {
 }
 
 async function testGetDetailsEndpoint() {
+  const restoreBill = stubBillModel();
+
   const res = await requestJson('POST', '/api/get-details', {
     vehicleNo: 'TEST1234',
-    state: 'Kerela',
   });
 
   assert.strictEqual(res.status, 200, 'POST /api/get-details should return 200');
+  assert.strictEqual(res.body.success, true, 'Response should indicate success');
   assert.ok(res.body.detail, 'Response should include detail object');
 
   const detail = res.body.detail;
-  ['chassisNo', 'mobileNo', 'ownerName', 'borderBarrier', 'checkpostName', 'checkPostName', 'seatingCapacityExcludingDriver', 'serviceType', 'taxMode'].forEach((key) => {
+  ['chassisNo', 'mobileNo', 'ownerName', 'borderBarrier', 'checkpostName', 'permitType', 'vehiclePermitType', 'vehicleClass', 'grossVehicleWeight', 'unladenWeight'].forEach((key) => {
     assert.ok(Object.prototype.hasOwnProperty.call(detail, key), `detail should contain ${key}`);
   });
 
-  assert.strictEqual(detail.state, 'kerala', 'State alias kerela should normalize to kerala');
+  assert.strictEqual(detail.chassisNo, 'CHASSIS001');
+  assert.strictEqual(detail.ownerName, 'John Doe');
+
+  restoreBill();
 }
 
 async function run() {
