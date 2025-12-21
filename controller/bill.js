@@ -16,6 +16,7 @@ const ip = require("ip");
 const moment = require("moment");
 const axios = require("axios");
 const fs = require("fs");
+const puppeteer = require("puppeteer");
 
 // --- TEMPLATE ALIASES MAP ---
 // Map short / aliased state tokens to canonical template base names (file names without suffix).
@@ -246,17 +247,65 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       return res.status(500).send("Template for this state is not available.");
     }
 
+    // 5. Render HTML using EJS (we still render HTML -- kept for fallback and debugging)
     const htmlContent = await ejs.renderFile(templatePath, { data });
-
     logger.info("Html content generated");
 
     if (!htmlContent) {
       return res.status(500).send("An error occurred while generating HTML");
     }
 
-    // 6. Just return the HTML (browser can Print → Save as PDF)
-    res.setHeader("Content-Type", "text/html; charset=utf-8");
-    return res.send(htmlContent);
+    // === NEW: Generate PDF using Puppeteer by loading the /bill/:id/page URL ===
+    // Use the absolute URL we previously built for the page (pdfData)
+    // pdfData already contains the absolute URL for /bill/:id/page
+    let browser = null;
+    try {
+      browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+
+      const page = await browser.newPage();
+
+      // If your page requires cookies/auth, you can set cookies here, e.g.:
+      // if (req.headers.cookie) {
+      //   const cookie = require('cookie');
+      //   const parsed = cookie.parse(req.headers.cookie);
+      //   const cookies = Object.entries(parsed).map(([name, value]) => ({
+      //     name, value, domain: (process.env.APP_BASE_DOMAIN || req.headers.host), path: '/', httpOnly: false
+      //   }));
+      //   await page.setCookie(...cookies);
+      // }
+
+      // Navigate to the printable page. Wait for network idle so dynamic content finishes.
+      await page.goto(pdfData, { waitUntil: 'networkidle0', timeout: 30000 });
+
+      // Ensure @media print rules apply
+      try { await page.emulateMediaType('print'); } catch (e) { /* ignore if deprecated */ }
+
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' },
+      });
+
+      // Return PDF as attachment so browsers download it automatically
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="receipt-${id}.pdf"`);
+      return res.send(pdfBuffer);
+
+    } catch (err) {
+      // If Puppeteer fails, log the error and fall back to returning the HTML so UX is preserved.
+      logger.error(`Puppeteer PDF generation failed for bill ${id}: ${err.message}`, { stack: err.stack });
+
+      // Fallback: return the HTML page (current behavior)
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      return res.send(htmlContent);
+    } finally {
+      if (browser) {
+        try { await browser.close(); } catch (e) { /* swallow */ }
+      }
+    }
   } catch (err) {
     logger.error(`PDF (HTML) generation error: ${err.message}`, {
       stack: err.stack,
