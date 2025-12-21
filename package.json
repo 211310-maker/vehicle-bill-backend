@@ -2,10 +2,10 @@
   "name": "billgenerator",
   "version": "1.0.0",
   "description": "backend built with Node.js, MongoDb",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "cross-env NODE_ENV=dev nodemon app.js",
+    "start": "node server.js",
+    "dev": "cross-env NODE_ENV=dev nodemon server.js",
     "test": "node tests/api.test.js"
   },
   "engines": {
