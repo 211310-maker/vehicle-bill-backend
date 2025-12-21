@@ -162,8 +162,28 @@
   </head>
 
   <body>
+    <%
+      const hasValue = (v) =>
+        v !== undefined && v !== null && String(v).trim() !== "";
+
+      // ✅ Goods logic for Assam should depend on Vehicle Class (since vehiclePermitType is forced TRANSPORT)
+      const isGoodsClass = (data.vehicleClass || "") === "GOODS CARRIER";
+
+      // ✅ Sleeper Cap: prefer form field first, then sleeperCap, else blank (never force 0)
+      const sleeperCapValue = hasValue(data.sleeperCapacityExcludingDriver)
+        ? data.sleeperCapacityExcludingDriver
+        : hasValue(data.sleeperCap)
+          ? data.sleeperCap
+          : "";
+
+      // Useful common dates
+      const payDate = data.paymentDate || data.receiptDate || "";
+    %>
+
     <div class="main">
-      <img class="qr-image-as" src="<%= data.src %>" />
+      <% if (data.src) { %>
+        <img class="qr-image-as" src="<%= data.src %>" />
+      <% } %>
 
       <div class="logo_as_main">
         <img src="/images1/Assam.png" />
@@ -182,10 +202,8 @@
       <div class="content__back">
         <% for (let i = 0; i < 16; i++) { %>
           <p>
-            <%= data.vehicleNo || '' %> /
-            <%= data.paymentDate || data.receiptDate || '' %>,
-            <%= data.vehicleNo || '' %> /
-            <%= data.paymentDate || data.receiptDate || '' %>
+            <%= data.vehicleNo || '' %> / <%= payDate %>,
+            <%= data.vehicleNo || '' %> / <%= payDate %>
           </p>
         <% } %>
       </div>
@@ -201,7 +219,7 @@
 
           <tr>
             <td class="r1-1">Payment Date</td>
-            <td class="r1-2">: <%= data.paymentDate || data.receiptDate || '' %></td>
+            <td class="r1-2">: <%= payDate %></td>
             <td class="r1-1">Owner Name</td>
             <td class="r1-2">: <%= data.ownerName || '' %></td>
           </tr>
@@ -233,11 +251,9 @@
               : <%= data.borderBarrier || data.districtName || data.district || '' %>
             </td>
 
-            <% if ((data.vehiclePermitType || '') === 'GOODS VEHICLE') { %>
+            <% if (isGoodsClass) { %>
               <td class="r1-1">Gross Weight</td>
-              <td class="r1-2">
-                : <%= data.grossVehicleWeight || '' %> KG
-              </td>
+              <td class="r1-2">: <%= data.grossVehicleWeight || '' %> KG</td>
             <% } else { %>
               <td class="r1-1">Seating Cap (Ex. Driver)</td>
               <td class="r1-2">
@@ -248,13 +264,9 @@
 
           <tr>
             <td class="r1-1">Sleeper Cap.</td>
-            <td class="r1-2">
-              : <%= data.sleeperCap || data.sleeperCapacityExcludingDriver || '' %>
-            </td>
+            <td class="r1-2">: <%= sleeperCapValue %></td>
             <td class="r1-1">Bank Ref. No.</td>
-            <td class="r1-2">
-              : <%= data.upBankRefNo || data.bankRefNo || 'NA' %>
-            </td>
+            <td class="r1-2">: <%= data.upBankRefNo || data.bankRefNo || 'NA' %></td>
           </tr>
 
           <tr>
