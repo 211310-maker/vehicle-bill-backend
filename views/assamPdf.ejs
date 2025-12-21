@@ -14,6 +14,10 @@
         margin: 0;
       }
 
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         margin: 0;
         padding: 0;
@@ -21,102 +25,112 @@
         font-size: 11px;
         line-height: 1.2;
         color: #000;
+        background: #fff;
       }
 
+      /* Full A4 canvas */
       .main {
         position: relative;
         width: 100%;
-        min-height: 1123px; /* helps print engines avoid weird extra space */
+        height: 100vh; /* puppeteer/browser will treat as full page height */
         padding: 18px 30px 30px 30px;
-        box-sizing: border-box;
-        overflow: hidden; /* important: background pattern won't overflow */
       }
 
-      /* QR */
+      /* QR (fixed at top-right) */
       .qr-image-as {
         position: absolute;
         top: 18px;
         right: 30px;
         width: 120px;
         height: 120px;
-        z-index: 10;
+        z-index: 20;
       }
 
-      /* Header left logo */
+      /* Logo top-left */
       .logo_as {
         position: absolute;
         top: 18px;
         left: 30px;
-        z-index: 10;
+        z-index: 20;
       }
-
       .logo_as img {
         width: 95px;
         display: block;
       }
 
-      /* ✅ Watermark: smaller + a bit darker like reference */
-      .logo_as_main {
-        position: absolute;
-        top: 52%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        opacity: 0.12;               /* was 0.07, now darker */
-        z-index: 1;
-        pointer-events: none;
-      }
-
-      .logo_as_main img {
-        width: 250px;                /* was 330px, now smaller */
-      }
-
-      /* Header center */
+      /* Header centered */
       .as-header {
         position: absolute;
         top: 44px;
         left: 0;
         right: 0;
         text-align: center;
-        z-index: 6;
+        z-index: 20;
       }
-
       .as-header h3 {
         margin: 0;
         font-size: 14px;
         font-weight: 700;
       }
-
       .as-header p {
         margin: 0;
         font-size: 11px;
       }
 
-      /* ✅ Repeating BG text: should cover full receipt like your reference */
-      .content__back {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        padding: 115px 30px 120px 30px; /* keep clear of header + bottom text */
-        box-sizing: border-box;
-        opacity: 0.18;                  /* a bit more visible */
-        font-size: 13px;                /* larger like ref */
-        font-weight: 500;
-        line-height: 1.55;
-        white-space: nowrap;
-        z-index: 2;
-        pointer-events: none;
+      /*
+        ✅ KEY FIX:
+        receipt-wrap grows only until the end of T&C + warning text.
+        Background + watermark live INSIDE this, so they stop there automatically.
+      */
+      .receipt-wrap {
+        position: relative;
+        z-index: 5;
+        margin-top: 120px; /* keeps space for logo/header/QR */
+        padding-top: 0;
+        padding-bottom: 6px;
       }
 
+      /*
+        ✅ Background vehicle/date repeated lines
+        Now bounded by receipt-wrap height (no more filling blank area).
+      */
+      .content__back {
+        position: absolute;
+        inset: 0; /* top/right/bottom/left = 0 within receipt-wrap */
+        opacity: 0.14;
+        font-size: 10px;
+        line-height: 1.35;
+        white-space: nowrap;
+        z-index: 1;
+        pointer-events: none;
+        overflow: hidden; /* ensures it never leaks outside receipt-wrap */
+      }
       .content__back p {
         margin: 0;
       }
 
+      /*
+        ✅ Center watermark (logo) INSIDE receipt-wrap
+        smaller + slightly darker than before
+      */
+      .wm-center {
+        position: absolute;
+        top: 48%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.11; /* darker than 0.07 */
+        z-index: 2;
+        pointer-events: none;
+      }
+      .wm-center img {
+        width: 240px; /* small (little bigger than logo, not huge) */
+        display: block;
+      }
+
+      /* Foreground content */
       .content {
         position: relative;
-        z-index: 7;
-        margin-top: 120px;
+        z-index: 5;
       }
 
       table {
@@ -140,25 +154,29 @@
       .r1-2 {
         width: 28%;
         padding-left: 6px;
+        font-weight: 700;
       }
 
       .tax-table-as {
         width: 100%;
-        margin-top: 8px;
+        margin-top: 10px;
         border-collapse: collapse;
       }
 
       .tax-table-as th,
       .tax-table-as td {
         border: 1px solid #000;
-        padding: 3px 4px;
+        padding: 4px 6px;
         text-align: center;
       }
-
       .tax-table-as td:first-child {
         text-align: left;
+        font-weight: 500;
       }
 
+      .content__grand {
+        margin-top: 6px;
+      }
       .content__grand p {
         margin: 2px 0;
       }
@@ -169,12 +187,10 @@
         line-height: 1.5;
         font-weight: 700;
       }
-
       .main__warning u {
         color: #0b57d0;
         text-decoration: underline;
       }
-
     </style>
   </head>
 
@@ -183,35 +199,26 @@
       const hasValue = (v) =>
         v !== undefined && v !== null && String(v).trim() !== "";
 
-      // ✅ Assam goods logic: based on Vehicle Class
+      // Goods depends on vehicleClass for Assam
       const isGoodsClass = (data.vehicleClass || "") === "GOODS CARRIER";
 
-      // ✅ Sleeper Cap: prefer form field first, then sleeperCap, else blank (never force 0)
+      const payDate = data.paymentDate || data.receiptDate || "";
+
+      // Sleeper cap should NOT force 0
       const sleeperCapValue = hasValue(data.sleeperCapacityExcludingDriver)
         ? data.sleeperCapacityExcludingDriver
         : hasValue(data.sleeperCap)
           ? data.sleeperCap
           : "";
 
-      // ✅ Unladen weight (blank if missing)
-      const unladenWtValue = hasValue(data.unladenWeight) ? data.unladenWeight : "";
-
-      // Useful common dates
-      const payDate = data.paymentDate || data.receiptDate || "";
-
-      // ✅ Background stamp text value in ref looks like: "<VEHNO> <DATE>"
-      // Keep it short, repeated.
-      const stampText = `${data.vehicleNo || ""} ${payDate}`.trim();
+      // Unladen weight for Goods
+      const unladenWt = hasValue(data.unladenWeight) ? data.unladenWeight : "";
     %>
 
     <div class="main">
       <% if (data.src) { %>
         <img class="qr-image-as" src="<%= data.src %>" />
       <% } %>
-
-      <div class="logo_as_main">
-        <img src="/images1/Assam.png" />
-      </div>
 
       <div class="logo_as">
         <img src="/images1/Assam.png" />
@@ -223,151 +230,154 @@
         <p>Checkpost Tax e-Receipt</p>
       </div>
 
-      <!-- ✅ FULL-PAGE repeating background like reference -->
-      <div class="content__back">
-        <% 
-          // Fill the whole page: 26-30 rows usually cover A4.
-          for (let i = 0; i < 30; i++) { 
-        %>
-          <p>
-            <%= stampText %>&nbsp;&nbsp;&nbsp;
-            <%= stampText %>&nbsp;&nbsp;&nbsp;
-            <%= stampText %>&nbsp;&nbsp;&nbsp;
-            <%= stampText %>
-          </p>
-        <% } %>
-      </div>
-
-      <div class="content">
-        <table>
-          <tr>
-            <td class="r1-1">Registration No.</td>
-            <td class="r1-2">: <b><%= data.vehicleNo || '' %></b></td>
-            <td class="r1-1">Receipt No.</td>
-            <td class="r1-2">: <%= data.receiptNo || '' %></td>
-          </tr>
-
-          <tr>
-            <td class="r1-1">Payment Date</td>
-            <td class="r1-2">: <%= payDate %></td>
-            <td class="r1-1">Owner Name</td>
-            <td class="r1-2">: <%= data.ownerName || '' %></td>
-          </tr>
-
-          <tr>
-            <td class="r1-1">Chassis No.</td>
-            <td class="r1-2">: <%= data.chassisNo || '' %></td>
-            <td class="r1-1">Tax Mode</td>
-            <td class="r1-2">: <%= data.taxMode || '' %></td>
-          </tr>
-
-          <tr>
-            <td class="r1-1">Vehicle Type</td>
-            <td class="r1-2">: <%= data.vehiclePermitType || '' %></td>
-            <td class="r1-1">Vehicle Class</td>
-            <td class="r1-2">: <%= data.vehicleClass || '' %></td>
-          </tr>
-
-          <tr>
-            <td class="r1-1">Vehicle Category</td>
-            <td class="r1-2">: <%= data.vehicleCategory || data.vehicleType || '' %></td>
-            <td class="r1-1">Mobile No.</td>
-            <td class="r1-2">: <%= data.mobileNo || '' %></td>
-          </tr>
-
-          <tr>
-            <td class="r1-1">District</td>
-            <td class="r1-2">
-              : <%= data.borderBarrier || data.districtName || data.district || '' %>
-            </td>
-
-            <% if (isGoodsClass) { %>
-              <td class="r1-1">Gross Weight</td>
-              <td class="r1-2">: <%= data.grossVehicleWeight || '' %> KG</td>
-            <% } else { %>
-              <td class="r1-1">Seating Cap (Ex. Driver)</td>
-              <td class="r1-2">
-                : <%= data.seatingCapacityExcludingDriver || data.seatingCapacity || '' %>
-              </td>
-            <% } %>
-          </tr>
-
-          <!-- ✅ FIX: Goods Carrier shows Unladen Wt. instead of Sleeper Cap -->
-          <tr>
-            <% if (isGoodsClass) { %>
-              <td class="r1-1">Unladen Wt. (in kg)</td>
-              <td class="r1-2">: <%= unladenWtValue %></td>
-            <% } else { %>
-              <td class="r1-1">Sleeper Cap.</td>
-              <td class="r1-2">: <%= sleeperCapValue %></td>
-            <% } %>
-
-            <td class="r1-1">Bank Ref. No.</td>
-            <td class="r1-2">: <%= data.upBankRefNo || data.bankRefNo || 'NA' %></td>
-          </tr>
-
-          <tr>
-            <td class="r1-1">Payment Mode</td>
-            <td class="r1-2">: <%= data.paymentMode || '' %></td>
-            <td class="r1-1">Service Type</td>
-            <td class="r1-2">: <%= data.serviceType || 'NOT APPLICABLE' %></td>
-          </tr>
-
-          <tr>
-            <td class="r1-1">Permit Type</td>
-            <td class="r1-2">: <%= data.permitType || '' %></td>
-            <td class="r1-1"></td>
-            <td class="r1-2"></td>
-          </tr>
-        </table>
-
-        <table class="tax-table-as">
-          <thead>
-            <tr>
-              <th>Tax/Fee Particular</th>
-              <th>Tax/Fees</th>
-              <th>Fine</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                Passenger Tax (
-                <%= data.taxFrom || data.mvTaxFrom || '' %> to
-                <%= data.taxTo || data.mvTaxTo || '' %>
-                )
-              </td>
-              <td><%= data.totalAmount || 0 %></td>
-              <td>0</td>
-              <td><%= data.totalAmount || 0 %></td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="content__grand">
-          <p>
-            <b>Grand Total :</b>
-            <%= data.totalAmount || 0 %>/- (
-            <%= data.totalAmountInWord || '' %> )
-          </p>
-
-          <p><b>Terms and Conditions:</b></p>
-          <p>1. This is a computer generated printout and no signature is required.</p>
-          <p>2. Should not carry unlawful/unaccompanied goods.</p>
-          <p>
-            3. If any false information/discrepancies are found at later,
-            necessary action will be taken against the vehicle owner/driver.
-          </p>
+      <!-- ✅ Everything below determines where background ends -->
+      <div class="receipt-wrap">
+        <!-- repeated bg lines bounded to receipt-wrap height -->
+        <div class="content__back">
+          <% for (let i = 0; i < 28; i++) { %>
+            <p>
+              <%= data.vehicleNo || '' %> <%= payDate ? (' ' + payDate) : '' %>
+              &nbsp;&nbsp;
+              <%= data.vehicleNo || '' %> <%= payDate ? (' ' + payDate) : '' %>
+              &nbsp;&nbsp;
+              <%= data.vehicleNo || '' %> <%= payDate ? (' ' + payDate) : '' %>
+            </p>
+          <% } %>
         </div>
 
-        <p class="main__warning">
-          <b>
+        <!-- centered watermark bounded to receipt-wrap height -->
+        <div class="wm-center">
+          <img src="/images1/Assam.png" alt="Watermark" />
+        </div>
+
+        <div class="content">
+          <table>
+            <tr>
+              <td class="r1-1">Registration No.</td>
+              <td class="r1-2">: <%= data.vehicleNo || '' %></td>
+              <td class="r1-1">Receipt No.</td>
+              <td class="r1-2">: <%= data.receiptNo || '' %></td>
+            </tr>
+
+            <tr>
+              <td class="r1-1">Payment Date</td>
+              <td class="r1-2">: <%= payDate %></td>
+              <td class="r1-1">Owner Name</td>
+              <td class="r1-2">: <%= data.ownerName || '' %></td>
+            </tr>
+
+            <tr>
+              <td class="r1-1">Chassis No.</td>
+              <td class="r1-2">: <%= data.chassisNo || '' %></td>
+              <td class="r1-1">Tax Mode</td>
+              <td class="r1-2">: <%= data.taxMode || '' %></td>
+            </tr>
+
+            <tr>
+              <td class="r1-1">Vehicle Type</td>
+              <td class="r1-2">: <%= data.vehiclePermitType || '' %></td>
+              <td class="r1-1">Vehicle Class</td>
+              <td class="r1-2">: <%= data.vehicleClass || '' %></td>
+            </tr>
+
+            <tr>
+              <td class="r1-1">Vehicle Category</td>
+              <td class="r1-2">: <%= data.vehicleCategory || data.vehicleType || '' %></td>
+              <td class="r1-1">Mobile No.</td>
+              <td class="r1-2">: <%= data.mobileNo || '' %></td>
+            </tr>
+
+            <tr>
+              <td class="r1-1">District</td>
+              <td class="r1-2">
+                : <%= data.borderBarrier || data.districtName || data.district || '' %>
+              </td>
+
+              <% if (isGoodsClass) { %>
+                <td class="r1-1">Gross Weight</td>
+                <td class="r1-2">: <%= data.grossVehicleWeight || '' %> KG</td>
+              <% } else { %>
+                <td class="r1-1">Seating Cap (Ex. Driver)</td>
+                <td class="r1-2">
+                  : <%= data.seatingCapacityExcludingDriver || data.seatingCapacity || '' %>
+                </td>
+              <% } %>
+            </tr>
+
+            <tr>
+              <% if (isGoodsClass) { %>
+                <td class="r1-1">Unladen Wt.</td>
+                <td class="r1-2">: <%= unladenWt %></td>
+              <% } else { %>
+                <td class="r1-1">Sleeper Cap.</td>
+                <td class="r1-2">: <%= sleeperCapValue %></td>
+              <% } %>
+
+              <td class="r1-1">Bank Ref. No.</td>
+              <td class="r1-2">: <%= data.upBankRefNo || data.bankRefNo || 'NA' %></td>
+            </tr>
+
+            <tr>
+              <td class="r1-1">Payment Mode</td>
+              <td class="r1-2">: <%= data.paymentMode || '' %></td>
+              <td class="r1-1">Service Type</td>
+              <td class="r1-2">: <%= data.serviceType || 'NOT APPLICABLE' %></td>
+            </tr>
+
+            <tr>
+              <td class="r1-1">Permit Type</td>
+              <td class="r1-2">: <%= data.permitType || '' %></td>
+              <td class="r1-1"></td>
+              <td class="r1-2"></td>
+            </tr>
+          </table>
+
+          <table class="tax-table-as">
+            <thead>
+              <tr>
+                <th>Tax/Fee Particular</th>
+                <th>Tax/Fees</th>
+                <th>Fine</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  Passenger Tax (
+                  <%= data.taxFrom || data.mvTaxFrom || '' %> to
+                  <%= data.taxTo || data.mvTaxTo || '' %>
+                  )
+                </td>
+                <td><%= data.totalAmount || 0 %></td>
+                <td>0</td>
+                <td><%= data.totalAmount || 0 %></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="content__grand">
+            <p>
+              <b>Grand Total :</b>
+              <%= data.totalAmount || 0 %>/- (
+              <%= data.totalAmountInWord || '' %> )
+            </p>
+
+            <p><b>Terms and Conditions:</b></p>
+            <p>1. This is a computer generated printout and no signature is required.</p>
+            <p>2. Should not carry unlawful/unaccompanied goods.</p>
+            <p>
+              3. If any false information/discrepancies are found at later,
+              necessary action will be taken against the vehicle owner/driver.
+            </p>
+          </div>
+
+          <p class="main__warning">
             Scan the QR code for genuinity of the receipt. It should land at
             <u>https://kms.parivahan.gov.in</u>. If the URL differs, the receipt
             could be fake.
-          </b>
-        </p>
+          </p>
+        </div>
       </div>
     </div>
   </body>
