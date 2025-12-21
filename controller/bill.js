@@ -1,4 +1,3 @@
-
 const Bill = require("../model/Bill");
 const _ = require("lodash");
 const asyncHandler = require("../middleware/asyncHandler");
@@ -20,43 +19,32 @@ const fs = require("fs");
 const puppeteer = require("puppeteer");
 
 // --- TEMPLATE ALIASES MAP ---
-// Map short / aliased state tokens to canonical template base names (file names without suffix).
-// Add Gujarat aliases here so frontend 'gujrat' (typo) and 'gujarat' both map to same template.
 const STATE_TEMPLATE_MAP = {
-  // Andhra Pradesh
   ap: "andhrapradesh",
   andhra: "andhrapradesh",
   andhrapradesh: "andhrapradesh",
   "andhra-pradesh": "andhrapradesh",
   "andhra_pradesh": "andhrapradesh",
-  // Chhattisgarh aliases:
   cg: "chhattisgarh",
   chhattisgarh: "chhattisgarh",
   chhattisgarhstate: "chhattisgarh",
-  // GUJARAT aliases:
   gujrat: "gujarat",
   gj: "gujarat",
   gujarat: "gujarat",
   gujaratstate: "gujarat",
-  // Haryana aliases:
   haryana: "haryana",
-  // Himachal Pradesh aliases:
   hp: "himachalpradesh",
   himachalpradesh: "himachalpradesh",
   "himachal-pradesh": "himachalpradesh",
   "himachal_pradesh": "himachalpradesh",
-  // Bihar mapping
   bihar: "bihar",
-  // Jharkhand mapping
   jharkhand: "jharkhand",
-  // New supported states
   karnataka: "karnataka",
   kerala: "kerala",
   kerela: "kerala",
   mp: "madhyapradesh",
   madhyapradesh: "madhyapradesh",
   maharashtra: "maharashtra",
-  // add other mappings below if you need more aliases in the future
 };
 
 const normalizeStateFile = (state) => {
@@ -72,30 +60,24 @@ const resolveTemplatePath = (state, baseDir, suffix) => {
   const { rawState, sanitizedState, sanitizedPreserveCase } =
     normalizeStateFile(state);
 
-  // Determine canonical state token to look up templates.
-  // Try mapping from sanitizedState first (handles 'ap', 'andhrapradesh', 'andhra-pradesh' -> sanitize)
   const sanitizedKey = String(sanitizedState || "").toLowerCase();
   const rawKey = String(rawState || "").toLowerCase();
   const preserveCaseKey = String(sanitizedPreserveCase || "").toLowerCase();
 
-  // prefer mapping by sanitized key, then raw, then preserveCase
   const mapped =
     STATE_TEMPLATE_MAP[sanitizedKey] ||
     STATE_TEMPLATE_MAP[rawKey] ||
     STATE_TEMPLATE_MAP[preserveCaseKey] ||
     null;
 
-  // If we found a mapped canonical name, use that as base; otherwise use sanitized/raw names.
   const baseNames = mapped
     ? [mapped, sanitizedState, rawState, sanitizedPreserveCase]
     : [sanitizedState, rawState, sanitizedPreserveCase];
 
-  // Build candidate file paths in order of preference.
   const candidates = baseNames
     .filter(Boolean)
     .map((name) => path.join(baseDir, `${name}${suffix}`));
 
-  // Finally: return the first existing candidate OR the first candidate path (so error logs still point to expected paths)
   return candidates.find((candidate) => fs.existsSync(candidate)) || candidates[0];
 };
 
@@ -134,7 +116,7 @@ const normalizeDetailResponse = (detailDoc = {}) => {
 
 //@desc    get details
 //@route   GET /bill/get-details?vehicleNo=XXX
-//@access  private (route is using protect)
+//@access  private
 module.exports.getDetails = asyncHandler(async (req, res, next) => {
   logger.info(
     `member asked detail for ${req.query.vehicleNo} from ${req.params.state} form`
@@ -176,12 +158,11 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
 
     // -------------------------
     // 2. Build absolute QR code URL (must have protocol + host)
-    // prefer APP_BASE_URL if provided (should include http:// or https://)
     const defaultRenderHost = "https://vehicle-bill-backend-1.onrender.com";
 
     const hostForQr =
       process.env.APP_BASE_URL && process.env.APP_BASE_URL.trim() !== ""
-        ? process.env.APP_BASE_URL.replace(/\/$/, "") // APP_BASE_URL always preferred
+        ? process.env.APP_BASE_URL.replace(/\/$/, "")
         : process.env.APP_BASE_IP && process.env.APP_BASE_IP.trim() !== ""
         ? process.env.APP_BASE_IP.replace(/\/$/, "")
         : process.env.NODE_ENV === "production"
@@ -207,7 +188,6 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
     const data = {
       ...bill._doc,
       src,
-      // ensure host is always defined in template; prefer APP_BASE_URL but fallback to hostForQr
       host: process.env.APP_BASE_URL || hostForQr,
       cssFix: process.env.NODE_ENV === "production",
       taxFrom: formatDate(bill.taxFromDate, true),
@@ -248,7 +228,7 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       return res.status(500).send("Template for this state is not available.");
     }
 
-    // 5. Render HTML using EJS (we still render HTML -- kept for fallback and debugging)
+    // 5. Render HTML using EJS (kept for fallback and debugging)
     const htmlContent = await ejs.renderFile(templatePath, { data });
     logger.info("Html content generated");
 
@@ -256,32 +236,70 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       return res.status(500).send("An error occurred while generating HTML");
     }
 
-    // === NEW: Generate PDF using Puppeteer by loading the /bill/:id/page URL ===
-    // Use the absolute URL we previously built for the page (pdfData)
-    // pdfData already contains the absolute URL for /bill/:id/page
+    // Insert <base href> so relative assets/css resolve correctly when using setContent()
+    const hostForBase = (data.host || process.env.APP_BASE_URL || `https://${req.headers.host}`).replace(/\/$/, '');
+    let htmlWithBase = htmlContent;
+    if (!/<base\s+href/i.test(htmlWithBase)) {
+      htmlWithBase = htmlWithBase.replace(
+        /<head([^>]*)>/i,
+        `<head$1>\n<base href="${hostForBase}">\n`
+      );
+    }
+
+    // === Generate PDF using Puppeteer from rendered HTML (avoid navigating to /bill/:id/page) ===
     let browser = null;
     try {
-      browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      // Try common system browser paths, prefer env var if provided
+      const possibleBrowsers = [
+        process.env.PUPPETEER_EXECUTABLE_PATH,
+        '/usr/bin/chromium-browser',
+        '/usr/bin/chromium',
+        '/snap/bin/chromium',
+        '/usr/bin/google-chrome-stable',
+        '/usr/bin/google-chrome',
+      ].filter(Boolean);
+
+      const execPath = possibleBrowsers.find((p) => {
+        try {
+          return p && fs.existsSync(p);
+        } catch (e) {
+          return false;
+        }
       });
 
+      const launchOptions = {
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process',
+        ],
+        timeout: 60000,
+      };
+
+      if (execPath) {
+        launchOptions.executablePath = execPath;
+        logger.info(`Puppeteer will use browser executable at: ${execPath}`);
+      } else {
+        logger.warn(
+          'No system browser found at common paths; attempting to use Puppeteer default bundled Chromium (if present).'
+        );
+      }
+
+      browser = await puppeteer.launch(launchOptions);
+
       const page = await browser.newPage();
+      page.setDefaultNavigationTimeout(60000);
+      await page.setViewport({ width: 1200, height: 1000 });
 
-      // If your page requires cookies/auth, you can set cookies here, e.g.:
-      // if (req.headers.cookie) {
-      //   const cookie = require('cookie');
-      //   const parsed = cookie.parse(req.headers.cookie);
-      //   const cookies = Object.entries(parsed).map(([name, value]) => ({
-      //     name, value, domain: (process.env.APP_BASE_DOMAIN || req.headers.host), path: '/', httpOnly: false
-      //   }));
-      //   await page.setCookie(...cookies);
-      // }
+      // Load the rendered HTML into the page and wait for resources to finish loading
+      await page.setContent(htmlWithBase, { waitUntil: 'networkidle0', timeout: 60000 });
 
-      // Navigate to the printable page. Wait for network idle so dynamic content finishes.
-      await page.goto(pdfData, { waitUntil: 'networkidle0', timeout: 30000 });
-
-      // Ensure @media print rules apply
+      // Apply print media so @media print CSS is used
       try { await page.emulateMediaType('print'); } catch (e) { /* ignore if deprecated */ }
 
       const pdfBuffer = await page.pdf({
@@ -296,10 +314,10 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       return res.send(pdfBuffer);
 
     } catch (err) {
-      // If Puppeteer fails, log the error and fall back to returning the HTML so UX is preserved.
+      // Log the real error for debugging, then fallback to sending HTML
       logger.error(`Puppeteer PDF generation failed for bill ${id}: ${err.message}`, { stack: err.stack });
 
-      // Fallback: return the HTML page (current behavior)
+      // Fallback: return the HTML page (existing behavior)
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       return res.send(htmlContent);
     } finally {
@@ -373,13 +391,11 @@ module.exports.getBillOnPageFormat = asyncHandler(async (req, res, next) => {
       "Page.ejs"
     );
 
-    // Debug logs to help find the issue in Render logs
     logger.info(
       `Rendering bill page. billId=${id}, billState=${bill.state}, templatePath=${templatePath}`
     );
     logger.info(`Bill document keys: ${Object.keys(bill._doc).join(", ")}`);
 
-    // Check template exists before rendering
     if (!fs.existsSync(templatePath)) {
       logger.error(`Template missing for state=${bill.state}, path=${templatePath}`);
       return res.status(500).send("Template for this state is not available.");
@@ -387,15 +403,12 @@ module.exports.getBillOnPageFormat = asyncHandler(async (req, res, next) => {
 
     ejs.renderFile(templatePath, { data }, function (err, htmlContent) {
       if (err) {
-        // Log full stack and helpful context — this will appear in Render logs
         logger.error(`Error rendering bill page for id=${id}, state=${bill.state}, err=${err.message}`, {
           stack: err.stack,
           billId: id,
           billState: bill.state,
           reqQuery: req.query,
         });
-
-        // TEMP: send full stack back to client for debugging (remove ASAP once fixed)
         return res.status(500).send(`<pre>${err.stack}</pre>`);
       }
 
@@ -435,105 +448,4 @@ const formatDateMsg = (date, state, type) => {
           time = time.replace("PM", "AM");
         }
       }
-      time = time.replace(/(.*)\D\d+/, "$1").toUpperCase();
-      x = `${new Date(date).getDate()}-${new Date(date)
-        .toLocaleDateString("default", {
-          month: "short",
-        })
-        .toUpperCase()}-${new Date(date).getFullYear()} ${time}`;
-    } else {
-      if (type === "to") {
-        time.setMinutes(time.getMinutes() - 1);
-      }
-      time = time.toLocaleTimeString();
-      time = time.replace(/(.*)\D\d+/, "$1").toUpperCase();
-      x = `${new Date(date).getDate()}-${new Date(date)
-        .toLocaleDateString("default", {
-          month: "short",
-        })
-        .toUpperCase()}-${new Date(date).getFullYear()} ${time}`;
-    }
-    return x;
-  } else {
-    return `${new Date().getDate()}-${new Date().toLocaleDateString("default", {
-      month: "short",
-    })}-${new Date().getFullYear()} ${new Date().toLocaleTimeString()}`;
-  }
-};
-
-//@desc    create bill
-//@route   POST /bill
-//@access  private
-module.exports.createBill = asyncHandler(async (req, res, next) => {
-  const { username, password } = req.body;
-  console.log(username, password);
-  console.log(process.env.PAYMENT_USERNAME);
-
-  if (
-    username !== process.env.PAYMENT_USERNAME &&
-    password !== process.env.PAYMENT_PASSWORD
-  ) {
-    return next(
-      new ErrorResponse("Invalid username & password", 400, false, null)
-    );
-  }
-
-  const bill = new Bill({ ...req.body });
-  bill.createdBy = req.user._id;
-  bill.receiptNo = receiptNoGenerator(req.body.state);
-
-  let time = new Date(req.body.taxFromDate);
-  time.setSeconds(new Date().getSeconds());
-  bill.paymentDate = time;
-
-  await bill.save();
-
-  const data = JSON.stringify({});
-
-  const config = {
-    method: "get",
-    maxBodyLength: Infinity,
-    url: `http://login.redsms.in/api/smsapi?key=c2c84407ebb090fc094fc169192f9cc8&route=2&sender=UVAHAN&number=${
-      bill.mobileNo
-    }&sms=Your tax of Rs. ${bill.totalAmount}/- has been paid for Vehicle No. ${
-      bill.vehicleNo
-    }, valid from ${formatDateMsg(
-      bill.taxFromDate,
-      bill.state,
-      "from"
-    )} to ${formatDateMsg(
-      bill.taxUptoDate,
-      bill.state,
-      "to"
-    )} paid on ${formatDateMsg(
-      bill.createdAt,
-      bill.state,
-      "createdAt"
-    )}. UVAHAN&templateid=1207163490769304299`,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    data: data,
-  };
-
-  axios(config)
-    .then(function (response) {
-      console.log(JSON.stringify(response.data));
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
-
-  logger.info(
-    `new bill generated with this id ${bill._id} and create by ${req.user._id}`
-  );
-
-  const pdfUrl = `${(process.env.APP_BASE_URL || "https://vehicle-bill-backend-1.onrender.com").replace(/\/$/, "")}/bill/${bill._id}/pdf`;
-
-  return res.status(201).send({
-    success: true,
-    code: 201,
-    bill,
-    pdfUrl,
-  });
-});
+      time = time.replace(/(.*)\D\d+/, "$1").toUpp*
