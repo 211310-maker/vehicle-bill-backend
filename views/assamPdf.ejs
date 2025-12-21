@@ -166,7 +166,7 @@
       const hasValue = (v) =>
         v !== undefined && v !== null && String(v).trim() !== "";
 
-      // ✅ Goods logic for Assam should depend on Vehicle Class (since vehiclePermitType is forced TRANSPORT)
+      // ✅ Assam goods logic: based on Vehicle Class
       const isGoodsClass = (data.vehicleClass || "") === "GOODS CARRIER";
 
       // ✅ Sleeper Cap: prefer form field first, then sleeperCap, else blank (never force 0)
@@ -175,6 +175,9 @@
         : hasValue(data.sleeperCap)
           ? data.sleeperCap
           : "";
+
+      // ✅ Unladen weight (blank if missing)
+      const unladenWtValue = hasValue(data.unladenWeight) ? data.unladenWeight : "";
 
       // Useful common dates
       const payDate = data.paymentDate || data.receiptDate || "";
@@ -262,9 +265,16 @@
             <% } %>
           </tr>
 
+          <!-- ✅ FIX: Goods Carrier should show Unladen Wt. instead of Sleeper Cap -->
           <tr>
-            <td class="r1-1">Sleeper Cap.</td>
-            <td class="r1-2">: <%= sleeperCapValue %></td>
+            <% if (isGoodsClass) { %>
+              <td class="r1-1">Unladen Wt. (in kg)</td>
+              <td class="r1-2">: <%= unladenWtValue %></td>
+            <% } else { %>
+              <td class="r1-1">Sleeper Cap.</td>
+              <td class="r1-2">: <%= sleeperCapValue %></td>
+            <% } %>
+
             <td class="r1-1">Bank Ref. No.</td>
             <td class="r1-2">: <%= data.upBankRefNo || data.bankRefNo || 'NA' %></td>
           </tr>
