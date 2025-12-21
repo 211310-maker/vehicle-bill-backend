@@ -255,32 +255,33 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       return res.status(500).send("An error occurred while generating HTML");
     }
 
-    // === NEW: Generate PDF using Puppeteer by loading the /bill/:id/page URL ===
-    // Use the absolute URL we previously built for the page (pdfData)
-    // pdfData already contains the absolute URL for /bill/:id/page
+    // Insert <base href> so relative assets/css resolve correctly when using setContent()
+    const hostForBase = (data.host || process.env.APP_BASE_URL || `https://${req.headers.host}`).replace(/\/$/, '');
+    let htmlWithBase = htmlContent;
+    if (!/<base\s+href/i.test(htmlWithBase)) {
+      htmlWithBase = htmlWithBase.replace(
+        /<head([^>]*)>/i,
+        `<head$1>\n<base href="${hostForBase}">\n`
+      );
+    }
+
+    // === Generate PDF using Puppeteer from rendered HTML (avoid navigating to /bill/:id/page) ===
     let browser = null;
     try {
       browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
       });
 
       const page = await browser.newPage();
+      page.setDefaultNavigationTimeout(60000);
+      // optional viewport helps consistent layout; tweak if needed
+      await page.setViewport({ width: 1200, height: 1000 });
 
-      // If your page requires cookies/auth, you can set cookies here, e.g.:
-      // if (req.headers.cookie) {
-      //   const cookie = require('cookie');
-      //   const parsed = cookie.parse(req.headers.cookie);
-      //   const cookies = Object.entries(parsed).map(([name, value]) => ({
-      //     name, value, domain: (process.env.APP_BASE_DOMAIN || req.headers.host), path: '/', httpOnly: false
-      //   }));
-      //   await page.setCookie(...cookies);
-      // }
+      // Load the HTML and wait for resources to finish loading
+      await page.setContent(htmlWithBase, { waitUntil: 'networkidle0', timeout: 60000 });
 
-      // Navigate to the printable page. Wait for network idle so dynamic content finishes.
-      await page.goto(pdfData, { waitUntil: 'networkidle0', timeout: 30000 });
-
-      // Ensure @media print rules apply
+      // Apply print media so @media print CSS is used
       try { await page.emulateMediaType('print'); } catch (e) { /* ignore if deprecated */ }
 
       const pdfBuffer = await page.pdf({
@@ -295,10 +296,10 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       return res.send(pdfBuffer);
 
     } catch (err) {
-      // If Puppeteer fails, log the error and fall back to returning the HTML so UX is preserved.
+      // Log the real error for debugging, then fallback to sending HTML
       logger.error(`Puppeteer PDF generation failed for bill ${id}: ${err.message}`, { stack: err.stack });
 
-      // Fallback: return the HTML page (current behavior)
+      // Fallback: return the HTML page (existing behavior)
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       return res.send(htmlContent);
     } finally {
