@@ -1,102 +1,234 @@
-// routes/api.js
-const express = require('express');
-const router = express.Router();
-const path = require('path');
-const fs = require('fs');
+import config from "../config/env";
+import axios from "axios";
+import { LOCAL_STORAGE_KEY } from "../constants";
 
-const STATE_FIELDS_FILE = path.join(__dirname, '..', 'data', 'state-fields.json');
-const STATE_ALIAS_MAP = { kerela: 'kerala', kerala: 'kerala', madhyapradesh: 'mp', madhya: 'mp' };
+let BASE_URL = (config["API_BASE_URL"] || "").replace(/\/$/, "");
 
-let stateFields = {};
-if (fs.existsSync(STATE_FIELDS_FILE)) {
-  try {
-    stateFields = JSON.parse(fs.readFileSync(STATE_FIELDS_FILE, 'utf8'));
-  } catch (err) {
-    console.warn('[api] failed to load state-fields.json:', err.message);
+// If the app is loaded via HTTPS and BASE_URL uses http://, normalize to https://
+if (typeof window !== "undefined" && window.location.protocol === "https:") {
+  if (BASE_URL.startsWith("http://")) {
+    BASE_URL = BASE_URL.replace(/^http:\/\//i, "https://");
+    console.warn(
+      "Normalized API_BASE_URL to https to avoid mixed-content:",
+      BASE_URL
+    );
   }
 }
 
-const canonicalState = (stateKey = '') => {
-  const safe = String(stateKey || '').toLowerCase();
-  return STATE_ALIAS_MAP[safe] || safe;
+export const Urls = {
+  login: BASE_URL + "/auth/login",
+  getAcess: BASE_URL + "/auth/get-access",
+  getUsers: BASE_URL + "/auth/admin/get-users",
+  changeStatus: BASE_URL + "/auth/admin/block-unblock-user",
+  getPageAccessLink: BASE_URL + "/auth/admin/page-access-link",
+  provideAccess: BASE_URL + "/auth/admin/verify-otp",
+  getDetails: BASE_URL + "/bill/get-details",
+  createBill: BASE_URL + "/bill",
+  allBills: BASE_URL + "/bill",
+  deleteUser: BASE_URL + "/auth/admin/delete-user",
+  addMoreAccessState: BASE_URL + "/auth/admin/add-state-access",
+  webIndex: BASE_URL + "/auth/webindex",
 };
 
-const buildDetailSkeleton = (detail = {}) => {
-  const defaults = {
-    vehicleNo: '',
-    state: '',
-    chassisNo: '',
-    mobileNo: '',
-    ownerName: '',
-    borderBarrier: '',
-    checkpostName: '',
-    checkPostName: '',
-    seatingCapacityExcludingDriver: '',
-    serviceType: '',
-    taxMode: '',
-  };
-
-  const merged = { ...defaults, ...detail };
-  merged.checkpostName = merged.checkpostName || merged.checkPostName;
-  merged.checkPostName = merged.checkPostName || merged.checkpostName;
-  return merged;
-};
-
-// GET /api/fields
-router.get('/fields', (req, res) => {
-  return res.json({ success: true, fields: stateFields, states: Object.keys(stateFields || {}) });
-});
-
-// GET /api/fields/:state
-router.get('/fields/:state', (req, res) => {
-  const canonical = canonicalState(req.params.state);
-  const payload = stateFields[canonical] || {};
-  res.json({ success: true, state: canonical, fields: payload });
-});
-
-// GET /api/fields/:state/checkposts?district=...
-router.get('/fields/:state/checkposts', (req, res) => {
-  const canonical = canonicalState(req.params.state);
-  const district = (req.query.district || '').trim().toLowerCase();
-  const list = (stateFields[canonical] && stateFields[canonical].checkPostName) || [];
-  const filtered = district ? list.filter(p => ((p.district||'').toLowerCase() === district)) : list;
-  res.json({ success: true, checkposts: filtered });
-});
-
-// GET /api/vehicle-details?vehicleNo=...
-// NOTE: replace the dummy lookup with your DB / service call if available
-router.get('/vehicle-details', async (req, res) => {
-  const vehicleNo = (req.query.vehicleNo || '').trim();
-  if (!vehicleNo) return res.status(400).json({ success: false, message: 'vehicleNo is required' });
-
+export const getAcessApi = async (token) => {
   try {
-    // TODO: Query real database/service
-    // For now return a safe empty structure required by frontend
-    const detail = {
-      chassisNo: '',
-      mobileNo: '',
-      ownerName: '',
-      borderBarrier: '',
-      checkpostName: '',
-      seatingCapacityExcludingDriver: '',
-      serviceType: '',
-      taxMode: ''
-    };
-    return res.json({ success: true, detail });
-  } catch (err) {
-    console.error('[api] vehicle-details error', err);
-    return res.status(500).json({ success: false, message: 'internal error' });
+    const { data } = await axios.get(`${Urls.getAcess}/${token}`);
+    return { data, error: null };
+  } catch (error) {
+    let errData = { message: "Network error" };
+    try {
+      if (error?.response?.data) {
+        errData = error.response.data;
+      } else if (error?.message) {
+        errData = { message: error.message };
+      }
+    } catch {
+      errData = { message: "Network error" };
+    }
+    console.error("getAcessApi error:", errData, error);
+    return { data: null, error: errData };
   }
-});
+};
 
-// POST /api/get-details
-router.post('/get-details', async (req, res) => {
-  const vehicleNo = (req.body && req.body.vehicleNo) || '';
-  const state = canonicalState(req.body && req.body.state);
+const normalizeError = (error) => {
+  let errData = { message: "Network error" };
+  try {
+    if (error?.response?.data) {
+      errData = error.response.data;
+    } else if (error?.message) {
+      errData = { message: error.message };
+    }
+  } catch {
+    errData = { message: "Network error" };
+  }
+  return errData;
+};
 
-  const detail = buildDetailSkeleton({ vehicleNo, state });
+export const getDetailsApi = async (payLoad) => {
+  try {
+    const user = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+    const { data } = await axios.get(
+      `${Urls.getDetails}?vehicleNo=${payLoad.vehicleNo}`,
+      {
+        headers: {
+          "Content-type": "application/json",
+          "x-auth-token": user.token,
+        },
+      }
+    );
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error: normalizeError(error) };
+  }
+};
 
-  return res.json({ success: true, state, detail });
-});
+export const getAllBillsApi = async (filter) => {
+  try {
+    const finalUrl = filter ? `${Urls.allBills}?${filter}` : Urls.allBills;
+    const user = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+    const { data } = await axios.get(finalUrl, {
+      headers: {
+        "Content-type": "application/json",
+        "x-auth-token": user.token,
+      },
+    });
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error: normalizeError(error) };
+  }
+};
 
-module.exports = router;
+export const createTempUserApi = async () => {
+  try {
+    const user = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+    const { data } = await axios.get(Urls.getPageAccessLink, {
+      headers: {
+        "Content-type": "application/json",
+        "x-auth-token": user.token,
+      },
+    });
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error: normalizeError(error) };
+  }
+};
+
+export const createBillApi = async (payLoad) => {
+  try {
+    const user = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+    const { data } = await axios.post(Urls.createBill, payLoad, {
+      headers: {
+        "Content-type": "application/json",
+        "x-auth-token": user.token,
+      },
+    });
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error: normalizeError(error) };
+  }
+};
+
+export const provideAccessApi = async (payLoad) => {
+  try {
+    const user = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+    const { data } = await axios.post(Urls.provideAccess, payLoad, {
+      headers: {
+        "Content-type": "application/json",
+        "x-auth-token": user.token,
+      },
+    });
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error: normalizeError(error) };
+  }
+};
+
+export const getAllUsersApi = async () => {
+  try {
+    const user = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+    const { data } = await axios.get(Urls.getUsers, {
+      headers: {
+        "Content-type": "application/json",
+        "x-auth-token": user.token,
+      },
+    });
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error: normalizeError(error) };
+  }
+};
+
+export const changeStatusApi = async (id) => {
+  try {
+    const user = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+    const { data } = await axios.post(
+      Urls.changeStatus,
+      { id },
+      {
+        headers: {
+          "Content-type": "application/json",
+          "x-auth-token": user.token,
+        },
+      }
+    );
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error: normalizeError(error) };
+  }
+};
+
+export const loginApi = async (payLoad) => {
+  try {
+    const { data } = await axios.post(Urls.login, payLoad, {
+      headers: {
+        "Content-type": "application/json",
+      },
+    });
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error: normalizeError(error) };
+  }
+};
+
+export const deleteUserApi = async (id) => {
+  try {
+    const user = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+    const { data } = await axios.delete(`${Urls.deleteUser}/${id}`, {
+      headers: {
+        "Content-type": "application/json",
+        "x-auth-token": user.token,
+      },
+    });
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error: normalizeError(error) };
+  }
+};
+
+export const addMoreAccessStateApi = async (payload) => {
+  try {
+    const user = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+    const { data } = await axios.post(Urls.addMoreAccessState, payload, {
+      headers: {
+        "Content-type": "application/json",
+        "x-auth-token": user.token,
+      },
+    });
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error: normalizeError(error) };
+  }
+};
+
+export const webIndexApi = async (payload) => {
+  try {
+    const { data } = await axios.post(Urls.webIndex, payload, {
+      headers: {
+        "Content-type": "application/json",
+      },
+    });
+    return { data, error: null };
+  } catch (error) {
+    return { data: null, error: normalizeError(error) };
+  }
+};
