@@ -1,5 +1,3 @@
-controller/bill.js
-
 
 const Bill = require("../model/Bill");
 const _ = require("lodash");
