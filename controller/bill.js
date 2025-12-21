@@ -1,4 +1,3 @@
-
 const Bill = require("../model/Bill");
 const _ = require("lodash");
 const asyncHandler = require("../middleware/asyncHandler");
@@ -20,43 +19,32 @@ const fs = require("fs");
 const puppeteer = require("puppeteer");
 
 // --- TEMPLATE ALIASES MAP ---
-// Map short / aliased state tokens to canonical template base names (file names without suffix).
-// Add Gujarat aliases here so frontend 'gujrat' (typo) and 'gujarat' both map to same template.
 const STATE_TEMPLATE_MAP = {
-  // Andhra Pradesh
   ap: "andhrapradesh",
   andhra: "andhrapradesh",
   andhrapradesh: "andhrapradesh",
   "andhra-pradesh": "andhrapradesh",
   "andhra_pradesh": "andhrapradesh",
-  // Chhattisgarh aliases:
   cg: "chhattisgarh",
   chhattisgarh: "chhattisgarh",
   chhattisgarhstate: "chhattisgarh",
-  // GUJARAT aliases:
   gujrat: "gujarat",
   gj: "gujarat",
   gujarat: "gujarat",
   gujaratstate: "gujarat",
-  // Haryana aliases:
   haryana: "haryana",
-  // Himachal Pradesh aliases:
   hp: "himachalpradesh",
   himachalpradesh: "himachalpradesh",
   "himachal-pradesh": "himachalpradesh",
   "himachal_pradesh": "himachalpradesh",
-  // Bihar mapping
   bihar: "bihar",
-  // Jharkhand mapping
   jharkhand: "jharkhand",
-  // New supported states
   karnataka: "karnataka",
   kerala: "kerala",
   kerela: "kerala",
   mp: "madhyapradesh",
   madhyapradesh: "madhyapradesh",
   maharashtra: "maharashtra",
-  // add other mappings below if you need more aliases in the future
 };
 
 const normalizeStateFile = (state) => {
@@ -64,7 +52,6 @@ const normalizeStateFile = (state) => {
   const rawState = originalState.toLowerCase();
   const sanitizedState = rawState.replace(/[^a-z0-9]/g, "");
   const sanitizedPreserveCase = originalState.replace(/[^a-z0-9]/gi, "");
-
   return { rawState, sanitizedState, sanitizedPreserveCase };
 };
 
@@ -72,30 +59,24 @@ const resolveTemplatePath = (state, baseDir, suffix) => {
   const { rawState, sanitizedState, sanitizedPreserveCase } =
     normalizeStateFile(state);
 
-  // Determine canonical state token to look up templates.
-  // Try mapping from sanitizedState first (handles 'ap', 'andhrapradesh', 'andhra-pradesh' -> sanitize)
   const sanitizedKey = String(sanitizedState || "").toLowerCase();
   const rawKey = String(rawState || "").toLowerCase();
   const preserveCaseKey = String(sanitizedPreserveCase || "").toLowerCase();
 
-  // prefer mapping by sanitized key, then raw, then preserveCase
   const mapped =
     STATE_TEMPLATE_MAP[sanitizedKey] ||
     STATE_TEMPLATE_MAP[rawKey] ||
     STATE_TEMPLATE_MAP[preserveCaseKey] ||
     null;
 
-  // If we found a mapped canonical name, use that as base; otherwise use sanitized/raw names.
   const baseNames = mapped
     ? [mapped, sanitizedState, rawState, sanitizedPreserveCase]
     : [sanitizedState, rawState, sanitizedPreserveCase];
 
-  // Build candidate file paths in order of preference.
   const candidates = baseNames
     .filter(Boolean)
     .map((name) => path.join(baseDir, `${name}${suffix}`));
 
-  // Finally: return the first existing candidate OR the first candidate path (so error logs still point to expected paths)
   return candidates.find((candidate) => fs.existsSync(candidate)) || candidates[0];
 };
 
@@ -216,7 +197,7 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       taxFrom_up: formatDate(bill.taxFromDate, false),
       taxTo_up: formatDate(bill.taxUptoDate, false),
       taxFrom_raj: formatDate(bill.taxFromDate, false),
-      taxTo_raj: formatDate(bill.taxUptoDate, false),
+      taxTo_raj: formatDate(bill.taxFromDate, false),
       taxFrom_uk: formatDate(bill.taxFromDate, true),
       taxTo_uk: formatDate(bill.taxUptoDate, true),
       taxFrom_jh: formatDate(bill.taxFromDate, false),
@@ -248,7 +229,7 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       return res.status(500).send("Template for this state is not available.");
     }
 
-    // 5. Render HTML using EJS (we still render HTML -- kept for fallback and debugging)
+    // 5. Render HTML using EJS (kept for fallback and debugging)
     const htmlContent = await ejs.renderFile(templatePath, { data });
     logger.info("Html content generated");
 
@@ -256,32 +237,89 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       return res.status(500).send("An error occurred while generating HTML");
     }
 
-    // === NEW: Generate PDF using Puppeteer by loading the /bill/:id/page URL ===
-    // Use the absolute URL we previously built for the page (pdfData)
-    // pdfData already contains the absolute URL for /bill/:id/page
+    // Insert <base href> so relative assets/css resolve correctly when using setContent()
+    const hostForBase = (data.host || process.env.APP_BASE_URL || `https://${req.headers.host}`).replace(/\/$/, '');
+    let htmlWithBase = htmlContent;
+    if (!/<base\s+href/i.test(htmlWithBase)) {
+      htmlWithBase = htmlWithBase.replace(
+        /<head([^>]*)>/i,
+        `<head$1>\n<base href="${hostForBase}">\n`
+      );
+    }
+
+    // === Generate PDF using Puppeteer from rendered HTML (avoid navigating to /bill/:id/page) ===
     let browser = null;
     try {
-      browser = await puppeteer.launch({
+      // Try common system browser paths, prefer env var if provided
+      const possibleBrowsers = [
+        process.env.PUPPETEER_EXECUTABLE_PATH,
+        '/usr/bin/chromium-browser',
+        '/usr/bin/chromium',
+        '/snap/bin/chromium',
+        '/usr/bin/google-chrome-stable',
+        '/usr/bin/google-chrome',
+      ].filter(Boolean);
+
+      // find first that exists and is executable
+      let execPath = null;
+      for (const p of possibleBrowsers) {
+        try {
+          if (!p) continue;
+          if (!fs.existsSync(p)) {
+            logger.debug(`Puppeteer candidate not found: ${p}`);
+            continue;
+          }
+          // ensure file is executable
+          fs.accessSync(p, fs.constants.X_OK);
+          execPath = p;
+          break;
+        } catch (e) {
+          logger.debug(`Puppeteer candidate not executable or inaccessible: ${p} -> ${e.message}`);
+          continue;
+        }
+      }
+
+      // If env var was set but not usable, warn specifically
+      if (process.env.PUPPETEER_EXECUTABLE_PATH && process.env.PUPPETEER_EXECUTABLE_PATH !== execPath) {
+        logger.warn(
+          `PUPPETEER_EXECUTABLE_PATH is configured (${process.env.PUPPETEER_EXECUTABLE_PATH}) ` +
+          `but it was not found or not executable in runtime. Will try other candidates or bundled Chromium.`
+        );
+      }
+
+      const launchOptions = {
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process',
+        ],
+        timeout: 60000,
+      };
+
+      if (execPath) {
+        launchOptions.executablePath = execPath;
+        logger.info(`Puppeteer will use browser executable at: ${execPath}`);
+      } else {
+        logger.warn(
+          'No system browser found at common paths; attempting to use Puppeteer default bundled Chromium (if present).'
+        );
+      }
+
+      browser = await puppeteer.launch(launchOptions);
 
       const page = await browser.newPage();
+      page.setDefaultNavigationTimeout(60000);
+      await page.setViewport({ width: 1200, height: 1000 });
 
-      // If your page requires cookies/auth, you can set cookies here, e.g.:
-      // if (req.headers.cookie) {
-      //   const cookie = require('cookie');
-      //   const parsed = cookie.parse(req.headers.cookie);
-      //   const cookies = Object.entries(parsed).map(([name, value]) => ({
-      //     name, value, domain: (process.env.APP_BASE_DOMAIN || req.headers.host), path: '/', httpOnly: false
-      //   }));
-      //   await page.setCookie(...cookies);
-      // }
+      // Load the rendered HTML into the page and wait for resources to finish loading
+      await page.setContent(htmlWithBase, { waitUntil: 'networkidle0', timeout: 60000 });
 
-      // Navigate to the printable page. Wait for network idle so dynamic content finishes.
-      await page.goto(pdfData, { waitUntil: 'networkidle0', timeout: 30000 });
-
-      // Ensure @media print rules apply
+      // Apply print media so @media print CSS is used
       try { await page.emulateMediaType('print'); } catch (e) { /* ignore if deprecated */ }
 
       const pdfBuffer = await page.pdf({
@@ -296,10 +334,10 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       return res.send(pdfBuffer);
 
     } catch (err) {
-      // If Puppeteer fails, log the error and fall back to returning the HTML so UX is preserved.
+      // Log the real error for debugging, then fallback to sending HTML
       logger.error(`Puppeteer PDF generation failed for bill ${id}: ${err.message}`, { stack: err.stack });
 
-      // Fallback: return the HTML page (current behavior)
+      // Fallback: return the HTML page (existing behavior)
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       return res.send(htmlContent);
     } finally {
@@ -357,7 +395,7 @@ module.exports.getBillOnPageFormat = asyncHandler(async (req, res, next) => {
       taxFrom_raj: formatDate(bill.taxFromDate, true),
       taxTo_raj: formatDate(bill.taxUptoDate, true),
       taxFrom_uk: formatDate(bill.taxFromDate, true),
-      taxTo_uk: formatDate(bill.taxUptoDate, true),
+      taxTo_uk: formatDate(bill.taxFromDate, true),
       permitFrom: formatDate(bill.permitFrom, false),
       permitUpto: formatDate(bill.permitUpto, false),
       totalAmountInWord: inWords(bill.totalAmount || 0).toUpperCase(),
@@ -373,7 +411,6 @@ module.exports.getBillOnPageFormat = asyncHandler(async (req, res, next) => {
       "Page.ejs"
     );
 
-    // Debug logs to help find the issue in Render logs
     logger.info(
       `Rendering bill page. billId=${id}, billState=${bill.state}, templatePath=${templatePath}`
     );
