@@ -26,10 +26,13 @@
       .main {
         position: relative;
         width: 100%;
+        min-height: 1123px; /* helps print engines avoid weird extra space */
         padding: 18px 30px 30px 30px;
         box-sizing: border-box;
+        overflow: hidden; /* important: background pattern won't overflow */
       }
 
+      /* QR */
       .qr-image-as {
         position: absolute;
         top: 18px;
@@ -39,6 +42,7 @@
         z-index: 10;
       }
 
+      /* Header left logo */
       .logo_as {
         position: absolute;
         top: 18px;
@@ -51,27 +55,29 @@
         display: block;
       }
 
+      /* ✅ Watermark: smaller + a bit darker like reference */
       .logo_as_main {
         position: absolute;
-        top: 50%;
+        top: 52%;
         left: 50%;
         transform: translate(-50%, -50%);
-        opacity: 0.07;
+        opacity: 0.12;               /* was 0.07, now darker */
         z-index: 1;
         pointer-events: none;
       }
 
       .logo_as_main img {
-        width: 330px;
+        width: 250px;                /* was 330px, now smaller */
       }
 
+      /* Header center */
       .as-header {
         position: absolute;
         top: 44px;
         left: 0;
         right: 0;
         text-align: center;
-        z-index: 5;
+        z-index: 6;
       }
 
       .as-header h3 {
@@ -85,15 +91,19 @@
         font-size: 11px;
       }
 
+      /* ✅ Repeating BG text: should cover full receipt like your reference */
       .content__back {
         position: absolute;
-        top: 115px;
-        left: 30px;
-        right: 30px;
-        bottom: 120px;
-        opacity: 0.12;
-        font-size: 10px;
-        line-height: 1.3;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 115px 30px 120px 30px; /* keep clear of header + bottom text */
+        box-sizing: border-box;
+        opacity: 0.18;                  /* a bit more visible */
+        font-size: 13px;                /* larger like ref */
+        font-weight: 500;
+        line-height: 1.55;
         white-space: nowrap;
         z-index: 2;
         pointer-events: none;
@@ -105,7 +115,7 @@
 
       .content {
         position: relative;
-        z-index: 5;
+        z-index: 7;
         margin-top: 120px;
       }
 
@@ -154,10 +164,17 @@
       }
 
       .main__warning {
-        font-size: 11px;
-        line-height: 15px;
-        margin-top: 8px;
+        margin-top: 12px;
+        font-size: 12.5px;
+        line-height: 1.5;
+        font-weight: 700;
       }
+
+      .main__warning u {
+        color: #0b57d0;
+        text-decoration: underline;
+      }
+
     </style>
   </head>
 
@@ -181,6 +198,10 @@
 
       // Useful common dates
       const payDate = data.paymentDate || data.receiptDate || "";
+
+      // ✅ Background stamp text value in ref looks like: "<VEHNO> <DATE>"
+      // Keep it short, repeated.
+      const stampText = `${data.vehicleNo || ""} ${payDate}`.trim();
     %>
 
     <div class="main">
@@ -202,11 +223,17 @@
         <p>Checkpost Tax e-Receipt</p>
       </div>
 
+      <!-- ✅ FULL-PAGE repeating background like reference -->
       <div class="content__back">
-        <% for (let i = 0; i < 16; i++) { %>
+        <% 
+          // Fill the whole page: 26-30 rows usually cover A4.
+          for (let i = 0; i < 30; i++) { 
+        %>
           <p>
-            <%= data.vehicleNo || '' %> / <%= payDate %>,
-            <%= data.vehicleNo || '' %> / <%= payDate %>
+            <%= stampText %>&nbsp;&nbsp;&nbsp;
+            <%= stampText %>&nbsp;&nbsp;&nbsp;
+            <%= stampText %>&nbsp;&nbsp;&nbsp;
+            <%= stampText %>
           </p>
         <% } %>
       </div>
@@ -265,7 +292,7 @@
             <% } %>
           </tr>
 
-          <!-- ✅ FIX: Goods Carrier should show Unladen Wt. instead of Sleeper Cap -->
+          <!-- ✅ FIX: Goods Carrier shows Unladen Wt. instead of Sleeper Cap -->
           <tr>
             <% if (isGoodsClass) { %>
               <td class="r1-1">Unladen Wt. (in kg)</td>
