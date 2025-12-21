@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "backend built with Node.js, MongoDb",
   "main": "app.js",
-+  "scripts": {
-+    "start": "node app.js",
-+    "dev": "cross-env NODE_ENV=dev nodemon app.js",
-+    "test": "node tests/api.test.js"
-+  },
+  "scripts": {
+    "start": "node app.js",
+    "dev": "cross-env NODE_ENV=dev nodemon app.js",
+    "test": "node tests/api.test.js"
+  },
   "engines": {
     "node": "18.x",
     "npm": "10.x"
