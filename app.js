@@ -12,10 +12,8 @@ const pdf = require('express-pdf');
 const cookieParser = require('cookie-parser');
 const logger = require('./logger');
 const apiRouter = require('./routes/api');
-const connectDB = require('./utils/db'); // <-- ensure DB connect is available
 require('colors');
 // process.env.TZ = 'Asia/Kolkata';
-
 dotenv.config({
   path: `${path.join(__dirname, 'config', process.env.NODE_ENV)}.env`,
 });
@@ -94,7 +92,7 @@ app.get('/app/*', (req, res, next) => {
 
 app.use(errorHandler);
 
-// uncaught exception handling
+// euncaught exception handling
 process.on('uncaughtException', (err, promise) => {
   logger.error(err.message);
   process.exit(1);
@@ -104,25 +102,5 @@ process.on('unhandledRejection', (err, promise) => {
   logger.error(err.message);
   process.exit(1);
 });
-
-// Start server when run directly. First connect to DB, then listen.
-if (require.main === module) {
-  (async () => {
-    try {
-      // Connect to MongoDB (throws on error)
-      await connectDB();
-
-      // Start HTTP server after DB is connected
-      const PORT = process.env.PORT || 4000;
-      app.listen(PORT, () => {
-        console.log(`Server listening on port ${PORT}`);
-      });
-    } catch (err) {
-      console.error('Failed to start server — DB connection error:', err);
-      // Exit so the platform (Render) marks the deploy as failed and you can see the logs.
-      process.exit(1);
-    }
-  })();
-}
 
 module.exports = app;
