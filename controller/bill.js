@@ -138,6 +138,106 @@ module.exports.getDetails = asyncHandler(async (req, res, next) => {
   });
 });
 
+// Helper: find a usable browser executable (system or bundled)
+const findBrowserExecutable = () => {
+  const pathJoin = path.join;
+
+  const candidates = [
+    process.env.PUPPETEER_EXECUTABLE_PATH,
+    "/usr/bin/chromium-browser",
+    "/usr/bin/chromium",
+    "/snap/bin/chromium",
+    "/usr/bin/google-chrome-stable",
+    "/usr/bin/google-chrome",
+  ].filter(Boolean);
+
+  const isExecutable = (p) => {
+    try {
+      if (!fs.existsSync(p)) return false;
+      const stat = fs.statSync(p);
+      if (!stat.isFile()) return false;
+      fs.accessSync(p, fs.constants.X_OK);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // 1) env var if valid
+  if (
+    process.env.PUPPETEER_EXECUTABLE_PATH &&
+    isExecutable(process.env.PUPPETEER_EXECUTABLE_PATH)
+  ) {
+    return process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
+
+  // 2) common system locations
+  for (const p of candidates) {
+    if (p && isExecutable(p)) return p;
+  }
+
+  // 3) puppeteer.executablePath() (bundled)
+  try {
+    if (typeof puppeteer.executablePath === "function") {
+      const bundled = puppeteer.executablePath();
+      if (bundled && isExecutable(bundled)) {
+        logger.info(`Found puppeteer.executablePath(): ${bundled}`);
+        return bundled;
+      }
+    }
+  } catch (e) {
+    logger.debug(
+      "puppeteer.executablePath() check failed:",
+      e && e.message ? e.message : e
+    );
+  }
+
+  // 4) scan node_modules/puppeteer/.local-chromium
+  try {
+    const base = pathJoin(__dirname, "..", "node_modules", "puppeteer", ".local-chromium");
+    if (fs.existsSync(base) && fs.statSync(base).isDirectory()) {
+      const scan = (dir) => {
+        const items = fs.readdirSync(dir);
+        for (const it of items) {
+          const p = pathJoin(dir, it);
+          const st = fs.statSync(p);
+          if (st.isDirectory()) {
+            // typical candidates
+            const linuxCandidate = pathJoin(p, "chrome-linux", "chrome");
+            const winCandidate = pathJoin(p, "chrome-win", "chrome.exe");
+            const macCandidate = pathJoin(
+              p,
+              "chrome-mac",
+              "Chromium.app",
+              "Contents",
+              "MacOS",
+              "Chromium"
+            );
+            const direct = pathJoin(p, "chrome");
+            const candidates2 = [linuxCandidate, winCandidate, macCandidate, direct];
+            for (const c of candidates2) {
+              if (fs.existsSync(c) && fs.statSync(c).isFile()) return c;
+            }
+            const rec = scan(p);
+            if (rec) return rec;
+          }
+        }
+        return null;
+      };
+      const found = scan(base);
+      if (found) {
+        logger.info(`Found local-chromium at ${found}`);
+        return found;
+      }
+    }
+  } catch (e) {
+    logger.debug("Error scanning local-chromium:", e && e.message ? e.message : e);
+  }
+
+  // nothing found
+  return null;
+};
+
 //@desc    get pdf (HTML receipt page; browser can print to PDF)
 //@route   GET /bill/:id/pdf
 //@access  public
@@ -157,12 +257,11 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
 
     // -------------------------
     // 2. Build absolute QR code URL (must have protocol + host)
-    // prefer APP_BASE_URL if provided (should include http:// or https://)
     const defaultRenderHost = "https://vehicle-bill-backend-1.onrender.com";
 
     const hostForQr =
       process.env.APP_BASE_URL && process.env.APP_BASE_URL.trim() !== ""
-        ? process.env.APP_BASE_URL.replace(/\/$/, "") // APP_BASE_URL always preferred
+        ? process.env.APP_BASE_URL.replace(/\/$/, "")
         : process.env.APP_BASE_IP && process.env.APP_BASE_IP.trim() !== ""
         ? process.env.APP_BASE_IP.replace(/\/$/, "")
         : process.env.NODE_ENV === "production"
@@ -176,7 +275,6 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
     // Build final absolute url for QR
     const pdfData = `${hostForQr}/bill/${id}/page?ChassisNo=${chassis}&ownerName=${owner}`;
 
-    // Debug log so you can open this URL directly
     logger.info("QR payload URL:", pdfData);
 
     // 3. Generate QR code
@@ -188,7 +286,6 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
     const data = {
       ...bill._doc,
       src,
-      // ensure host is always defined in template; prefer APP_BASE_URL but fallback to hostForQr
       host: process.env.APP_BASE_URL || hostForQr,
       cssFix: process.env.NODE_ENV === "production",
       taxFrom: formatDate(bill.taxFromDate, true),
@@ -199,9 +296,9 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       taxFrom_raj: formatDate(bill.taxFromDate, false),
       taxTo_raj: formatDate(bill.taxFromDate, false),
       taxFrom_uk: formatDate(bill.taxFromDate, true),
-      taxTo_uk: formatDate(bill.taxUptoDate, true),
+      taxTo_uk: formatDate(bill.taxFromDate, true),
       taxFrom_jh: formatDate(bill.taxFromDate, false),
-      taxTo_jh: formatDate(bill.taxUptoDate, false),
+      taxTo_jh: formatDate(bill.taxFromDate, false),
       permitFrom: formatDate(bill.permitFrom, false),
       permitUpto: formatDate(bill.permitUpto, false),
       totalAmountInWord: inWords(bill.totalAmount || 0).toUpperCase(),
@@ -218,18 +315,13 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       "Pdf.ejs"
     );
 
-    logger.info(
-      `[bill] resolveTemplatePath state=${bill.state} -> ${templatePath}`
-    );
+    logger.info(`[bill] resolveTemplatePath state=${bill.state} -> ${templatePath}`);
 
     if (!fs.existsSync(templatePath)) {
-      logger.error(
-        `Template missing for state=${bill.state}, path=${templatePath}`
-      );
+      logger.error(`Template missing for state=${bill.state}, path=${templatePath}`);
       return res.status(500).send("Template for this state is not available.");
     }
 
-    // 5. Render HTML using EJS (kept for fallback and debugging)
     const htmlContent = await ejs.renderFile(templatePath, { data });
     logger.info("Html content generated");
 
@@ -238,65 +330,39 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
     }
 
     // Insert <base href> so relative assets/css resolve correctly when using setContent()
-    const hostForBase = (data.host || process.env.APP_BASE_URL || `https://${req.headers.host}`).replace(/\/$/, '');
+    const hostForBase = (data.host || process.env.APP_BASE_URL || `https://${req.headers.host}`).replace(
+      /\/$/,
+      ""
+    );
     let htmlWithBase = htmlContent;
     if (!/<base\s+href/i.test(htmlWithBase)) {
-      htmlWithBase = htmlWithBase.replace(
-        /<head([^>]*)>/i,
-        `<head$1>\n<base href="${hostForBase}">\n`
-      );
+      htmlWithBase = htmlWithBase.replace(/<head([^>]*)>/i, `<head$1>\n<base href="${hostForBase}">\n`);
     }
 
-    // === Generate PDF using Puppeteer from rendered HTML (avoid navigating to /bill/:id/page) ===
+    // === Generate PDF using Puppeteer ===
     let browser = null;
     try {
-      // Try common system browser paths, prefer env var if provided
-      const possibleBrowsers = [
-        process.env.PUPPETEER_EXECUTABLE_PATH,
-        '/usr/bin/chromium-browser',
-        '/usr/bin/chromium',
-        '/snap/bin/chromium',
-        '/usr/bin/google-chrome-stable',
-        '/usr/bin/google-chrome',
-      ].filter(Boolean);
+      // find a browser executable
+      const execPath = findBrowserExecutable();
 
-      // find first that exists and is executable
-      let execPath = null;
-      for (const p of possibleBrowsers) {
-        try {
-          if (!p) continue;
-          if (!fs.existsSync(p)) {
-            logger.debug(`Puppeteer candidate not found: ${p}`);
-            continue;
-          }
-          // ensure file is executable
-          fs.accessSync(p, fs.constants.X_OK);
-          execPath = p;
-          break;
-        } catch (e) {
-          logger.debug(`Puppeteer candidate not executable or inaccessible: ${p} -> ${e.message}`);
-          continue;
-        }
-      }
-
-      // If env var was set but not usable, warn specifically
-      if (process.env.PUPPETEER_EXECUTABLE_PATH && process.env.PUPPETEER_EXECUTABLE_PATH !== execPath) {
+      // If env var was set but invalid, ensure we don't leave it set (puppeteer may attempt to use it)
+      if (process.env.PUPPETEER_EXECUTABLE_PATH && !execPath) {
         logger.warn(
-          `PUPPETEER_EXECUTABLE_PATH is configured (${process.env.PUPPETEER_EXECUTABLE_PATH}) ` +
-          `but it was not found or not executable in runtime. Will try other candidates or bundled Chromium.`
+          `PUPPETEER_EXECUTABLE_PATH is configured (${process.env.PUPPETEER_EXECUTABLE_PATH}) but it was not usable. Clearing it for this launch.`
         );
+        delete process.env.PUPPETEER_EXECUTABLE_PATH;
       }
 
       const launchOptions = {
         headless: true,
         args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--single-process',
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-accelerated-2d-canvas",
+          "--no-first-run",
+          "--no-zygote",
+          "--single-process",
         ],
         timeout: 60000,
       };
@@ -305,9 +371,7 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
         launchOptions.executablePath = execPath;
         logger.info(`Puppeteer will use browser executable at: ${execPath}`);
       } else {
-        logger.warn(
-          'No system browser found at common paths; attempting to use Puppeteer default bundled Chromium (if present).'
-        );
+        logger.warn("No explicit system/browser path found; Puppeteer will try bundled Chromium or default.");
       }
 
       browser = await puppeteer.launch(launchOptions);
@@ -316,33 +380,34 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       page.setDefaultNavigationTimeout(60000);
       await page.setViewport({ width: 1200, height: 1000 });
 
-      // Load the rendered HTML into the page and wait for resources to finish loading
-      await page.setContent(htmlWithBase, { waitUntil: 'networkidle0', timeout: 60000 });
+      await page.setContent(htmlWithBase, { waitUntil: "networkidle0", timeout: 60000 });
 
-      // Apply print media so @media print CSS is used
-      try { await page.emulateMediaType('print'); } catch (e) { /* ignore if deprecated */ }
+      try {
+        await page.emulateMediaType("print");
+      } catch (e) {
+        // ignore
+      }
 
       const pdfBuffer = await page.pdf({
-        format: 'A4',
+        format: "A4",
         printBackground: true,
-        margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' },
+        margin: { top: "10mm", right: "10mm", bottom: "10mm", left: "10mm" },
       });
 
-      // Return PDF as attachment so browsers download it automatically
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="receipt-${id}.pdf"`);
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="receipt-${id}.pdf"`);
       return res.send(pdfBuffer);
-
     } catch (err) {
-      // Log the real error for debugging, then fallback to sending HTML
       logger.error(`Puppeteer PDF generation failed for bill ${id}: ${err.message}`, { stack: err.stack });
-
-      // Fallback: return the HTML page (existing behavior)
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       return res.send(htmlContent);
     } finally {
       if (browser) {
-        try { await browser.close(); } catch (e) { /* swallow */ }
+        try {
+          await browser.close();
+        } catch (e) {
+          // swallow
+        }
       }
     }
   } catch (err) {
@@ -364,12 +429,10 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
 //@query   ?from=&to=&createdBy=&
 module.exports.getAllBills = asyncHandler(async (req, res, next) => {
   const bills = await Bill.find({ ...req.query }).sort({ createdAt: "-1" });
-  return res
-    .status(200)
-    .send({ success: true, code: 200, bills, count: bills.length });
+  return res.status(200).send({ success: true, code: 200, bills, count: bills.length });
 });
 
-//@desc    get all
+//@desc    get bill page
 //@route   GET /bill/:id/page
 //@access  public
 module.exports.getBillOnPageFormat = asyncHandler(async (req, res, next) => {
@@ -383,7 +446,6 @@ module.exports.getBillOnPageFormat = asyncHandler(async (req, res, next) => {
       return res.render("not-found");
     }
 
-    // Build data object for template with safe defaults
     const data = {
       ...bill._doc,
       host: process.env.APP_BASE_URL || `https://${req.headers.host}`,
@@ -405,18 +467,11 @@ module.exports.getBillOnPageFormat = asyncHandler(async (req, res, next) => {
       rjBankRefNo: "1KBVoBVBSMGg",
     };
 
-    const templatePath = resolveTemplatePath(
-      bill.state,
-      path.join(__dirname, "../views/pages"),
-      "Page.ejs"
-    );
+    const templatePath = resolveTemplatePath(bill.state, path.join(__dirname, "../views/pages"), "Page.ejs");
 
-    logger.info(
-      `Rendering bill page. billId=${id}, billState=${bill.state}, templatePath=${templatePath}`
-    );
+    logger.info(`Rendering bill page. billId=${id}, billState=${bill.state}, templatePath=${templatePath}`);
     logger.info(`Bill document keys: ${Object.keys(bill._doc).join(", ")}`);
 
-    // Check template exists before rendering
     if (!fs.existsSync(templatePath)) {
       logger.error(`Template missing for state=${bill.state}, path=${templatePath}`);
       return res.status(500).send("Template for this state is not available.");
@@ -424,15 +479,12 @@ module.exports.getBillOnPageFormat = asyncHandler(async (req, res, next) => {
 
     ejs.renderFile(templatePath, { data }, function (err, htmlContent) {
       if (err) {
-        // Log full stack and helpful context — this will appear in Render logs
         logger.error(`Error rendering bill page for id=${id}, state=${bill.state}, err=${err.message}`, {
           stack: err.stack,
           billId: id,
           billState: bill.state,
           reqQuery: req.query,
         });
-
-        // TEMP: send full stack back to client for debugging (remove ASAP once fixed)
         return res.status(500).send(`<pre>${err.stack}</pre>`);
       }
 
