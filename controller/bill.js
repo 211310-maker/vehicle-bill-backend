@@ -25,26 +25,36 @@ const STATE_TEMPLATE_MAP = {
   andhrapradesh: "andhrapradesh",
   "andhra-pradesh": "andhrapradesh",
   "andhra_pradesh": "andhrapradesh",
+
   cg: "chhattisgarh",
   chhattisgarh: "chhattisgarh",
   chhattisgarhstate: "chhattisgarh",
+
   gujrat: "gujarat",
   gj: "gujarat",
   gujarat: "gujarat",
   gujaratstate: "gujarat",
+
   haryana: "haryana",
+
   hp: "himachalpradesh",
   himachalpradesh: "himachalpradesh",
   "himachal-pradesh": "himachalpradesh",
   "himachal_pradesh": "himachalpradesh",
+
   bihar: "bihar",
   jharkhand: "jharkhand",
   karnataka: "karnataka",
   kerala: "kerala",
   kerela: "kerala",
+
   mp: "madhyapradesh",
   madhyapradesh: "madhyapradesh",
   maharashtra: "maharashtra",
+
+  // ✅ add template alias if you have Puducherry template named puducherryPdf.ejs
+  puducherry: "puducherry",
+  pondicherry: "puducherry",
 };
 
 const normalizeStateFile = (state) => {
@@ -83,6 +93,14 @@ const resolveTemplatePath = (state, baseDir, suffix) => {
 module.exports.resolveTemplatePath = resolveTemplatePath;
 module.exports.STATE_TEMPLATE_MAP = STATE_TEMPLATE_MAP;
 
+// ✅ safe date formatter to avoid INVALID-DATE
+const safeFormatDate = (dt, showTime) => {
+  if (!dt) return "";
+  const d = new Date(dt);
+  if (Number.isNaN(d.getTime())) return "";
+  return formatDate(dt, showTime);
+};
+
 const DETAIL_DEFAULTS = {
   state: "",
   chassisNo: "",
@@ -92,8 +110,13 @@ const DETAIL_DEFAULTS = {
   checkpostName: "",
   checkPostName: "",
   seatingCapacityExcludingDriver: "",
+  sleeperCapacityExcludingDriver: "",
+  sleeperCap: "",
+  vehicleCategory: "",
   serviceType: "",
   taxMode: "",
+  permitFrom: "",
+  permitUpto: "",
 };
 
 const normalizeDetailResponse = (detailDoc = {}) => {
@@ -103,12 +126,23 @@ const normalizeDetailResponse = (detailDoc = {}) => {
       : { ...detailDoc };
 
   const merged = { ...DETAIL_DEFAULTS, ...payload };
+
   merged.checkpostName = merged.checkpostName || merged.checkPostName;
   merged.checkPostName = merged.checkPostName || merged.checkpostName;
 
+  // ✅ normalize kerela -> kerala
   if (merged.state && merged.state.toLowerCase() === "kerela") {
     merged.state = "kerala";
   }
+
+  // ✅ ensure sleeperCap is available for frontend (if only sleeperCapacityExcludingDriver exists)
+  merged.sleeperCap =
+    merged.sleeperCap ||
+    merged.sleeperCapacityExcludingDriver ||
+    "";
+
+  // ✅ ensure vehicleCategory isn't lost
+  merged.vehicleCategory = merged.vehicleCategory || "";
 
   return merged;
 };
@@ -202,7 +236,6 @@ const findBrowserExecutable = () => {
           const p = pathJoin(dir, it);
           const st = fs.statSync(p);
           if (st.isDirectory()) {
-            // typical candidates
             const linuxCandidate = pathJoin(p, "chrome-linux", "chrome");
             const winCandidate = pathJoin(p, "chrome-win", "chrome.exe");
             const macCandidate = pathJoin(
@@ -234,7 +267,6 @@ const findBrowserExecutable = () => {
     logger.debug("Error scanning local-chromium:", e && e.message ? e.message : e);
   }
 
-  // nothing found
   return null;
 };
 
@@ -245,7 +277,6 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // 1. Get the bill details
     const bill = await Bill.findById(id);
     if (!bill) {
       logger.info(`bill not found with this id ${id}`);
@@ -256,7 +287,7 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
     logger.info(`bill found with this id ${id}`);
 
     // -------------------------
-    // 2. Build absolute QR code URL (must have protocol + host)
+    // Build absolute QR code URL
     const defaultRenderHost = "https://vehicle-bill-backend-1.onrender.com";
 
     const hostForQr =
@@ -268,47 +299,58 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
         ? defaultRenderHost
         : `http://${ip.address()}:${process.env.PORT || 5000}`;
 
-    // Encode query values
     const chassis = encodeURIComponent(bill.chassisNo || "");
     const owner = encodeURIComponent(bill.ownerName || "");
 
-    // Build final absolute url for QR
     const pdfData = `${hostForQr}/bill/${id}/page?ChassisNo=${chassis}&ownerName=${owner}`;
 
     logger.info("QR payload URL:", pdfData);
 
-    // 3. Generate QR code
     const src = await qrCode.toDataURL(pdfData);
     logger.info("QR code generated");
     // -------------------------
 
-    // 4. Prepare data for EJS template (use safe defaults)
+    // Prepare template data
     const data = {
       ...bill._doc,
       src,
       host: process.env.APP_BASE_URL || hostForQr,
       cssFix: process.env.NODE_ENV === "production",
-      taxFrom: formatDate(bill.taxFromDate, true),
+
+      // ✅ keep your original formats but safe for permit
+      taxFrom: safeFormatDate(bill.taxFromDate, true),
       receiptDate: getAheadTimeWithDate(bill.paymentDate),
-      taxTo: formatDate(bill.taxUptoDate, true),
-      taxFrom_up: formatDate(bill.taxFromDate, false),
-      taxTo_up: formatDate(bill.taxUptoDate, false),
-      taxFrom_raj: formatDate(bill.taxFromDate, false),
-      taxTo_raj: formatDate(bill.taxFromDate, false),
-      taxFrom_uk: formatDate(bill.taxFromDate, true),
-      taxTo_uk: formatDate(bill.taxFromDate, true),
-      taxFrom_jh: formatDate(bill.taxFromDate, false),
-      taxTo_jh: formatDate(bill.taxFromDate, false),
-      permitFrom: formatDate(bill.permitFrom, false),
-      permitUpto: formatDate(bill.permitUpto, false),
+      taxTo: safeFormatDate(bill.taxUptoDate, true),
+
+      taxFrom_up: safeFormatDate(bill.taxFromDate, false),
+      taxTo_up: safeFormatDate(bill.taxUptoDate, false),
+
+      taxFrom_raj: safeFormatDate(bill.taxFromDate, false),
+      taxTo_raj: safeFormatDate(bill.taxFromDate, false),
+
+      taxFrom_uk: safeFormatDate(bill.taxFromDate, true),
+      taxTo_uk: safeFormatDate(bill.taxFromDate, true),
+
+      taxFrom_jh: safeFormatDate(bill.taxFromDate, false),
+      taxTo_jh: safeFormatDate(bill.taxFromDate, false),
+
+      // ✅ avoid INVALID-DATE
+      permitFrom: safeFormatDate(bill.permitFrom, false),
+      permitUpto: safeFormatDate(bill.permitUpto, false),
+
+      // ✅ ensure these are present for PDF always
+      vehicleCategory: bill.vehicleCategory || "",
+      sleeperCap: bill.sleeperCap || bill.sleeperCapacityExcludingDriver || "",
+
       totalAmountInWord: inWords(bill.totalAmount || 0).toUpperCase(),
-      paymentDate: formatDate(bill.paymentDate, true),
-      upPaymentDate: formatDate(bill.paymentDate, false),
+      paymentDate: safeFormatDate(bill.paymentDate, true),
+      upPaymentDate: safeFormatDate(bill.paymentDate, false),
+
+      // ⛔ keep bank ref static as you asked (we won't change it here)
       upBankRefNo: "IGANXUHFSS",
       rjBankRefNo: "1KBVoBVBSMGg",
     };
 
-    // 5. Render HTML using EJS
     const templatePath = resolveTemplatePath(
       bill.state,
       path.join(__dirname, "../views"),
@@ -329,7 +371,7 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       return res.status(500).send("An error occurred while generating HTML");
     }
 
-    // Insert <base href> so relative assets/css resolve correctly when using setContent()
+    // Insert <base href> so relative assets resolve correctly
     const hostForBase = (data.host || process.env.APP_BASE_URL || `https://${req.headers.host}`).replace(
       /\/$/,
       ""
@@ -342,10 +384,8 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
     // === Generate PDF using Puppeteer ===
     let browser = null;
     try {
-      // find a browser executable
       const execPath = findBrowserExecutable();
 
-      // If env var was set but invalid, ensure we don't leave it set (puppeteer may attempt to use it)
       if (process.env.PUPPETEER_EXECUTABLE_PATH && !execPath) {
         logger.warn(
           `PUPPETEER_EXECUTABLE_PATH is configured (${process.env.PUPPETEER_EXECUTABLE_PATH}) but it was not usable. Clearing it for this launch.`
@@ -384,9 +424,7 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
 
       try {
         await page.emulateMediaType("print");
-      } catch (e) {
-        // ignore
-      }
+      } catch (e) {}
 
       const pdfBuffer = await page.pdf({
         format: "A4",
@@ -405,9 +443,7 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       if (browser) {
         try {
           await browser.close();
-        } catch (e) {
-          // swallow
-        }
+        } catch (e) {}
       }
     }
   } catch (err) {
@@ -450,19 +486,30 @@ module.exports.getBillOnPageFormat = asyncHandler(async (req, res, next) => {
       ...bill._doc,
       host: process.env.APP_BASE_URL || `https://${req.headers.host}`,
       cssFix: process.env.NODE_ENV === "production",
-      taxFrom: formatDate(bill.taxFromDate, true),
-      taxTo: formatDate(bill.taxUptoDate, true),
-      taxFrom_up: formatDate(bill.taxFromDate, false),
-      taxTo_up: formatDate(bill.taxUptoDate, false),
-      taxFrom_raj: formatDate(bill.taxFromDate, true),
-      taxTo_raj: formatDate(bill.taxUptoDate, true),
-      taxFrom_uk: formatDate(bill.taxFromDate, true),
-      taxTo_uk: formatDate(bill.taxFromDate, true),
-      permitFrom: formatDate(bill.permitFrom, false),
-      permitUpto: formatDate(bill.permitUpto, false),
+
+      taxFrom: safeFormatDate(bill.taxFromDate, true),
+      taxTo: safeFormatDate(bill.taxUptoDate, true),
+      taxFrom_up: safeFormatDate(bill.taxFromDate, false),
+      taxTo_up: safeFormatDate(bill.taxUptoDate, false),
+
+      taxFrom_raj: safeFormatDate(bill.taxFromDate, true),
+      taxTo_raj: safeFormatDate(bill.taxUptoDate, true),
+
+      taxFrom_uk: safeFormatDate(bill.taxFromDate, true),
+      taxTo_uk: safeFormatDate(bill.taxFromDate, true),
+
+      permitFrom: safeFormatDate(bill.permitFrom, false),
+      permitUpto: safeFormatDate(bill.permitUpto, false),
+
+      // ✅ important
+      vehicleCategory: bill.vehicleCategory || "",
+      sleeperCap: bill.sleeperCap || bill.sleeperCapacityExcludingDriver || "",
+
       totalAmountInWord: inWords(bill.totalAmount || 0).toUpperCase(),
-      paymentDate: formatDate(bill.paymentDate, true),
-      upPaymentDate: formatDate(bill.paymentDate, false),
+      paymentDate: safeFormatDate(bill.paymentDate, true),
+      upPaymentDate: safeFormatDate(bill.paymentDate, false),
+
+      // ⛔ keep static for now
       upBankRefNo: "IGANXUHFSS",
       rjBankRefNo: "1KBVoBVBSMGg",
     };
@@ -569,11 +616,31 @@ module.exports.createBill = asyncHandler(async (req, res, next) => {
 
   const bill = new Bill({ ...req.body });
   bill.createdBy = req.user._id;
-  bill.receiptNo = receiptNoGenerator(req.body.state);
 
+  // ✅ Receipt generation for ALL states:
+  // prefix depends on state, and date logic same for all states (YYMMDD from taxFromDate)
+  bill.receiptNo = receiptNoGenerator(req.body.state, req.body.taxFromDate);
+
+  // ✅ paymentDate derived from taxFromDate (your existing logic)
   let time = new Date(req.body.taxFromDate);
   time.setSeconds(new Date().getSeconds());
   bill.paymentDate = time;
+
+  // ✅ Ensure vehicleCategory does not remain empty if request has it
+  if (!bill.vehicleCategory && req.body.vehicleCategory) {
+    bill.vehicleCategory = req.body.vehicleCategory;
+  }
+
+  // ✅ Ensure sleeperCap is not empty if request has sleeperCapacityExcludingDriver
+  // (do NOT force zero; keep empty if nothing provided)
+  const reqSleeper =
+    req.body.sleeperCap ||
+    req.body.sleeperCapacityExcludingDriver ||
+    "";
+
+  if (!bill.sleeperCap && reqSleeper) {
+    bill.sleeperCap = String(reqSleeper);
+  }
 
   await bill.save();
 
@@ -617,7 +684,10 @@ module.exports.createBill = asyncHandler(async (req, res, next) => {
     `new bill generated with this id ${bill._id} and create by ${req.user._id}`
   );
 
-  const pdfUrl = `${(process.env.APP_BASE_URL || "https://vehicle-bill-backend-1.onrender.com").replace(/\/$/, "")}/bill/${bill._id}/pdf`;
+  const pdfUrl = `${(process.env.APP_BASE_URL || "https://vehicle-bill-backend-1.onrender.com").replace(
+    /\/$/,
+    ""
+  )}/bill/${bill._id}/pdf`;
 
   return res.status(201).send({
     success: true,
