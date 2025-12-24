@@ -68,34 +68,46 @@ module.exports.inWords = (num) => {
   return str + "only";
 };
 
-module.exports.receiptNoGenerator = (state) => {
-  let inititals = "";
-  if (state === "bihar") {
-    inititals = "BRT";
-  } else if (state === "punjab") {
-    inititals = "PBT";
-  } else if (state === "haryana") {
-    inititals = "HRT";
-  } else if (state === "up") {
-    inititals = "UPT";
-  } else if (state === "uk") {
-    inititals = "UKT";
-  } else if (state === "gujrat") {
-    inititals = "GJ";
-  } else if (state === "maharashtra") {
-    inititals = "MH";
-  } else if (state === "rajasthan") {
-    inititals = "RJ";
-  } else if (state === "jharkhand") {
-    inititals = "JHT";
-  } else if (state === "chhattisgarh") {
-    inititals = "CGT";
-  }
+// ✅ Receipt generator for ALL STATES:
+// prefix depends on state
+// date logic same for all states (YYMMDD from taxFromDate)
+// tail random 7 digits
+module.exports.receiptNoGenerator = (state, taxFromDate) => {
+  const s = String(state || "").toLowerCase().trim();
 
-  return `${inititals}${Math.floor(
-    Math.pow(10, 13 - 1) +
-      Math.random() * (Math.pow(10, 13) - Math.pow(10, 13 - 1) - 1)
-  )}`;
+  // Add as many states as you want here; unknown states fall back to "RCP"
+  const PREFIX = {
+    bihar: "BRT",
+    punjab: "PBT",
+    haryana: "HRT",
+    up: "UPT",
+    uk: "UKT",
+    gujrat: "GJ",
+    gujarat: "GJ", // ✅ handle both spellings
+    maharashtra: "MH",
+    rajasthan: "RJ",
+    jharkhand: "JHT",
+    chhattisgarh: "CGT",
+
+    // ✅ add Puducherry
+    puducherry: "PYR",
+    pondicherry: "PYR",
+  };
+
+  const inititals = PREFIX[s] || "RCP";
+
+  const d = new Date(taxFromDate);
+  // if taxFromDate is invalid, fallback to today's date (not a fixed number)
+  const safeDate = Number.isNaN(d.getTime()) ? new Date() : d;
+
+  const yy = String(safeDate.getFullYear()).slice(-2);
+  const mm = String(safeDate.getMonth() + 1).padStart(2, "0");
+  const dd = String(safeDate.getDate()).padStart(2, "0");
+  const datePart = `${yy}${mm}${dd}`;
+
+  const tail = Math.floor(1000000 + Math.random() * 9000000);
+
+  return `${inititals}${datePart}${tail}`;
 };
 
 module.exports.randomNumber = (length) => {
