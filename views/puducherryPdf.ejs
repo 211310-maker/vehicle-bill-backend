@@ -28,13 +28,13 @@
 
     .content{ position:relative; z-index: 2; }
 
-    /* ✅ watermark like sample-2 (big + centered) */
+    /* ✅ watermark smaller (as requested) */
     .watermark{
       position:absolute;
       top: 52%;
       left: 50%;
       transform: translate(-50%,-50%);
-      width: 460px;
+      width: 380px;              /* ✅ was 460px */
       opacity: 0.12;
       z-index: 1;
       pointer-events:none;
@@ -95,10 +95,10 @@
     }
     table.kv td.label{
       white-space: nowrap;
-      font-weight: normal;
+      font-weight: normal; /* ✅ labels normal */
     }
     table.kv td.value{
-      font-weight: bold;
+      font-weight: bold;   /* ✅ values bold like ref */
       padding-left: 2px;
       white-space: normal;
     }
@@ -116,7 +116,7 @@
       font-size: 11px;
     }
     table.mini td{ padding: 2px 2px; vertical-align: top; }
-    table.mini td.label{ width: 20%; white-space: nowrap; }
+    table.mini td.label{ width: 20%; white-space: nowrap; font-weight: normal; }
     table.mini td.value{ width: 30%; font-weight: bold; }
 
     .small-text{
@@ -132,7 +132,7 @@
       font-size: 11px;
     }
     table.tax th, table.tax td{
-      border: 1px solid #6aa5ff;  /* closer to sample-2 */
+      border: 1px solid #6aa5ff;
       padding: 4px 6px;
     }
     table.tax th{
@@ -152,11 +152,7 @@
     .terms-list{ margin: 0 0 0 16px; padding: 0; }
     .terms-list li{ margin-bottom: 2px; }
 
-    .bottom-note{
-      margin-top: 10px;
-      font-size: 18px;
-      font-weight: bold;
-    }
+    /* ✅ Bold bottom note like ref */
     .bottom-note-url{
       font-size: 14px;
       font-weight: bold;
@@ -197,55 +193,17 @@
     return `${pad2(d.getDate())}-${(d.toLocaleString('en-US',{month:'short'})).toUpperCase()}-${d.getFullYear()} ${hh}:${mm} ${ampm}`;
   };
 
-  const randDigits = (len=7) => {
-    let out = '';
-    for (let i=0;i<len;i++) out += Math.floor(Math.random()*10);
-    return out;
-  };
-
-  const genBankRef = () => {
-    // Example: IK + YYMMDD + 5 digits (similar feel)
-    const base = new Date();
-    const yy = String(base.getFullYear()).slice(-2);
-    const mm = pad2(base.getMonth()+1);
-    const dd = pad2(base.getDate());
-    return `IK${yy}${mm}${dd}${randDigits(5)}`;
-  };
-
-  const genReceiptNoFromTaxFrom = () => {
-    // Example like sample-2: PYR + YYMMDD + random 7 digits
-    const d = new Date(data.taxFromDate || data.taxFrom || data.paymentDate || Date.now());
-    const yy = String(d.getFullYear()).slice(-2);
-    const mm = pad2(d.getMonth()+1);
-    const dd = pad2(d.getDate());
-    return `PYR${yy}${mm}${dd}${randDigits(7)}`;
-  };
-
-  // ✅ values with proper fallbacks
-  const vehicleCategoryVal =
-    (data.vehicleCategory && String(data.vehicleCategory).trim()) ||
-    (isGoodsVehicle ? (data.permitType || 'GOODS VEHICLE') : '') ||
-    '';
-
-  // sleeper: if backend gives 0 for passenger, show blank (matches sample vibe)
-  const sleeperValRaw = data.sleeperCap ?? data.sleeperCapacityExcludingDriver ?? '';
-  const sleeperVal =
-    (!sleeperValRaw || String(sleeperValRaw) === '0') ? '' : sleeperValRaw;
+  /* ✅ sleeper cap: always show 0 if not received */
+  const sleeperValRaw = (data.sleeperCap ?? data.sleeperCapacityExcludingDriver ?? '');
+  const sleeperVal = (sleeperValRaw === '' || sleeperValRaw === null || sleeperValRaw === undefined)
+    ? '0'
+    : String(sleeperValRaw);
 
   const permitValidityVal =
     safeDate(data.permitUpto) ||
     safeDate(data.permitValidity) ||
     safeDate(data.permitValidUpto) ||
     '';
-
-  const bankRefNoVal =
-    (data.upBankRefNo && String(data.upBankRefNo).trim()) ||
-    (data.bankRefNo && String(data.bankRefNo).trim()) ||
-    genBankRef();
-
-  const receiptNoVal =
-    (data.receiptNo && String(data.receiptNo).trim()) ||
-    genReceiptNoFromTaxFrom();
 
   const paymentDateVal =
     safeDateTime(data.paymentDate) ||
@@ -258,6 +216,7 @@
   const serviceTypeVal =
     (data.serviceType && String(data.serviceType).trim()) ||
     (isGoodsVehicle ? 'NOT APPLICABLE' : '');
+
 %>
 
 <div class="main">
@@ -298,7 +257,7 @@
         <td class="label">Registration No.</td>
         <td class="value">: <%= data.vehicleNo || '' %></td>
         <td class="label">Receipt No.</td>
-        <td class="value">: <%= receiptNoVal %></td>
+        <td class="value">: <%= data.receiptNo || '' %></td>
       </tr>
 
       <tr>
@@ -322,11 +281,12 @@
         <td class="value">: <%= data.vehicleClass || '' %></td>
       </tr>
 
+      <!-- ✅ Vehicle Category removed -->
       <tr>
-        <td class="label">Vehicle Category</td>
-        <td class="value">: <%= vehicleCategoryVal %></td>
         <td class="label">Mobile No.</td>
         <td class="value">: <%= data.mobileNo || '' %></td>
+        <td class="label"></td>
+        <td class="value"></td>
       </tr>
 
       <tr>
@@ -368,7 +328,7 @@
     <table class="mini">
       <tr>
         <td class="label">Bank Ref. No.</td>
-        <td class="value">: <%= bankRefNoVal %></td>
+        <td class="value">: <%= data.bankRefNo || data.upBankRefNo || '' %></td>
         <td class="label">Permit Validity</td>
         <td class="value">: <%= permitValidityVal %></td>
       </tr>
@@ -454,7 +414,6 @@
       </ol>
     </div>
 
-    <!-- ✅ bottom note like sample-2 -->
     <div class="bottom-note-url">
       Scan the QR code for genuinity of the receipt, It should land at
       <a href="https://kms.parivahan.gov.in">https://kms.parivahan.gov.in</a>
