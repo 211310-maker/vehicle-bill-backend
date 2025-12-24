@@ -17,6 +17,7 @@
       color:#000;
       font-size: 12px;
       line-height: 1.25;
+      font-weight: bold; /* ✅ make everything bold */
     }
 
     .main{
@@ -28,14 +29,14 @@
 
     .content{ position:relative; z-index: 2; }
 
-    /* ✅ watermark smaller (as requested) */
+    /* ✅ watermark MORE smaller */
     .watermark{
       position:absolute;
       top: 52%;
       left: 50%;
       transform: translate(-50%,-50%);
-      width: 380px;              /* ✅ was 460px */
-      opacity: 0.12;
+      width: 300px;           /* ✅ smaller than before */
+      opacity: 0.10;
       z-index: 1;
       pointer-events:none;
     }
@@ -71,6 +72,7 @@
     .header-center .rule{
       font-size: 11px;
       margin-top: 1px;
+      font-weight: bold;
     }
     .header-center .auth{
       font-size: 12px;
@@ -88,41 +90,47 @@
       border-collapse: collapse;
       table-layout: fixed;
       margin-bottom: 6px;
+      font-size: 12px;
     }
     table.kv td{
       padding: 2px 2px;
       vertical-align: top;
+      font-weight: bold; /* ✅ label + value bold */
     }
     table.kv td.label{
       white-space: nowrap;
-      font-weight: normal; /* ✅ labels normal */
+      font-weight: bold;
     }
     table.kv td.value{
-      font-weight: bold;   /* ✅ values bold like ref */
+      font-weight: bold;
       padding-left: 2px;
       white-space: normal;
     }
 
     .body-text{
       margin-top: 4px;
-      font-size: 11px;
+      font-size: 12px;
       text-align: justify;
+      font-weight: bold;
     }
 
+    /* ✅ mini table font size equal to kv */
     table.mini{
       width:100%;
       border-collapse: collapse;
       margin-top: 6px;
-      font-size: 11px;
+      font-size: 12px;  /* ✅ increased */
+      font-weight: bold;
     }
-    table.mini td{ padding: 2px 2px; vertical-align: top; }
-    table.mini td.label{ width: 20%; white-space: nowrap; font-weight: normal; }
+    table.mini td{ padding: 2px 2px; vertical-align: top; font-weight:bold; }
+    table.mini td.label{ width: 20%; white-space: nowrap; font-weight:bold; }
     table.mini td.value{ width: 30%; font-weight: bold; }
 
     .small-text{
       margin-top: 6px;
-      font-size: 10.5px;
+      font-size: 12px;
       text-align: justify;
+      font-weight: bold;
     }
 
     table.tax{
@@ -134,6 +142,7 @@
     table.tax th, table.tax td{
       border: 1px solid #6aa5ff;
       padding: 4px 6px;
+      font-weight: bold;
     }
     table.tax th{
       text-align:center;
@@ -147,12 +156,11 @@
       font-weight: bold;
     }
 
-    .note-small{ margin-top: 6px; font-size: 10px; }
+    .note-small{ margin-top: 6px; font-size: 10px; font-weight: bold; }
     .terms-title{ font-weight: bold; margin-top: 4px; margin-bottom: 2px; }
     .terms-list{ margin: 0 0 0 16px; padding: 0; }
-    .terms-list li{ margin-bottom: 2px; }
+    .terms-list li{ margin-bottom: 2px; font-weight: bold; }
 
-    /* ✅ Bold bottom note like ref */
     .bottom-note-url{
       font-size: 14px;
       font-weight: bold;
@@ -168,8 +176,6 @@
 
 <body>
 <%
-  const isGoodsVehicle = (data.vehiclePermitType || '') === 'GOODS VEHICLE';
-
   const pad2 = (n) => String(n).padStart(2,'0');
 
   const safeDate = (v) => {
@@ -193,7 +199,7 @@
     return `${pad2(d.getDate())}-${(d.toLocaleString('en-US',{month:'short'})).toUpperCase()}-${d.getFullYear()} ${hh}:${mm} ${ampm}`;
   };
 
-  /* ✅ sleeper cap: always show 0 if not received */
+  // ✅ Sleeper cap fallback to 0 if missing/blank
   const sleeperValRaw = (data.sleeperCap ?? data.sleeperCapacityExcludingDriver ?? '');
   const sleeperVal = (sleeperValRaw === '' || sleeperValRaw === null || sleeperValRaw === undefined)
     ? '0'
@@ -213,14 +219,10 @@
   const districtVal = data.borderBarrier || data.districtName || data.district || '';
   const checkpostVal = data.checkpostName || data.checkPostName || '';
 
-  const serviceTypeVal =
-    (data.serviceType && String(data.serviceType).trim()) ||
-    (isGoodsVehicle ? 'NOT APPLICABLE' : '');
-
+  const bankRefStatic = "IK0DLTDUU5"; /* ✅ STATIC as you asked */
 %>
 
 <div class="main">
-  <!-- watermark -->
   <img src="<%= data.host %>/images1/Pudu.png" class="watermark" alt="Watermark" />
 
   <div class="content">
@@ -296,21 +298,12 @@
         <td class="value">: <%= checkpostVal %></td>
       </tr>
 
-      <% if (!isGoodsVehicle) { %>
-        <tr>
-          <td class="label">Seating Capacity</td>
-          <td class="value">: <%= data.seatingCapacityExcludingDriver || data.seatingCapacity || '' %></td>
-          <td class="label">Sleeper Cap</td>
-          <td class="value">: <%= sleeperVal %></td>
-        </tr>
-      <% } else { %>
-        <tr>
-          <td class="label">Gross Vehicle Wt.</td>
-          <td class="value">: <%= data.grossVehicleWeight || '' %></td>
-          <td class="label">Unladen Wt.</td>
-          <td class="value">: <%= data.unladenWeight || '' %></td>
-        </tr>
-      <% } %>
+      <tr>
+        <td class="label">Seating Capacity</td>
+        <td class="value">: <%= data.seatingCapacityExcludingDriver || data.seatingCapacity || '' %></td>
+        <td class="label">Sleeper Cap</td>
+        <td class="value">: <%= sleeperVal %></td>
+      </tr>
 
       <tr>
         <td class="label">Payment Mode</td>
@@ -328,7 +321,7 @@
     <table class="mini">
       <tr>
         <td class="label">Bank Ref. No.</td>
-        <td class="value">: <%= data.bankRefNo || data.upBankRefNo || '' %></td>
+        <td class="value">: <%= bankRefStatic %></td>
         <td class="label">Permit Validity</td>
         <td class="value">: <%= permitValidityVal %></td>
       </tr>
@@ -342,7 +335,7 @@
 
       <tr>
         <td class="label">Service Type</td>
-        <td class="value">: <%= serviceTypeVal %></td>
+        <td class="value">: <%= data.serviceType || '' %></td>
         <td class="label">Permit Type</td>
         <td class="value">: <%= data.permitType || '' %></td>
       </tr>
