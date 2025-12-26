@@ -35,35 +35,8 @@
         width: 155px;
         height: 155px;
         object-fit: contain;
-        z-index: 30;
+        z-index: 40; /* keep on top */
         background: #fff;
-      }
-
-      /* ===== WATERMARK REPEAT TEXT (FIXED CLIPPING) ===== */
-      .wm-text-layer {
-        position: absolute;
-        inset: 0;
-        z-index: 1;
-        pointer-events: none;
-        padding: 18px 18px;
-        padding-right: 210px; /* ✅ reserve space for QR so right text doesn’t clip */
-        opacity: 1;
-      }
-
-      .wm-line {
-        display: flex;
-        justify-content: space-between;
-        gap: 60px;
-        white-space: nowrap;
-        margin: 0 0 12px 0;
-        font-size: 13px;              /* ✅ slightly smaller so it fits like original */
-        line-height: 14px;
-        letter-spacing: 0.4px;
-        color: rgba(0, 0, 0, 0.16);   /* ✅ visible but still watermark */
-      }
-
-      .wm-line span {
-        flex: 0 0 auto;               /* ✅ prevents "… / 2" truncation */
       }
 
       /* ===== MAIN CONTENT ===== */
@@ -71,17 +44,50 @@
         position: relative;
         z-index: 10;
         padding: 10px 14px 12px 14px;
+        /* create a stacking context so watermark inside .content is clipped to content bounds */
       }
 
-      /* ===== LOGO WATERMARK ===== */
+      /* ===== WATERMARK LINES (placed inside .content, behind content) ===== */
+      .wm-text-layer {
+        position: absolute;
+        inset: 0;                   /* cover the content area */
+        z-index: 1;                 /* behind content (content has z-index:10) */
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 12px 180px 12px 12px; /* reserve right space for QR and some left padding */
+        overflow: hidden;
+      }
+
+      .wm-line {
+        width: 100%;
+        margin: 6px 0;
+        font-size: 13px;                /* slightly small */
+        line-height: 14px;
+        letter-spacing: 0.4px;
+        color: rgba(0, 0, 0, 0.12);     /* subtle watermark */
+        white-space: nowrap;            /* do not wrap: we output a long repeated string */
+        text-align: center;
+        display: block;
+        overflow: hidden;               /* crop overflow if any */
+      }
+
+      .wm-line .wm-line-text {
+        display: inline-block;
+        /* keep the repeated text in a single inline block */
+      }
+
+      /* ===== LOGO/EMBLEM WATERMARK (centered and behind content but above lines) ===== */
       .wm-emblem {
         position: absolute;
         left: 50%;
-        top: 145px;        /* ✅ moved slightly up */
+        top: 145px;
         transform: translateX(-50%);
-        width: 235px;      /* ✅ smaller */
-        opacity: 0.28;     /* ✅ darker */
-        z-index: 6;
+        width: 235px;
+        opacity: 0.28;
+        z-index: 6; /* above text lines (1) but below main content (10) */
         pointer-events: none;
       }
 
@@ -195,24 +201,29 @@
 
       const vType = (data.vehiclePermitType || "").toString().toUpperCase();
       const isGoods = vType === "GOODS VEHICLE";
+
+      // helper to create a long repeated string that fills horizontally
+      const repeatForLine = (text, count) => {
+        const sep = ' \u00A0 \u00A0 '; // small gap
+        return Array(count).fill(text).join(sep);
+      };
     %>
 
     <div class="page">
       <!-- QR -->
       <img class="qr" src="<%= data.src %>" alt="QR" />
 
-      <!-- Background repeated watermark lines -->
-      <div class="wm-text-layer">
-        <% for (let i = 0; i < 28; i++) { %>
-          <div class="wm-line">
-            <span><%= wmText %></span>
-            <span><%= wmText %></span>
-          </div>
-        <% } %>
-      </div>
-
       <div class="content">
-        <!-- Emblem watermark -->
+        <!-- Background repeated watermark lines (placed inside content so clipped to receipt) -->
+        <div class="wm-text-layer" aria-hidden="true">
+          <% for (let i = 0; i < 28; i++) { %>
+            <div class="wm-line">
+              <span class="wm-line-text"><%= repeatForLine(wmText, 18) %></span>
+            </div>
+          <% } %>
+        </div>
+
+        <!-- Emblem watermark (centered, above lines but behind content) -->
         <img class="wm-emblem" src="/images1/Sikkim.jpg" alt="Watermark" />
 
         <div class="header">
