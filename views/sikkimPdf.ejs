@@ -27,6 +27,14 @@
         overflow: hidden;
       }
 
+      /* ✅ receipt/content block container (everything stays inside this) */
+      .receipt {
+        position: relative;
+        width: 100%;
+        padding: 10px 14px 12px 14px;
+        z-index: 5;
+      }
+
       /* ===== QR ===== */
       .qr {
         position: absolute;
@@ -36,47 +44,43 @@
         height: 155px;
         object-fit: contain;
         z-index: 30;
-
-        /* ✅ IMPORTANT: allow watermark to show behind QR */
-        background: transparent;
+        background: transparent; /* allow watermark behind */
       }
 
-      /* ===== WATERMARK REPEAT TEXT (VISIBLE UNDER QR) ===== */
+      /* ✅ watermark TEXT only behind receipt block (NOT whole page) */
       .wm-text-layer {
         position: absolute;
-        inset: 0;
+        left: 14px;
+        right: 14px;
+        top: 8px;
+
+        /* IMPORTANT: limit height so it doesn't flood the whole page */
+        height: 360px; /* 🔧 adjust (320–420) to match original exactly */
+
         z-index: 1;
         pointer-events: none;
+        overflow: hidden; /* ✅ clips watermark inside block */
 
-        /* ✅ no reserved QR space so watermark prints behind it */
-        padding: 18px 18px;
-
+        /* subtle like original */
         opacity: 1;
       }
 
       .wm-line {
-        display: flex;
-        justify-content: space-between;
-        gap: 60px;
+        width: 100%;
+        text-align: center; /* ✅ single centered line */
         white-space: nowrap;
-        margin: 0 0 12px 0;
-        font-size: 13px;
-        line-height: 14px;
-        letter-spacing: 0.4px;
-
-        /* ✅ make watermark visible like original */
-        color: rgba(0, 0, 0, 0.16);
+        font-size: 18px;
+        line-height: 26px;
+        letter-spacing: 1px;
+        color: rgba(0, 0, 0, 0.20); /* ✅ visible but light */
+        margin: 0;
+        padding: 0;
       }
 
-      .wm-line span {
-        flex: 0 0 auto; /* ✅ prevents "... / 2" truncation */
-      }
-
-      /* ===== MAIN CONTENT ===== */
+      /* ===== MAIN CONTENT (sits above watermark text layer) ===== */
       .content {
         position: relative;
         z-index: 10;
-        padding: 10px 14px 12px 14px;
       }
 
       /* ===== LOGO WATERMARK ===== */
@@ -204,88 +208,88 @@
     %>
 
     <div class="page">
-      <!-- QR -->
-      <img class="qr" src="<%= data.src %>" alt="QR" />
+      <div class="receipt">
+        <!-- QR -->
+        <img class="qr" src="<%= data.src %>" alt="QR" />
 
-      <!-- Background repeated watermark lines -->
-      <div class="wm-text-layer">
-        <% for (let i = 0; i < 28; i++) { %>
-          <div class="wm-line">
-            <span><%= wmText %></span>
-            <span><%= wmText %></span>
-          </div>
-        <% } %>
-      </div>
-
-      <div class="content">
-        <!-- Emblem watermark -->
-        <img class="wm-emblem" src="/images1/Sikkim.jpg" alt="Watermark" />
-
-        <div class="header">
-          <div class="h1">GOVERNMENT OF SIKKIM</div>
-          <div class="h2">Department of Transport</div>
-          <div class="h3">Checkpost e-Receipt</div>
-          <div class="h4">In terms of Section 87(1) b &amp; c of CMV act 1988</div>
+        <!-- ✅ watermark text ONLY inside receipt content block -->
+        <div class="wm-text-layer">
+          <% for (let i = 0; i < 18; i++) { %>
+            <p class="wm-line"><%= wmText %></p>
+          <% } %>
         </div>
 
-        <div class="details-wrap">
-          <!-- LEFT -->
-          <div>
-            <div class="drow"><div class="label">Registration No.</div><div class="colon">:</div><div class="value"><%= data.vehicleNo || "" %></div></div>
-            <div class="drow"><div class="label">Receipt No.</div><div class="colon">:</div><div class="value"><%= data.receiptNo || "" %></div></div>
-            <div class="drow"><div class="label">Payment Date</div><div class="colon">:</div><div class="value"><%= data.paymentDate || data.receiptDate || "" %></div></div>
-            <div class="drow"><div class="label">Owner Name</div><div class="colon">:</div><div class="value"><%= data.ownerName || "" %></div></div>
-            <div class="drow"><div class="label">Chassis No.</div><div class="colon">:</div><div class="value"><%= data.chassisNo || "" %></div></div>
-            <div class="drow"><div class="label">Vehicle Type</div><div class="colon">:</div><div class="value"><%= data.vehiclePermitType || "" %></div></div>
-            <div class="drow"><div class="label">Mobile No.</div><div class="colon">:</div><div class="value"><%= data.mobileNo || "" %></div></div>
-            <div class="drow"><div class="label">Service Type</div><div class="colon">:</div><div class="value"><%= (data.serviceType || "NOT APPLICABLE") %></div></div>
-            <div class="drow"><div class="label">Bank Ref. No.</div><div class="colon">:</div><div class="value"><%= (data.upBankRefNo || data.bankRefNo || "NA") %></div></div>
+        <!-- Main Content -->
+        <div class="content">
+          <!-- emblem watermark -->
+          <img class="wm-emblem" src="/images1/Sikkim.jpg" alt="Watermark" />
 
-            <% if (!isGoods) { %>
-              <div class="drow"><div class="label">Sleeper Cap.</div><div class="colon">:</div><div class="value"><%= (data.sleeperCap || data.sleeperCapacityExcludingDriver || "") %></div></div>
-            <% } %>
-
-            <div class="drow"><div class="label">Permit Type</div><div class="colon">:</div><div class="value"><%= data.permitType || "NOT APPLICABLE" %></div></div>
+          <div class="header">
+            <div class="h1">GOVERNMENT OF SIKKIM</div>
+            <div class="h2">Department of Transport</div>
+            <div class="h3">Checkpost e-Receipt</div>
+            <div class="h4">In terms of Section 87(1) b &amp; c of CMV act 1988</div>
           </div>
 
-          <!-- RIGHT -->
-          <div>
-            <div class="drow"><div class="label">Tax Mode</div><div class="colon">:</div><div class="value"><%= data.taxMode || "" %></div></div>
-            <div class="drow"><div class="label">Vehicle Class</div><div class="colon">:</div><div class="value"><%= data.vehicleClass || "" %></div></div>
-            <div class="drow"><div class="label">Checkpost Name</div><div class="colon">:</div><div class="value"><%= (data.borderBarrier || data.districtName || data.district || "") %></div></div>
+          <div class="details-wrap">
+            <!-- LEFT -->
+            <div>
+              <div class="drow"><div class="label">Registration No.</div><div class="colon">:</div><div class="value"><%= data.vehicleNo || "" %></div></div>
+              <div class="drow"><div class="label">Receipt No.</div><div class="colon">:</div><div class="value"><%= data.receiptNo || "" %></div></div>
+              <div class="drow"><div class="label">Payment Date</div><div class="colon">:</div><div class="value"><%= data.paymentDate || data.receiptDate || "" %></div></div>
+              <div class="drow"><div class="label">Owner Name</div><div class="colon">:</div><div class="value"><%= data.ownerName || "" %></div></div>
+              <div class="drow"><div class="label">Chassis No.</div><div class="colon">:</div><div class="value"><%= data.chassisNo || "" %></div></div>
+              <div class="drow"><div class="label">Vehicle Type</div><div class="colon">:</div><div class="value"><%= data.vehiclePermitType || "" %></div></div>
+              <div class="drow"><div class="label">Mobile No.</div><div class="colon">:</div><div class="value"><%= data.mobileNo || "" %></div></div>
+              <div class="drow"><div class="label">Service Type</div><div class="colon">:</div><div class="value"><%= (data.serviceType || "NOT APPLICABLE") %></div></div>
+              <div class="drow"><div class="label">Bank Ref. No.</div><div class="colon">:</div><div class="value"><%= (data.upBankRefNo || data.bankRefNo || "NA") %></div></div>
 
-            <% if (!isGoods) { %>
-              <div class="drow"><div class="label">Seat Cap(Ex. Driver)</div><div class="colon">:</div><div class="value"><%= (data.seatingCapacityExcludingDriver || data.seatingCapacity || "") %></div></div>
-            <% } else { %>
-              <div class="drow"><div class="label">Gross Weight</div><div class="colon">:</div><div class="value"><%= (data.grossVehicleWeight || "") %></div></div>
-              <div class="drow"><div class="label">Unladen Wt.</div><div class="colon">:</div><div class="value"><%= (data.unladenWeight || "") %></div></div>
-            <% } %>
+              <% if (!isGoods) { %>
+                <div class="drow"><div class="label">Sleeper Cap.</div><div class="colon">:</div><div class="value"><%= (data.sleeperCap || data.sleeperCapacityExcludingDriver || "") %></div></div>
+              <% } %>
 
-            <div class="drow"><div class="label">Payment Mode</div><div class="colon">:</div><div class="value"><%= (data.paymentMode || "") %></div></div>
+              <div class="drow"><div class="label">Permit Type</div><div class="colon">:</div><div class="value"><%= data.permitType || "NOT APPLICABLE" %></div></div>
+            </div>
+
+            <!-- RIGHT -->
+            <div>
+              <div class="drow"><div class="label">Tax Mode</div><div class="colon">:</div><div class="value"><%= data.taxMode || "" %></div></div>
+              <div class="drow"><div class="label">Vehicle Class</div><div class="colon">:</div><div class="value"><%= data.vehicleClass || "" %></div></div>
+              <div class="drow"><div class="label">Checkpost Name</div><div class="colon">:</div><div class="value"><%= (data.borderBarrier || data.districtName || data.district || "") %></div></div>
+
+              <% if (!isGoods) { %>
+                <div class="drow"><div class="label">Seat Cap(Ex. Driver)</div><div class="colon">:</div><div class="value"><%= (data.seatingCapacityExcludingDriver || data.seatingCapacity || "") %></div></div>
+              <% } else { %>
+                <div class="drow"><div class="label">Gross Weight</div><div class="colon">:</div><div class="value"><%= (data.grossVehicleWeight || "") %></div></div>
+                <div class="drow"><div class="label">Unladen Wt.</div><div class="colon">:</div><div class="value"><%= (data.unladenWeight || "") %></div></div>
+              <% } %>
+
+              <div class="drow"><div class="label">Payment Mode</div><div class="colon">:</div><div class="value"><%= (data.paymentMode || "") %></div></div>
+            </div>
           </div>
-        </div>
 
-        <div class="money">
-          <div class="head">
-            <div class="cell">Particular</div>
-            <div class="cell num">Fees/Tax</div>
-            <div class="cell num">Fine</div>
-            <div class="cell num">Total</div>
+          <div class="money">
+            <div class="head">
+              <div class="cell">Particular</div>
+              <div class="cell num">Fees/Tax</div>
+              <div class="cell num">Fine</div>
+              <div class="cell num">Total</div>
+            </div>
+
+            <div class="row">
+              <div class="cell">Permit Fee(<%= from %> To <%= to %>)</div>
+              <div class="cell num"><%= amt %></div>
+              <div class="cell num">0</div>
+              <div class="cell num"><%= amt %></div>
+            </div>
           </div>
 
-          <div class="row">
-            <div class="cell">Permit Fee(<%= from %> To <%= to %>)</div>
-            <div class="cell num"><%= amt %></div>
-            <div class="cell num">0</div>
-            <div class="cell num"><%= amt %></div>
+          <div class="grand">
+            <div><b>Grand Total :</b> ₹ <%= amt %>/- ( <%= data.totalAmountInWord || "" %> )</div>
+            <div class="note">Note : 1) This is a computer generated printout and no signature is required.</div>
+            <div class="note">2) Incorrect mentioning of vehicle class or seating capacity may lead to tax evasion and defaulter shall be liable for penal action.</div>
+            <div class="note mt6">You will also receive the payment confirmation message.</div>
           </div>
-        </div>
-
-        <div class="grand">
-          <div><b>Grand Total :</b> ₹ <%= amt %>/- ( <%= data.totalAmountInWord || "" %> )</div>
-          <div class="note">Note : 1) This is a computer generated printout and no signature is required.</div>
-          <div class="note">2) Incorrect mentioning of vehicle class or seating capacity may lead to tax evasion and defaulter shall be liable for penal action.</div>
-          <div class="note mt6">You will also receive the payment confirmation message.</div>
         </div>
       </div>
     </div>
