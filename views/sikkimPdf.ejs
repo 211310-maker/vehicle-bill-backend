@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <title>Sikkim Receipt</title>
 
+    <!-- ✅ Roboto (as you asked) -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,400;1,500&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
       @page {
         size: A4;
@@ -13,7 +19,7 @@
       body {
         margin: 0;
         padding: 0;
-        font-family: "Times New Roman", Times, serif;
+        font-family: "Roboto", sans-serif;
         color: #000;
         background: #fff;
       }
@@ -35,64 +41,75 @@
         z-index: 5;
       }
 
-      /* ===== QR ===== */
+      /* ===== QR (top-right like original) ===== */
       .qr {
         position: absolute;
-        top: 10px;
-        right: 12px;
-        width: 155px;
-        height: 155px;
+        top: 6px;
+        right: 8px;
+        width: 170px;
+        height: 170px;
         object-fit: contain;
-        z-index: 30;
-        background: transparent; /* allow watermark behind */
+        z-index: 50;
+        background: #fff; /* original looks like white box behind QR */
+        padding: 2px;
       }
 
-      /* ✅ watermark TEXT only behind receipt block (NOT whole page) */
-      .wm-text-layer {
+      /* ✅ Watermark area only behind the receipt content block */
+      .wm-area {
         position: absolute;
-        left: 14px;
-        right: 14px;
-        top: 8px;
+        left: 0;
+        right: 0;
+        top: 0;
 
-        /* IMPORTANT: limit height so it doesn't flood the whole page */
-        height: 360px; /* 🔧 adjust (320–420) to match original exactly */
+        /* 🔧 IMPORTANT: This defines how tall the watermark zone is.
+           Make it match exactly your "content block" height. */
+        height: 410px;
 
         z-index: 1;
         pointer-events: none;
-        overflow: hidden; /* ✅ clips watermark inside block */
-
-        /* subtle like original */
-        opacity: 1;
+        overflow: hidden;
       }
 
+      /* ✅ watermark TEXT lines */
+      .wm-text-layer {
+        position: absolute;
+        inset: 0;
+        padding: 10px 14px 0 14px;
+        z-index: 1;
+      }
+
+      /* ✅ One line = left + right (like original) */
       .wm-line {
         width: 100%;
-        text-align: center; /* ✅ single centered line */
+        display: flex;
+        justify-content: space-between;
         white-space: nowrap;
-        font-size: 18px;
-        line-height: 26px;
+
+        font-size: 24px;       /* closer to original */
+        line-height: 22px;
         letter-spacing: 1px;
-        color: rgba(0, 0, 0, 0.20); /* ✅ visible but light */
-        margin: 0;
+
+        color: rgba(0, 0, 0, 0.18);
+        margin: 0 0 14px 0;
         padding: 0;
       }
 
-      /* ===== MAIN CONTENT (sits above watermark text layer) ===== */
-      .content {
-        position: relative;
-        z-index: 10;
-      }
-
-      /* ===== LOGO WATERMARK ===== */
+      /* ===== watermark emblem (center) ===== */
       .wm-emblem {
         position: absolute;
         left: 50%;
-        top: 145px; /* slightly up */
+        top: 135px;           /* ✅ moved slightly up */
         transform: translateX(-50%);
-        width: 235px; /* smaller */
-        opacity: 0.28; /* darker */
-        z-index: 6;
+        width: 220px;         /* ✅ smaller */
+        opacity: 0.30;        /* ✅ darker like original */
+        z-index: 2;
         pointer-events: none;
+      }
+
+      /* ===== MAIN CONTENT (above watermark) ===== */
+      .content {
+        position: relative;
+        z-index: 10;
       }
 
       /* ===== HEADER ===== */
@@ -212,18 +229,24 @@
         <!-- QR -->
         <img class="qr" src="<%= data.src %>" alt="QR" />
 
-        <!-- ✅ watermark text ONLY inside receipt content block -->
-        <div class="wm-text-layer">
-          <% for (let i = 0; i < 18; i++) { %>
-            <p class="wm-line"><%= wmText %></p>
-          <% } %>
+        <!-- ✅ watermark area only behind the receipt block -->
+        <div class="wm-area">
+          <!-- watermark text lines (behind content, clipped) -->
+          <div class="wm-text-layer">
+            <% for (let i = 0; i < 14; i++) { %>
+              <p class="wm-line">
+                <span><%= wmText %></span>
+                <span><%= wmText %></span>
+              </p>
+            <% } %>
+          </div>
+
+          <!-- emblem watermark (behind content) -->
+          <img class="wm-emblem" src="/images1/Sikkim.jpg" alt="Watermark" />
         </div>
 
         <!-- Main Content -->
         <div class="content">
-          <!-- emblem watermark -->
-          <img class="wm-emblem" src="/images1/Sikkim.jpg" alt="Watermark" />
-
           <div class="header">
             <div class="h1">GOVERNMENT OF SIKKIM</div>
             <div class="h2">Department of Transport</div>
