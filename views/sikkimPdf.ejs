@@ -20,14 +20,14 @@
 
       .page {
         position: relative;
-        width: 794px; /* A4 ~96dpi */
+        width: 794px;
         min-height: 1123px;
         margin: 0 auto;
         background: #fff;
         overflow: hidden;
       }
 
-      /* ===== QR (top-right like original) ===== */
+      /* ===== QR ===== */
       .qr {
         position: absolute;
         top: 10px;
@@ -35,31 +35,41 @@
         width: 155px;
         height: 155px;
         object-fit: contain;
-        z-index: 20;
-        background: #fff;
+        z-index: 30;
+
+        /* ✅ IMPORTANT: allow watermark to show behind QR */
+        background: transparent;
       }
 
-      /* ===== BACKGROUND REPEAT TEXT WATERMARK ===== */
+      /* ===== WATERMARK REPEAT TEXT (VISIBLE UNDER QR) ===== */
       .wm-text-layer {
         position: absolute;
         inset: 0;
         z-index: 1;
         pointer-events: none;
+
+        /* ✅ no reserved QR space so watermark prints behind it */
         padding: 18px 18px;
-        /* more visible */
+
         opacity: 1;
       }
 
       .wm-line {
         display: flex;
         justify-content: space-between;
-        gap: 80px;
+        gap: 60px;
         white-space: nowrap;
         margin: 0 0 12px 0;
-        font-size: 15px;
-        line-height: 15px;
+        font-size: 13px;
+        line-height: 14px;
         letter-spacing: 0.4px;
-        color: rgba(0, 0, 0, 0.18); /* more visible */
+
+        /* ✅ make watermark visible like original */
+        color: rgba(0, 0, 0, 0.16);
+      }
+
+      .wm-line span {
+        flex: 0 0 auto; /* ✅ prevents "... / 2" truncation */
       }
 
       /* ===== MAIN CONTENT ===== */
@@ -69,14 +79,14 @@
         padding: 10px 14px 12px 14px;
       }
 
-      /* ===== LOGO WATERMARK (center, smaller, darker, moved up) ===== */
+      /* ===== LOGO WATERMARK ===== */
       .wm-emblem {
         position: absolute;
         left: 50%;
-        top: 150px;            /* moved up */
+        top: 145px; /* slightly up */
         transform: translateX(-50%);
-        width: 240px;          /* smaller */
-        opacity: 0.25;         /* darker */
+        width: 235px; /* smaller */
+        opacity: 0.28; /* darker */
         z-index: 6;
         pointer-events: none;
       }
@@ -116,7 +126,7 @@
         margin: 3px 0 0 0;
       }
 
-      /* ===== DETAILS LAYOUT ===== */
+      /* ===== DETAILS TWO-COLUMN ===== */
       .details-wrap {
         margin-top: 18px;
         display: grid;
@@ -132,19 +142,9 @@
         margin-bottom: 4px;
       }
 
-      .drow .label {
-        font-weight: 700;
-      }
-
-      .drow .colon {
-        font-weight: 700;
-        text-align: center;
-      }
-
-      .drow .value {
-        font-weight: 700;
-        word-break: break-word;
-      }
+      .drow .label { font-weight: 700; }
+      .drow .colon { font-weight: 700; text-align: center; }
+      .drow .value { font-weight: 700; word-break: break-word; }
 
       /* ===== MONEY TABLE ===== */
       .money {
@@ -185,9 +185,7 @@
         font-size: 11px;
       }
 
-      .mt6 {
-        margin-top: 6px;
-      }
+      .mt6 { margin-top: 6px; }
     </style>
   </head>
 
@@ -211,7 +209,7 @@
 
       <!-- Background repeated watermark lines -->
       <div class="wm-text-layer">
-        <% for (let i = 0; i < 26; i++) { %>
+        <% for (let i = 0; i < 28; i++) { %>
           <div class="wm-line">
             <span><%= wmText %></span>
             <span><%= wmText %></span>
@@ -220,7 +218,7 @@
       </div>
 
       <div class="content">
-        <!-- Emblem watermark inside content (centered) -->
+        <!-- Emblem watermark -->
         <img class="wm-emblem" src="/images1/Sikkim.jpg" alt="Watermark" />
 
         <div class="header">
@@ -230,7 +228,6 @@
           <div class="h4">In terms of Section 87(1) b &amp; c of CMV act 1988</div>
         </div>
 
-        <!-- DETAILS (two columns like original) -->
         <div class="details-wrap">
           <!-- LEFT -->
           <div>
@@ -268,7 +265,6 @@
           </div>
         </div>
 
-        <!-- MONEY TABLE -->
         <div class="money">
           <div class="head">
             <div class="cell">Particular</div>
@@ -285,10 +281,8 @@
           </div>
         </div>
 
-        <!-- GRAND TOTAL + NOTES -->
         <div class="grand">
           <div><b>Grand Total :</b> ₹ <%= amt %>/- ( <%= data.totalAmountInWord || "" %> )</div>
-
           <div class="note">Note : 1) This is a computer generated printout and no signature is required.</div>
           <div class="note">2) Incorrect mentioning of vehicle class or seating capacity may lead to tax evasion and defaulter shall be liable for penal action.</div>
           <div class="note mt6">You will also receive the payment confirmation message.</div>
