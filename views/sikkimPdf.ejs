@@ -4,14 +4,17 @@
     <meta charset="UTF-8" />
     <title>Tax - Sikkim Receipt</title>
 
+    <!-- Roboto as requested -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
     <style>
       @page { size: A4; margin: 14mm; }
 
-      /* Use classic serif to match original receipt */
+      /* Use Roboto as requested */
       body {
         margin: 0;
         padding: 0;
-        font-family: "Times New Roman", Times, serif;
+        font-family: "Roboto", Arial, sans-serif;
         color: #000;
         background: #fff;
       }
@@ -37,111 +40,83 @@
         background: #fff;
       }
 
-      /* ===== MAIN CONTENT ===== */
+      /* MAIN CONTENT: stacking context */
       .content {
         position: relative;
-        z-index: 30;               /* above emblem (20) and lines (10) */
+        z-index: 40;               /* above emblem (30) and lines (10) */
         padding: 10px 14px 12px 14px;
+        /* create stacking context for pseudo-element */
       }
 
-      /* ===== WATERMARK LINES (inside content, clipped to receipt) =====
-         Key points:
-         - absolutely positioned inside .content so it is clipped to receipt area
-         - right offset reserves space for QR (adjust QR_WIDTH if you change QR)
-         - text repeated tightly to appear continuous
-      */
-      .wm-text-layer {
+      /* ----- dashed-horizontal-lines background using pseudo-element on .content ----- */
+      /* - rightOffset reserves room for the QR (adjust if QR size changes) */
+      .content::before {
+        content: "";
         position: absolute;
+        left: 0;
+        /* reserve space on the right so lines don't run under QR */
+        right: 190px; /* adjust if you change QR width/margin */
         top: 0;
-        left: 14px;               /* match .content left padding */
-        right: 14px;              /* we will reserve QR with inner rule on each line */
         bottom: 0;
-        z-index: 10;              /* behind content (30) and emblem (20 above lines) */
+        z-index: 10; /* behind emblem (30) and behind content(40) */
         pointer-events: none;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: stretch;
-        overflow: hidden;
-        padding-top: 8px;
-        padding-bottom: 8px;
+
+        /* dashed horizontal lines: small dash, gap, repeated horizontally, and repeated vertically */
+        background-image: linear-gradient(
+                            to right,
+                            rgba(0,0,0,0.16) 0px,
+                            rgba(0,0,0,0.16) 2px,
+                            rgba(0,0,0,0) 2px,
+                            rgba(0,0,0,0) 14px
+                          );
+        /* repeat that horizontal dash pattern vertically every 18px */
+        background-size: auto 18px;
+        background-repeat: repeat;
+        /* subtle clipping so the lines are slightly lighter */
+        opacity: 1;
       }
 
-      /* Each repeated line — we use a single long inline-block to avoid wrapping gaps */
-      .wm-line {
-        display: block;
-        width: 100%;
-        margin: 8px 0;              /* vertical spacing between watermark lines */
-        font-family: "Times New Roman", Times, serif;
-        font-size: 13px;           /* tune to match original */
-        line-height: 14px;
-        color: rgba(0,0,0,0.14);   /* slightly stronger so it shows up in print */
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: clip;
-      }
-
-      /* To make lines appear continuous up to the QR area:
-         inside each line we wrap the long repeated string and then add a side mask on right
-         by using a right padding on the text and letting QR overlay on top (QR has higher z-index).
-      */
-      .wm-line .wm-line-text {
-        display: inline-block;
-        padding-right: 200px; /* reserve extra space for QR so text doesn't flow under QR (adjust if you change QR size) */
-        transform: translateZ(0); /* help rendering */
-      }
-
-      /* ===== EMBLEM (centered, above lines but behind content) ===== */
+      /* emblem watermark (centered, above lines but below content) */
       .wm-emblem {
         position: absolute;
         left: 50%;
         top: 145px;
         transform: translateX(-50%);
-        width: 255px;           /* slightly larger for better coverage */
+        width: 255px;
         opacity: 0.28;
-        z-index: 20;            /* above lines (10) but below content (30) */
+        z-index: 30; /* above lines (10) but below content (40) */
         pointer-events: none;
       }
 
-      /* ===== HEADER ===== */
+      /* HEADER */
       .header {
         text-align: center;
         line-height: 1.08;
         margin-top: 8px;
       }
 
-      .header .h1 {
-        font-weight: 700;
-        font-size: 16px;
-        margin: 0;
-        text-transform: uppercase;
-        display: inline-block;
-        padding-bottom: 2px;
-        border-bottom: 1px solid #000;
-      }
-
+      .header .h1 { font-weight: 700; font-size: 18px; margin: 0; text-transform: uppercase; display: inline-block; padding-bottom: 2px; border-bottom: 1px solid #000; }
       .header .h2 { font-weight: 700; font-size: 13px; margin: 4px 0 0 0; }
       .header .h3 { font-weight: 700; font-size: 13px; margin: 3px 0 0 0; }
-      .header .h4 { font-weight: 700; font-size: 11px; margin: 3px 0 0 0; }
+      .header .h4 { font-weight: 500; font-size: 11px; margin: 3px 0 0 0; }
 
-      /* ===== DETAILS ===== */
-      .details-wrap { margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 34px; font-size: 12px; }
-
+      /* DETAILS */
+      .details-wrap { margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 34px; font-size: 12px; font-family: "Roboto", Arial, sans-serif; }
       .drow { display: grid; grid-template-columns: 135px 12px 1fr; align-items: start; margin-bottom: 4px; }
       .drow .label { font-weight: 700; }
       .drow .colon { font-weight: 700; text-align: center; }
-      .drow .value { font-weight: 700; word-break: break-word; }
+      .drow .value { font-weight: 500; word-break: break-word; }
 
-      /* ===== MONEY TABLE ===== */
+      /* MONEY TABLE */
       .money { margin-top: 12px; border-top: 1px solid #000; border-bottom: 1px solid #000; font-size: 12px; }
       .money .head, .money .row { display: grid; grid-template-columns: 1fr 90px 70px 70px; }
       .money .head { font-weight: 700; border-bottom: 1px solid #000; }
       .money .cell { padding: 3px 6px; }
       .money .num { text-align: right; }
 
-      /* ===== NOTES ===== */
+      /* GRAND / NOTES */
       .grand { margin-top: 8px; font-size: 12px; }
-      .note { margin-top: 2px; font-style: italic; font-size: 11px; }
+      .note { margin-top: 2px; font-style: italic; font-size: 11px; font-weight: 400; }
       .mt6 { margin-top: 6px; }
     </style>
   </head>
@@ -158,31 +133,16 @@
 
       const vType = (data.vehiclePermitType || "").toString().toUpperCase();
       const isGoods = vType === "GOODS VEHICLE";
-
-      // create a long repeated string without NBSP to avoid dotted gaps
-      const makeLong = (text, repeats = 40) => {
-        // use a small visible separator (a dash) instead of multiple NBSPs to avoid dotted appearance
-        return Array(repeats).fill(text).join("  —  ");
-      };
     %>
 
     <div class="page">
       <!-- QR -->
       <img class="qr" src="<%= data.src %>" alt="QR" />
 
+      <!-- emblem (above lines but below content) -->
+      <img class="wm-emblem" src="/images1/Sikkim.jpg" alt="Watermark" />
+
       <div class="content">
-        <!-- Watermark repeated lines (clipped to content region) -->
-        <div class="wm-text-layer" aria-hidden="true">
-          <% for (let i = 0; i < 36; i++) { %>
-            <div class="wm-line">
-              <span class="wm-line-text"><%= makeLong(wmText, 36) %></span>
-            </div>
-          <% } %>
-        </div>
-
-        <!-- Emblem watermark -->
-        <img class="wm-emblem" src="/images1/Sikkim.jpg" alt="Watermark" />
-
         <div class="header">
           <div class="h1">GOVERNMENT OF SIKKIM</div>
           <div class="h2">Department of Transport</div>
