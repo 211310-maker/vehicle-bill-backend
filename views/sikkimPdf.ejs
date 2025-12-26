@@ -5,11 +5,9 @@
     <title>Tax - Sikkim Receipt</title>
 
     <style>
-      @page {
-        size: A4;
-        margin: 14mm;
-      }
+      @page { size: A4; margin: 14mm; }
 
+      /* Use classic serif to match original receipt */
       body {
         margin: 0;
         padding: 0;
@@ -27,7 +25,7 @@
         overflow: hidden;
       }
 
-      /* ===== QR ===== */
+      /* QR on top-right */
       .qr {
         position: absolute;
         top: 10px;
@@ -35,59 +33,73 @@
         width: 155px;
         height: 155px;
         object-fit: contain;
-        z-index: 40; /* keep on top */
+        z-index: 60; /* very top */
         background: #fff;
       }
 
       /* ===== MAIN CONTENT ===== */
       .content {
         position: relative;
-        z-index: 10;
+        z-index: 30;               /* above emblem (20) and lines (10) */
         padding: 10px 14px 12px 14px;
-        /* create a stacking context so watermark inside .content is clipped to content bounds */
       }
 
-      /* ===== WATERMARK LINES (placed inside .content, behind content) ===== */
+      /* ===== WATERMARK LINES (inside content, clipped to receipt) =====
+         Key points:
+         - absolutely positioned inside .content so it is clipped to receipt area
+         - right offset reserves space for QR (adjust QR_WIDTH if you change QR)
+         - text repeated tightly to appear continuous
+      */
       .wm-text-layer {
         position: absolute;
-        inset: 0;                   /* cover the content area */
-        z-index: 1;                 /* behind content (content has z-index:10) */
+        top: 0;
+        left: 14px;               /* match .content left padding */
+        right: 14px;              /* we will reserve QR with inner rule on each line */
+        bottom: 0;
+        z-index: 10;              /* behind content (30) and emblem (20 above lines) */
         pointer-events: none;
         display: flex;
         flex-direction: column;
-        align-items: center;
         justify-content: flex-start;
-        padding: 12px 180px 12px 12px; /* reserve right space for QR and some left padding */
+        align-items: stretch;
         overflow: hidden;
+        padding-top: 8px;
+        padding-bottom: 8px;
       }
 
+      /* Each repeated line — we use a single long inline-block to avoid wrapping gaps */
       .wm-line {
-        width: 100%;
-        margin: 6px 0;
-        font-size: 13px;                /* slightly small */
-        line-height: 14px;
-        letter-spacing: 0.4px;
-        color: rgba(0, 0, 0, 0.12);     /* subtle watermark */
-        white-space: nowrap;            /* do not wrap: we output a long repeated string */
-        text-align: center;
         display: block;
-        overflow: hidden;               /* crop overflow if any */
+        width: 100%;
+        margin: 8px 0;              /* vertical spacing between watermark lines */
+        font-family: "Times New Roman", Times, serif;
+        font-size: 13px;           /* tune to match original */
+        line-height: 14px;
+        color: rgba(0,0,0,0.14);   /* slightly stronger so it shows up in print */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: clip;
       }
 
+      /* To make lines appear continuous up to the QR area:
+         inside each line we wrap the long repeated string and then add a side mask on right
+         by using a right padding on the text and letting QR overlay on top (QR has higher z-index).
+      */
       .wm-line .wm-line-text {
         display: inline-block;
-        /* keep the repeated text in a single inline block */
+        padding-right: 200px; /* reserve extra space for QR so text doesn't flow under QR (adjust if you change QR size) */
+        transform: translateZ(0); /* help rendering */
       }
 
-      /* ===== LOGO/EMBLEM WATERMARK (centered and behind content but above lines) ===== */
+      /* ===== EMBLEM (centered, above lines but behind content) ===== */
       .wm-emblem {
         position: absolute;
         left: 50%;
         top: 145px;
         transform: translateX(-50%);
-        width: 235px;
+        width: 255px;           /* slightly larger for better coverage */
         opacity: 0.28;
-        z-index: 6; /* above text lines (1) but below main content (10) */
+        z-index: 20;            /* above lines (10) but below content (30) */
         pointer-events: none;
       }
 
@@ -108,83 +120,28 @@
         border-bottom: 1px solid #000;
       }
 
-      .header .h2 {
-        font-weight: 700;
-        font-size: 13px;
-        margin: 4px 0 0 0;
-      }
+      .header .h2 { font-weight: 700; font-size: 13px; margin: 4px 0 0 0; }
+      .header .h3 { font-weight: 700; font-size: 13px; margin: 3px 0 0 0; }
+      .header .h4 { font-weight: 700; font-size: 11px; margin: 3px 0 0 0; }
 
-      .header .h3 {
-        font-weight: 700;
-        font-size: 13px;
-        margin: 3px 0 0 0;
-      }
+      /* ===== DETAILS ===== */
+      .details-wrap { margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 34px; font-size: 12px; }
 
-      .header .h4 {
-        font-weight: 700;
-        font-size: 11px;
-        margin: 3px 0 0 0;
-      }
-
-      /* ===== DETAILS TWO-COLUMN ===== */
-      .details-wrap {
-        margin-top: 18px;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        column-gap: 34px;
-        font-size: 12px;
-      }
-
-      .drow {
-        display: grid;
-        grid-template-columns: 135px 12px 1fr;
-        align-items: start;
-        margin-bottom: 4px;
-      }
-
+      .drow { display: grid; grid-template-columns: 135px 12px 1fr; align-items: start; margin-bottom: 4px; }
       .drow .label { font-weight: 700; }
       .drow .colon { font-weight: 700; text-align: center; }
       .drow .value { font-weight: 700; word-break: break-word; }
 
       /* ===== MONEY TABLE ===== */
-      .money {
-        margin-top: 12px;
-        border-top: 1px solid #000;
-        border-bottom: 1px solid #000;
-        font-size: 12px;
-      }
+      .money { margin-top: 12px; border-top: 1px solid #000; border-bottom: 1px solid #000; font-size: 12px; }
+      .money .head, .money .row { display: grid; grid-template-columns: 1fr 90px 70px 70px; }
+      .money .head { font-weight: 700; border-bottom: 1px solid #000; }
+      .money .cell { padding: 3px 6px; }
+      .money .num { text-align: right; }
 
-      .money .head,
-      .money .row {
-        display: grid;
-        grid-template-columns: 1fr 90px 70px 70px;
-      }
-
-      .money .head {
-        font-weight: 700;
-        border-bottom: 1px solid #000;
-      }
-
-      .money .cell {
-        padding: 3px 6px;
-      }
-
-      .money .num {
-        text-align: right;
-      }
-
-      /* ===== GRAND TOTAL / NOTES ===== */
-      .grand {
-        margin-top: 8px;
-        font-size: 12px;
-      }
-
-      .note {
-        margin-top: 2px;
-        font-style: italic;
-        font-size: 11px;
-      }
-
+      /* ===== NOTES ===== */
+      .grand { margin-top: 8px; font-size: 12px; }
+      .note { margin-top: 2px; font-style: italic; font-size: 11px; }
       .mt6 { margin-top: 6px; }
     </style>
   </head>
@@ -202,10 +159,10 @@
       const vType = (data.vehiclePermitType || "").toString().toUpperCase();
       const isGoods = vType === "GOODS VEHICLE";
 
-      // helper to create a long repeated string that fills horizontally
-      const repeatForLine = (text, count) => {
-        const sep = ' \u00A0 \u00A0 '; // small gap
-        return Array(count).fill(text).join(sep);
+      // create a long repeated string without NBSP to avoid dotted gaps
+      const makeLong = (text, repeats = 40) => {
+        // use a small visible separator (a dash) instead of multiple NBSPs to avoid dotted appearance
+        return Array(repeats).fill(text).join("  —  ");
       };
     %>
 
@@ -214,16 +171,16 @@
       <img class="qr" src="<%= data.src %>" alt="QR" />
 
       <div class="content">
-        <!-- Background repeated watermark lines (placed inside content so clipped to receipt) -->
+        <!-- Watermark repeated lines (clipped to content region) -->
         <div class="wm-text-layer" aria-hidden="true">
-          <% for (let i = 0; i < 28; i++) { %>
+          <% for (let i = 0; i < 36; i++) { %>
             <div class="wm-line">
-              <span class="wm-line-text"><%= repeatForLine(wmText, 18) %></span>
+              <span class="wm-line-text"><%= makeLong(wmText, 36) %></span>
             </div>
           <% } %>
         </div>
 
-        <!-- Emblem watermark (centered, above lines but behind content) -->
+        <!-- Emblem watermark -->
         <img class="wm-emblem" src="/images1/Sikkim.jpg" alt="Watermark" />
 
         <div class="header">
