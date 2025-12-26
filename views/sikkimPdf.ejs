@@ -5,7 +5,6 @@
     <title>Sikkim Receipt</title>
 
     <style>
-      /* ===== PAGE ===== */
       @page {
         size: A4;
         margin: 14mm;
@@ -21,63 +20,65 @@
 
       .page {
         position: relative;
-        width: 794px; /* A4 @ ~96dpi */
+        width: 794px; /* A4 ~96dpi */
         min-height: 1123px;
         margin: 0 auto;
         background: #fff;
         overflow: hidden;
       }
 
-      /* ===== QR ===== */
+      /* ===== QR (top-right like original) ===== */
       .qr {
         position: absolute;
-        top: 14px;
-        right: 16px;
-        width: 145px;
-        height: 145px;
+        top: 10px;
+        right: 12px;
+        width: 155px;
+        height: 155px;
         object-fit: contain;
-        z-index: 10;
+        z-index: 20;
         background: #fff;
       }
 
-      /* ===== WATERMARK BACKGROUND TEXT (REPEATED) ===== */
+      /* ===== BACKGROUND REPEAT TEXT WATERMARK ===== */
       .wm-text-layer {
         position: absolute;
         inset: 0;
         z-index: 1;
         pointer-events: none;
-        opacity: 0.18;
-        padding: 18px 16px;
+        padding: 18px 18px;
+        /* more visible */
+        opacity: 1;
       }
 
       .wm-line {
         display: flex;
         justify-content: space-between;
-        gap: 70px;
-        font-size: 14px;
-        line-height: 14px;
-        color: rgba(0, 0, 0, 0.22);
+        gap: 80px;
         white-space: nowrap;
-        margin: 0 0 10px 0;
-      }
-
-      /* ===== CENTER WATERMARK EMBLEM ===== */
-      .wm-emblem {
-        position: absolute;
-        left: 50%;
-        top: 175px;
-        transform: translateX(-50%);
-        width: 310px;
-        opacity: 0.15;
-        z-index: 2;
-        pointer-events: none;
+        margin: 0 0 12px 0;
+        font-size: 15px;
+        line-height: 15px;
+        letter-spacing: 0.4px;
+        color: rgba(0, 0, 0, 0.18); /* more visible */
       }
 
       /* ===== MAIN CONTENT ===== */
       .content {
         position: relative;
-        z-index: 5;
+        z-index: 10;
         padding: 10px 14px 12px 14px;
+      }
+
+      /* ===== LOGO WATERMARK (center, smaller, darker, moved up) ===== */
+      .wm-emblem {
+        position: absolute;
+        left: 50%;
+        top: 150px;            /* moved up */
+        transform: translateX(-50%);
+        width: 240px;          /* smaller */
+        opacity: 0.25;         /* darker */
+        z-index: 6;
+        pointer-events: none;
       }
 
       /* ===== HEADER ===== */
@@ -94,7 +95,7 @@
         text-transform: uppercase;
         display: inline-block;
         padding-bottom: 2px;
-        border-bottom: 1px solid #000; /* underline like original */
+        border-bottom: 1px solid #000;
       }
 
       .header .h2 {
@@ -115,7 +116,7 @@
         margin: 3px 0 0 0;
       }
 
-      /* ===== DETAILS LAYOUT (2 columns like original) ===== */
+      /* ===== DETAILS LAYOUT ===== */
       .details-wrap {
         margin-top: 18px;
         display: grid;
@@ -145,7 +146,7 @@
         word-break: break-word;
       }
 
-      /* ===== MONEY TABLE (thin lines like original) ===== */
+      /* ===== MONEY TABLE ===== */
       .money {
         margin-top: 12px;
         border-top: 1px solid #000;
@@ -208,9 +209,9 @@
       <!-- QR -->
       <img class="qr" src="<%= data.src %>" alt="QR" />
 
-      <!-- Repeated watermark text -->
+      <!-- Background repeated watermark lines -->
       <div class="wm-text-layer">
-        <% for (let i = 0; i < 22; i++) { %>
+        <% for (let i = 0; i < 26; i++) { %>
           <div class="wm-line">
             <span><%= wmText %></span>
             <span><%= wmText %></span>
@@ -218,11 +219,10 @@
         <% } %>
       </div>
 
-      <!-- Emblem watermark -->
-      <img class="wm-emblem" src="/images1/Sikkim.jpg" alt="Watermark" />
-
-      <!-- Main content -->
       <div class="content">
+        <!-- Emblem watermark inside content (centered) -->
+        <img class="wm-emblem" src="/images1/Sikkim.jpg" alt="Watermark" />
+
         <div class="header">
           <div class="h1">GOVERNMENT OF SIKKIM</div>
           <div class="h2">Department of Transport</div>
@@ -232,7 +232,7 @@
 
         <!-- DETAILS (two columns like original) -->
         <div class="details-wrap">
-          <!-- LEFT COLUMN -->
+          <!-- LEFT -->
           <div>
             <div class="drow"><div class="label">Registration No.</div><div class="colon">:</div><div class="value"><%= data.vehicleNo || "" %></div></div>
             <div class="drow"><div class="label">Receipt No.</div><div class="colon">:</div><div class="value"><%= data.receiptNo || "" %></div></div>
@@ -251,11 +251,10 @@
             <div class="drow"><div class="label">Permit Type</div><div class="colon">:</div><div class="value"><%= data.permitType || "NOT APPLICABLE" %></div></div>
           </div>
 
-          <!-- RIGHT COLUMN -->
+          <!-- RIGHT -->
           <div>
             <div class="drow"><div class="label">Tax Mode</div><div class="colon">:</div><div class="value"><%= data.taxMode || "" %></div></div>
             <div class="drow"><div class="label">Vehicle Class</div><div class="colon">:</div><div class="value"><%= data.vehicleClass || "" %></div></div>
-
             <div class="drow"><div class="label">Checkpost Name</div><div class="colon">:</div><div class="value"><%= (data.borderBarrier || data.districtName || data.district || "") %></div></div>
 
             <% if (!isGoods) { %>
