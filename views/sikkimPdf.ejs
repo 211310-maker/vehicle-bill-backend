@@ -21,7 +21,7 @@
 
       .page {
         position: relative;
-        width: 794px; /* approx A4 @ 96dpi */
+        width: 794px; /* A4 @ ~96dpi */
         min-height: 1123px;
         margin: 0 auto;
         background: #fff;
@@ -32,11 +32,12 @@
       .qr {
         position: absolute;
         top: 14px;
-        right: 18px;
-        width: 150px;
-        height: 150px;
+        right: 16px;
+        width: 145px;
+        height: 145px;
         object-fit: contain;
         z-index: 10;
+        background: #fff;
       }
 
       /* ===== WATERMARK BACKGROUND TEXT (REPEATED) ===== */
@@ -45,31 +46,29 @@
         inset: 0;
         z-index: 1;
         pointer-events: none;
-        opacity: 0.18; /* adjust watermark text visibility */
-        display: grid;
-        grid-template-columns: 1fr;
-        align-content: start;
-        padding: 22px;
-        row-gap: 18px;
+        opacity: 0.18;
+        padding: 18px 16px;
       }
+
       .wm-line {
         display: flex;
-        gap: 80px;
         justify-content: space-between;
-        font-size: 18px;
-        color: #000;
-        opacity: 0.25;
+        gap: 70px;
+        font-size: 14px;
+        line-height: 14px;
+        color: rgba(0, 0, 0, 0.22);
         white-space: nowrap;
+        margin: 0 0 10px 0;
       }
 
       /* ===== CENTER WATERMARK EMBLEM ===== */
       .wm-emblem {
         position: absolute;
         left: 50%;
-        top: 220px;
+        top: 175px;
         transform: translateX(-50%);
-        width: 260px;       /* 🔧 change size here */
-        opacity: 0.14;      /* 🔧 change opacity here */
+        width: 310px;
+        opacity: 0.15;
         z-index: 2;
         pointer-events: none;
       }
@@ -78,128 +77,140 @@
       .content {
         position: relative;
         z-index: 5;
-        padding: 18px 22px 20px 22px;
+        padding: 10px 14px 12px 14px;
       }
 
+      /* ===== HEADER ===== */
       .header {
         text-align: center;
-        line-height: 1.1;
+        line-height: 1.08;
         margin-top: 8px;
       }
+
       .header .h1 {
         font-weight: 700;
-        font-size: 18px;
-        letter-spacing: 0.3px;
-        text-transform: uppercase;
-        margin: 0;
-      }
-      .header .h2 {
-        font-weight: 700;
         font-size: 16px;
-        margin: 4px 0 0 0;
+        margin: 0;
+        text-transform: uppercase;
+        display: inline-block;
+        padding-bottom: 2px;
+        border-bottom: 1px solid #000; /* underline like original */
       }
-      .header .h3 {
-        font-weight: 700;
-        font-size: 15px;
-        margin: 4px 0 0 0;
-      }
-      .header .h4 {
+
+      .header .h2 {
         font-weight: 700;
         font-size: 13px;
         margin: 4px 0 0 0;
       }
 
-      /* ===== DETAILS TABLE (LIKE SCREENSHOT) ===== */
-      .details {
-        margin-top: 14px;
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 12.5px;
-      }
-      .details td {
-        padding: 2px 4px;
-        vertical-align: top;
-      }
-      .label {
-        width: 140px;
+      .header .h3 {
         font-weight: 700;
-      }
-      .colon {
-        width: 10px;
-        font-weight: 700;
-      }
-      .value {
-        font-weight: 700;
-        width: 220px;
-      }
-      .rlabel {
-        width: 130px;
-        font-weight: 700;
-      }
-      .rvalue {
-        font-weight: 700;
-        width: 200px;
+        font-size: 13px;
+        margin: 3px 0 0 0;
       }
 
-      /* ===== MONEY TABLE (LIKE SCREENSHOT) ===== */
-      .money-wrap {
-        margin-top: 12px;
-        border-top: 2px solid #000;
-        border-bottom: 2px solid #000;
+      .header .h4 {
+        font-weight: 700;
+        font-size: 11px;
+        margin: 3px 0 0 0;
+      }
+
+      /* ===== DETAILS LAYOUT (2 columns like original) ===== */
+      .details-wrap {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 34px;
         font-size: 12px;
       }
-      .money-row {
+
+      .drow {
+        display: grid;
+        grid-template-columns: 135px 12px 1fr;
+        align-items: start;
+        margin-bottom: 4px;
+      }
+
+      .drow .label {
+        font-weight: 700;
+      }
+
+      .drow .colon {
+        font-weight: 700;
+        text-align: center;
+      }
+
+      .drow .value {
+        font-weight: 700;
+        word-break: break-word;
+      }
+
+      /* ===== MONEY TABLE (thin lines like original) ===== */
+      .money {
+        margin-top: 12px;
+        border-top: 1px solid #000;
+        border-bottom: 1px solid #000;
+        font-size: 12px;
+      }
+
+      .money .head,
+      .money .row {
         display: grid;
         grid-template-columns: 1fr 90px 70px 70px;
-        border-top: 1px solid #000;
       }
-      .money-row:first-child {
-        border-top: none;
-      }
-      .money-cell {
-        padding: 4px 6px;
-        border-right: 1px solid #000;
-      }
-      .money-row .money-cell:last-child {
-        border-right: none;
-      }
-      .money-head {
+
+      .money .head {
         font-weight: 700;
-        background: #fff;
+        border-bottom: 1px solid #000;
+      }
+
+      .money .cell {
+        padding: 3px 6px;
+      }
+
+      .money .num {
+        text-align: right;
       }
 
       /* ===== GRAND TOTAL / NOTES ===== */
       .grand {
-        margin-top: 10px;
+        margin-top: 8px;
         font-size: 12px;
       }
-      .grand b {
-        font-weight: 700;
-      }
+
       .note {
-        margin-top: 4px;
+        margin-top: 2px;
         font-style: italic;
         font-size: 11px;
       }
 
-      /* small helper */
-      .mt6 { margin-top: 6px; }
+      .mt6 {
+        margin-top: 6px;
+      }
     </style>
   </head>
 
   <body>
+    <%
+      const wmVehicle = (data.vehicleNo || "").toString();
+      const wmDate = (data.paymentDate || data.receiptDate || "").toString();
+      const wmText = `${wmVehicle} / ${wmDate}`;
+
+      const from = data.taxFrom || data.taxFromDate || "";
+      const to = data.taxTo || data.taxUptoDate || "";
+      const amt = Number(data.totalAmount || data.permitFee || 0) || 0;
+
+      const vType = (data.vehiclePermitType || "").toString().toUpperCase();
+      const isGoods = vType === "GOODS VEHICLE";
+    %>
+
     <div class="page">
       <!-- QR -->
       <img class="qr" src="<%= data.src %>" alt="QR" />
 
       <!-- Repeated watermark text -->
-      <%
-        const wmVehicle = (data.vehicleNo || "").toString();
-        const wmDate = (data.paymentDate || data.receiptDate || "").toString();
-        const wmText = `${wmVehicle} / ${wmDate}`;
-      %>
       <div class="wm-text-layer">
-        <% for (let i = 0; i < 12; i++) { %>
+        <% for (let i = 0; i < 22; i++) { %>
           <div class="wm-line">
             <span><%= wmText %></span>
             <span><%= wmText %></span>
@@ -207,159 +218,81 @@
         <% } %>
       </div>
 
-      <!-- Emblem watermark (same image, just faded) -->
-      <!-- If you have a better emblem image, replace src below with that file -->
+      <!-- Emblem watermark -->
       <img class="wm-emblem" src="/images1/Sikkim.jpg" alt="Watermark" />
 
-      <!-- Main Content -->
+      <!-- Main content -->
       <div class="content">
         <div class="header">
-          <p class="h1">GOVERNMENT OF SIKKIM</p>
-          <p class="h2">Department of Transport</p>
-          <p class="h3">Checkpost e-Receipt</p>
-          <p class="h4">In terms of Section 87(1) b &amp; c of CMV act 1988</p>
+          <div class="h1">GOVERNMENT OF SIKKIM</div>
+          <div class="h2">Department of Transport</div>
+          <div class="h3">Checkpost e-Receipt</div>
+          <div class="h4">In terms of Section 87(1) b &amp; c of CMV act 1988</div>
         </div>
 
-        <table class="details">
-          <tr>
-            <td class="label">Registration No.</td><td class="colon">:</td>
-            <td class="value"><%= data.vehicleNo || "" %></td>
-
-            <td class="rlabel"></td><td class="colon"></td>
-            <td class="rvalue"></td>
-          </tr>
-
-          <tr>
-            <td class="label">Receipt No.</td><td class="colon">:</td>
-            <td class="value"><%= data.receiptNo || "" %></td>
-
-            <td class="rlabel"></td><td class="colon"></td>
-            <td class="rvalue"></td>
-          </tr>
-
-          <tr>
-            <td class="label">Payment Date</td><td class="colon">:</td>
-            <td class="value"><%= data.paymentDate || data.receiptDate || "" %></td>
-
-            <td class="rlabel"></td><td class="colon"></td>
-            <td class="rvalue"></td>
-          </tr>
-
-          <tr>
-            <td class="label">Owner Name</td><td class="colon">:</td>
-            <td class="value"><%= data.ownerName || "" %></td>
-
-            <td class="rlabel"></td><td class="colon"></td>
-            <td class="rvalue"></td>
-          </tr>
-
-          <tr>
-            <td class="label">Chassis No.</td><td class="colon">:</td>
-            <td class="value"><%= data.chassisNo || "" %></td>
-
-            <td class="rlabel">Tax Mode</td><td class="colon">:</td>
-            <td class="rvalue"><%= data.taxMode || "" %></td>
-          </tr>
-
-          <tr>
-            <td class="label">Vehicle Type</td><td class="colon">:</td>
-            <td class="value"><%= data.vehiclePermitType || "" %></td>
-
-            <td class="rlabel">Vehicle Class</td><td class="colon">:</td>
-            <td class="rvalue"><%= data.vehicleClass || "" %></td>
-          </tr>
-
-          <tr>
-            <td class="label">Mobile No.</td><td class="colon">:</td>
-            <td class="value"><%= data.mobileNo || "" %></td>
-
-            <td class="rlabel">Checkpost Name</td><td class="colon">:</td>
-            <td class="rvalue"><%= (data.borderBarrier || data.districtName || data.district || "") %></td>
-          </tr>
-
-          <tr>
-            <td class="label">Service Type</td><td class="colon">:</td>
-            <td class="value"><%= (data.serviceType || "NOT APPLICABLE") %></td>
-
-            <td class="rlabel">Bank Ref. No.</td><td class="colon">:</td>
-            <td class="rvalue"><%= (data.upBankRefNo || data.bankRefNo || "NA") %></td>
-          </tr>
-
-          <tr>
-            <% if ((data.vehiclePermitType || "").toUpperCase() === "GOODS VEHICLE") { %>
-              <td class="label">Gross Weight</td><td class="colon">:</td>
-              <td class="value"><%= data.grossVehicleWeight || "" %></td>
-
-              <td class="rlabel">Unladen Wt.</td><td class="colon">:</td>
-              <td class="rvalue"><%= data.unladenWeight || "" %></td>
-            <% } else { %>
-              <td class="label">Sleeper Cap.</td><td class="colon">:</td>
-              <td class="value"><%= (data.sleeperCap || data.sleeperCapacityExcludingDriver || "") %></td>
-
-              <td class="rlabel">Seat Cap(Ex. Driver)</td><td class="colon">:</td>
-              <td class="rvalue"><%= (data.seatingCapacityExcludingDriver || data.seatingCapacity || "") %></td>
-            <% } %>
-          </tr>
-
-          <tr>
-            <td class="label">Payment Mode</td><td class="colon">:</td>
-            <td class="value"><%= data.paymentMode || "" %></td>
-
-            <td class="rlabel"></td><td class="colon"></td>
-            <td class="rvalue"></td>
-          </tr>
-
-          <tr>
-            <td class="label">Permit Type</td><td class="colon">:</td>
-            <td class="value"><%= data.permitType || "" %></td>
-
-            <td class="rlabel"></td><td class="colon"></td>
-            <td class="rvalue"></td>
-          </tr>
-        </table>
-
-        <!-- Money Table -->
-        <div class="money-wrap mt6">
-          <div class="money-row money-head">
-            <div class="money-cell">Particular</div>
-            <div class="money-cell" style="text-align:right;">Fees/Tax</div>
-            <div class="money-cell" style="text-align:right;">Fine</div>
-            <div class="money-cell" style="text-align:right;">Total</div>
-          </div>
-
-          <%
-            const from = data.taxFrom || data.taxFromDate || "";
-            const to = data.taxTo || data.taxUptoDate || "";
-            const amt = Number(data.totalAmount || data.permitFee || 0) || 0;
-          %>
-
-          <div class="money-row">
-            <div class="money-cell">
-              Permit Fee(<%= from %> To <%= to %>)
-            </div>
-            <div class="money-cell" style="text-align:right;"><%= amt %></div>
-            <div class="money-cell" style="text-align:right;">0</div>
-            <div class="money-cell" style="text-align:right;"><%= amt %></div>
-          </div>
-        </div>
-
-        <!-- Grand total + notes -->
-        <div class="grand">
+        <!-- DETAILS (two columns like original) -->
+        <div class="details-wrap">
+          <!-- LEFT COLUMN -->
           <div>
-            <b>Grand Total :</b> ₹ <%= amt %>/- ( <%= data.totalAmountInWord || "" %> )
+            <div class="drow"><div class="label">Registration No.</div><div class="colon">:</div><div class="value"><%= data.vehicleNo || "" %></div></div>
+            <div class="drow"><div class="label">Receipt No.</div><div class="colon">:</div><div class="value"><%= data.receiptNo || "" %></div></div>
+            <div class="drow"><div class="label">Payment Date</div><div class="colon">:</div><div class="value"><%= data.paymentDate || data.receiptDate || "" %></div></div>
+            <div class="drow"><div class="label">Owner Name</div><div class="colon">:</div><div class="value"><%= data.ownerName || "" %></div></div>
+            <div class="drow"><div class="label">Chassis No.</div><div class="colon">:</div><div class="value"><%= data.chassisNo || "" %></div></div>
+            <div class="drow"><div class="label">Vehicle Type</div><div class="colon">:</div><div class="value"><%= data.vehiclePermitType || "" %></div></div>
+            <div class="drow"><div class="label">Mobile No.</div><div class="colon">:</div><div class="value"><%= data.mobileNo || "" %></div></div>
+            <div class="drow"><div class="label">Service Type</div><div class="colon">:</div><div class="value"><%= (data.serviceType || "NOT APPLICABLE") %></div></div>
+            <div class="drow"><div class="label">Bank Ref. No.</div><div class="colon">:</div><div class="value"><%= (data.upBankRefNo || data.bankRefNo || "NA") %></div></div>
+
+            <% if (!isGoods) { %>
+              <div class="drow"><div class="label">Sleeper Cap.</div><div class="colon">:</div><div class="value"><%= (data.sleeperCap || data.sleeperCapacityExcludingDriver || "") %></div></div>
+            <% } %>
+
+            <div class="drow"><div class="label">Permit Type</div><div class="colon">:</div><div class="value"><%= data.permitType || "NOT APPLICABLE" %></div></div>
           </div>
 
-          <div class="note">
-            Note : 1) This is a computer generated printout and no signature is required.
+          <!-- RIGHT COLUMN -->
+          <div>
+            <div class="drow"><div class="label">Tax Mode</div><div class="colon">:</div><div class="value"><%= data.taxMode || "" %></div></div>
+            <div class="drow"><div class="label">Vehicle Class</div><div class="colon">:</div><div class="value"><%= data.vehicleClass || "" %></div></div>
+
+            <div class="drow"><div class="label">Checkpost Name</div><div class="colon">:</div><div class="value"><%= (data.borderBarrier || data.districtName || data.district || "") %></div></div>
+
+            <% if (!isGoods) { %>
+              <div class="drow"><div class="label">Seat Cap(Ex. Driver)</div><div class="colon">:</div><div class="value"><%= (data.seatingCapacityExcludingDriver || data.seatingCapacity || "") %></div></div>
+            <% } else { %>
+              <div class="drow"><div class="label">Gross Weight</div><div class="colon">:</div><div class="value"><%= (data.grossVehicleWeight || "") %></div></div>
+              <div class="drow"><div class="label">Unladen Wt.</div><div class="colon">:</div><div class="value"><%= (data.unladenWeight || "") %></div></div>
+            <% } %>
+
+            <div class="drow"><div class="label">Payment Mode</div><div class="colon">:</div><div class="value"><%= (data.paymentMode || "") %></div></div>
+          </div>
+        </div>
+
+        <!-- MONEY TABLE -->
+        <div class="money">
+          <div class="head">
+            <div class="cell">Particular</div>
+            <div class="cell num">Fees/Tax</div>
+            <div class="cell num">Fine</div>
+            <div class="cell num">Total</div>
           </div>
 
-          <div class="note">
-            2) Incorrect mentioning of vehicle class or seating capacity may lead to tax evasion and defaulter shall be liable for penal action.
+          <div class="row">
+            <div class="cell">Permit Fee(<%= from %> To <%= to %>)</div>
+            <div class="cell num"><%= amt %></div>
+            <div class="cell num">0</div>
+            <div class="cell num"><%= amt %></div>
           </div>
+        </div>
 
-          <div class="note mt6">
-            You will also receive the payment confirmation message.
-          </div>
+        <!-- GRAND TOTAL + NOTES -->
+        <div class="grand">
+          <div><b>Grand Total :</b> ₹ <%= amt %>/- ( <%= data.totalAmountInWord || "" %> )</div>
+
+          <div class="note">Note : 1) This is a computer generated printout and no signature is required.</div>
+          <div class="note">2) Incorrect mentioning of vehicle class or seating capacity may lead to tax evasion and defaulter shall be liable for penal action.</div>
+          <div class="note mt6">You will also receive the payment confirmation message.</div>
         </div>
       </div>
     </div>
