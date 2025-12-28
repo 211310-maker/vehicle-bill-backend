@@ -71,13 +71,39 @@ const BillSchema = new mongoose.Schema(
       trim: true,
     },
 
-    vehicleCategory: {
-    type: String,
-    default: "",
-    trim: true,
-    uppercase: true,
+    // ✅ NEW (MP page + MP PDF / payload)
+    cgst: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    sgst: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    roadTaxValidity: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    aitpPermitValidity: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    standingCapacity: {
+      type: String,
+      default: "0",
+      trim: true,
     },
 
+    vehicleCategory: {
+      type: String,
+      default: "",
+      trim: true,
+      uppercase: true,
+    },
 
     permitValidity: {
       type: String,
