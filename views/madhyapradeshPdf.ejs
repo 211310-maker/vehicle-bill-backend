@@ -68,6 +68,13 @@
         font-weight: 500;
       }
 
+       .logo-left {
+         position: absolute;
+         top: 0;
+         left: 0;
+         width: 130px; /* same as QR */
+      }
+
       /* Logo watermark */
       .wm {
         position: absolute;
@@ -141,6 +148,7 @@
   <body>
     <div class="page">
       <!-- QR -->
+      <img class="logo-left" src="/images1/MP.png" alt="MP Logo" />
       <img class="qr" src="<%= data.src %>" alt="QR" />
 
       <!-- Header -->
