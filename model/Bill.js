@@ -36,6 +36,12 @@ const BillSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    route: {
+    type: String,
+    default: "",
+    trim: true,
+    uppercase: true,
+    },
 
     // ✅ Existing amounts (kept as-is)
     taxAmount: {
