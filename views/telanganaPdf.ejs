@@ -1,3 +1,6 @@
+i am pasting the full file give me the full updated file 
+
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -25,19 +28,6 @@
         overflow: hidden;
       }
 
-      /* content area */
-      .content {
-        position: relative;
-        width: 100%;
-        height: 100%;
-      }
-
-      /* receipt content must always be ABOVE watermarks */
-      .receipt {
-        position: relative;
-        z-index: 2;
-      }
-
       /* repeated faint background text */
       .bg-text {
         position: absolute;
@@ -55,17 +45,22 @@
         overflow: hidden;
       }
 
-      /* centered watermark emblem (center of RECEIPT content) */
+      /* center watermark emblem */
       .bg-emblem {
         position: absolute;
         left: 50%;
-        top: 52%; /* tweak: 50% exact center, 52% looks better visually */
+        top: 50%;
         transform: translate(-50%, -50%);
-        width: 190px;
-        height: 190px;
-        opacity: 0.14;
-        z-index: 1;
+        width: 150px;
+        height: 180px;
+        opacity: 0.16;
+        z-index: 0;
         pointer-events: none;
+      }
+
+      .content {
+        position: relative;
+        z-index: 1;
       }
 
       .top {
@@ -234,14 +229,12 @@
       const svcAmt   = pick(data.serviceAmount, data.userCharge, data.serviceUserCharge);
       const svcFine  = pick(data.serviceFine, data.userChargeFine);
       const svcTotal = pick(data.serviceTotal, (toNum(svcAmt) + toNum(svcFine)));
-
-      // ✅ Telangana: token fee keys
       const tokenAmt = pick(
-        data.taxTokenFee,        // from Telangana.jsx payload
-        data.taxTokenFeeAmount,  // optional if you add later
-        data.tokenFeeAmount,
-        data.tokenFee
-      );
+       data.taxTokenFee,        // ✅ from Telangana.jsx
+       data.taxTokenFeeAmount,  // optional if you add later
+       data.tokenFeeAmount,
+       data.tokenFee
+     );
       const tokenFine  = pick(data.tokenFeeFine, data.tokenFine);
       const tokenTotal = pick(data.tokenFeeTotal, (toNum(tokenAmt) + toNum(tokenFine)));
 
@@ -292,106 +285,101 @@
       const seatingCap = pick(data.seatingCapacityExcludingDriver, data.seatingCapacity, data.seatCapacity);
       const sleeperCap = pick(data.sleeperCapacityExcludingDriver, data.sleeperCapacity, data.sleeperCap);
 
-      const vehicleType = pick(data.vehicleType, data.vehiclePermitType);
+      const vehicleType = pick(data.vehicleType, data.vehiclePermitType); // your old code used vehiclePermitType only
       const checkpost   = pick(data.checkpostName, data.checkPostName, data.borderBarrier);
     %>
 
     <div class="page">
+      <div class="bg-text" aria-hidden="true">
+        <% for (let i = 0; i < 26; i++) { %>
+          <div class="row">
+            <%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>
+          </div>
+        <% } %>
+      </div>
+
+      <img class="bg-emblem" src="/images1/Telangana.png" alt="" />
+
       <div class="content">
-        <!-- repeated background text -->
-        <div class="bg-text" aria-hidden="true">
-          <% for (let i = 0; i < 26; i++) { %>
-            <div class="row">
-              <%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>
-            </div>
+        <div class="top">
+          <img class="logo" src="/images1/Telangana.png" alt="Telangana Logo" />
+
+          <div class="title">
+            <div class="t1">GOVERNMENT OF TELANGANA</div>
+            <div class="t2">Department of Transport</div>
+            <div class="t3">Checkpost Tax e-Receipt(Single Journey)</div>
+          </div>
+
+          <% if (data.src) { %>
+            <img class="qr" src="<%= data.src %>" alt="QR Code" />
+          <% } else { %>
+            <div></div>
           <% } %>
         </div>
 
-        <!-- centered emblem watermark -->
-        <img class="bg-emblem" src="/images1/Telangana.png" alt="" />
-
-        <!-- receipt content -->
-        <div class="receipt">
-          <div class="top">
-            <img class="logo" src="/images1/Telangana.png" alt="Telangana Logo" />
-
-            <div class="title">
-              <div class="t1">GOVERNMENT OF TELANGANA</div>
-              <div class="t2">Department of Transport</div>
-              <div class="t3">Checkpost Tax e-Receipt(Single Journey)</div>
-            </div>
-
-            <% if (data.src) { %>
-              <img class="qr" src="<%= data.src %>" alt="QR Code" />
-            <% } else { %>
-              <div></div>
-            <% } %>
-          </div>
-
-          <div class="kv-wrap">
-            <table class="kv">
-              <tr><td class="label">Registration No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.vehicleNo)) %></td></tr>
-              <tr><td class="label">Owner Name</td><td class="colon">:</td><td class="value"><%= safe(pick(data.ownerName)) %></td></tr>
-              <tr><td class="label">Tax Mode</td><td class="colon">:</td><td class="value"><%= safe(pick(data.taxMode)) %></td></tr>
-              <tr><td class="label">Vehicle Class</td><td class="colon">:</td><td class="value"><%= safe(pick(data.vehicleClass)) %></td></tr>
-              <tr><td class="label">Mobile No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.mobileNo)) %></td></tr>
-              <tr><td class="label">Seating Capacity</td><td class="colon">:</td><td class="value"><%= safe(seatingCap) %></td></tr>
-              <tr><td class="label">Bank Ref. No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.upBankRefNo, data.bankRefNo)) %></td></tr>
-              <tr><td class="label">Permit Validity</td><td class="colon">:</td><td class="value"><%= safe(pick(data.permitValidity)) %></td></tr>
-              <tr><td class="label">Permit Type</td><td class="colon">:</td><td class="value"><%= safe(pick(data.permitType)) %></td></tr>
-              <tr><td class="label">Gross Combination Weight(in kg.)</td><td class="colon">:</td><td class="value"><%= safe(grossCombWt) %></td></tr>
-            </table>
-
-            <table class="kv">
-              <tr><td class="label">Receipt No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.receiptNo, data.receiptNumber)) %></td></tr>
-              <tr><td class="label">Chassis No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.chassisNo)) %></td></tr>
-              <tr><td class="label">Vehicle Type</td><td class="colon">:</td><td class="value"><%= safe(vehicleType) %></td></tr>
-              <tr><td class="label">Vehicle Category</td><td class="colon">:</td><td class="value"><%= safe(pick(data.vehicleCategory)) %></td></tr>
-              <tr><td class="label">CheckPost Name</td><td class="colon">:</td><td class="value"><%= safe(checkpost) %></td></tr>
-              <tr><td class="label">Sleeper Cap</td><td class="colon">:</td><td class="value"><%= safe(sleeperCap) %></td></tr>
-              <tr><td class="label">Payment Mode</td><td class="colon">:</td><td class="value"><%= safe(pick(data.paymentMode)) %></td></tr>
-              <tr><td class="label">Service Type</td><td class="colon">:</td><td class="value"><%= safe(pick(data.serviceType)) %></td></tr>
-              <tr><td class="label">Route</td><td class="colon">:</td><td class="value"><%= safe(pick(data.route)) %></td></tr>
-            </table>
-          </div>
-
-          <table class="tax-table">
-            <thead>
-              <tr>
-                <th style="width: 64%;">Tax/Fee Particular</th>
-                <th style="width: 12%;">Tax/Fees</th>
-                <th style="width: 12%;">Fine</th>
-                <th style="width: 12%;">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% rows.forEach((r) => { %>
-                <tr>
-                  <td class="part"><%= safe(r.particular) %></td>
-                  <td class="num"><%= toNum(r.taxFees) %></td>
-                  <td class="num"><%= toNum(r.fine) %></td>
-                  <td class="num"><%= toNum(r.total) %></td>
-                </tr>
-              <% }) %>
-            </tbody>
+        <div class="kv-wrap">
+          <table class="kv">
+            <tr><td class="label">Registration No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.vehicleNo)) %></td></tr>
+            <tr><td class="label">Owner Name</td><td class="colon">:</td><td class="value"><%= safe(pick(data.ownerName)) %></td></tr>
+            <tr><td class="label">Tax Mode</td><td class="colon">:</td><td class="value"><%= safe(pick(data.taxMode)) %></td></tr>
+            <tr><td class="label">Vehicle Class</td><td class="colon">:</td><td class="value"><%= safe(pick(data.vehicleClass)) %></td></tr>
+            <tr><td class="label">Mobile No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.mobileNo)) %></td></tr>
+            <tr><td class="label">Seating Capacity</td><td class="colon">:</td><td class="value"><%= safe(seatingCap) %></td></tr>
+            <tr><td class="label">Bank Ref. No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.upBankRefNo, data.bankRefNo)) %></td></tr>
+            <tr><td class="label">Permit Validity</td><td class="colon">:</td><td class="value"><%= safe(pick(data.permitValidity)) %></td></tr>
+            <tr><td class="label">Permit Type</td><td class="colon">:</td><td class="value"><%= safe(pick(data.permitType)) %></td></tr>
+            <tr><td class="label">Gross Combination Weight(in kg.)</td><td class="colon">:</td><td class="value"><%= safe(grossCombWt) %></td></tr>
           </table>
 
-          <div class="grand">
-            Grand Total : <%= grandTotal %>/- <%= grandWords ? ("- " + grandWords + " Only") : "" %>
-          </div>
-
-          <div class="section">
-            <div class="hdr">Note :</div>
-            <div class="hdr">Terms and Conditions:</div>
-            <ol>
-              <li>This is a computer generated printout and no signature is required.</li>
-              <li>Should not carry unlawful/unaccompanied goods.</li>
-              <li>If any false information/discrepancies are found at later, necessary action will be taken against the vehicle owner/driver.</li>
-            </ol>
-          </div>
-
-          <div class="footer-bold">Scan the QR code for genuinity of the receipt.</div>
+          <table class="kv">
+            <tr><td class="label">Receipt No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.receiptNo, data.receiptNumber)) %></td></tr>
+            <tr><td class="label">Chassis No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.chassisNo)) %></td></tr>
+            <tr><td class="label">Vehicle Type</td><td class="colon">:</td><td class="value"><%= safe(vehicleType) %></td></tr>
+            <tr><td class="label">Vehicle Category</td><td class="colon">:</td><td class="value"><%= safe(pick(data.vehicleCategory)) %></td></tr>
+            <tr><td class="label">CheckPost Name</td><td class="colon">:</td><td class="value"><%= safe(checkpost) %></td></tr>
+            <tr><td class="label">Sleeper Cap</td><td class="colon">:</td><td class="value"><%= safe(sleeperCap) %></td></tr>
+            <tr><td class="label">Payment Mode</td><td class="colon">:</td><td class="value"><%= safe(pick(data.paymentMode)) %></td></tr>
+            <tr><td class="label">Service Type</td><td class="colon">:</td><td class="value"><%= safe(pick(data.serviceType)) %></td></tr>
+            <tr><td class="label">Route</td><td class="colon">:</td><td class="value"><%= safe(pick(data.route)) %></td></tr>
+          </table>
         </div>
+
+        <table class="tax-table">
+          <thead>
+            <tr>
+              <th style="width: 64%;">Tax/Fee Particular</th>
+              <th style="width: 12%;">Tax/Fees</th>
+              <th style="width: 12%;">Fine</th>
+              <th style="width: 12%;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% rows.forEach((r) => { %>
+              <tr>
+                <td class="part"><%= safe(r.particular) %></td>
+                <td class="num"><%= toNum(r.taxFees) %></td>
+                <td class="num"><%= toNum(r.fine) %></td>
+                <td class="num"><%= toNum(r.total) %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+
+        <div class="grand">
+          Grand Total : <%= grandTotal %>/- <%= grandWords ? ("- " + grandWords + " Only") : "" %>
+        </div>
+
+        <div class="section">
+          <div class="hdr">Note :</div>
+          <div class="hdr">Terms and Conditions:</div>
+          <ol>
+            <li>This is a computer generated printout and no signature is required.</li>
+            <li>Should not carry unlawful/unaccompanied goods.</li>
+            <li>If any false information/discrepancies are found at later, necessary action will be taken against the vehicle owner/driver.</li>
+          </ol>
+        </div>
+
+        <div class="footer-bold">Scan the QR code for genuinity of the receipt.</div>
       </div>
     </div>
   </body>
