@@ -226,8 +226,12 @@
       const svcAmt   = pick(data.serviceAmount, data.userCharge, data.serviceUserCharge);
       const svcFine  = pick(data.serviceFine, data.userChargeFine);
       const svcTotal = pick(data.serviceTotal, (toNum(svcAmt) + toNum(svcFine)));
-
-      const tokenAmt   = pick(data.tokenFeeAmount, data.taxTokenFee, data.tokenFee);
+      const tokenAmt = pick(
+       data.taxTokenFee,        // ✅ from Telangana.jsx
+       data.taxTokenFeeAmount,  // optional if you add later
+       data.tokenFeeAmount,
+       data.tokenFee
+     );
       const tokenFine  = pick(data.tokenFeeFine, data.tokenFine);
       const tokenTotal = pick(data.tokenFeeTotal, (toNum(tokenAmt) + toNum(tokenFine)));
 
