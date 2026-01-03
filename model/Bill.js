@@ -42,6 +42,23 @@ const BillSchema = new mongoose.Schema(
     trim: true,
     uppercase: true,
     },
+    // ✅ Tax Token Fee (Telangana)
+    taxTokenFeeAmount: {
+    type: String,
+    default: "",
+    trim: true,
+    },
+    taxTokenFeeFine: {
+    type: String,
+    default: "0",
+    trim: true,
+    },  
+    taxTokenFeeTotal: {
+    type: String,
+    default: "",
+    trim: true,
+    },
+
 
     // ✅ Existing amounts (kept as-is)
     taxAmount: {
