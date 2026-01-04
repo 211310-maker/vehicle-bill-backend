@@ -77,22 +77,30 @@ module.exports.receiptNoGenerator = (state, taxFromDate) => {
 
   // Add as many states as you want here; unknown states fall back to "RCP"
   const PREFIX = {
-    bihar: "BRT",
-    punjab: "PBT",
-    haryana: "HRT",
-    up: "UPT",
-    uk: "UKT",
-    gujrat: "GJ",
-    gujarat: "GJ", // ✅ handle both spellings
-    maharashtra: "MH",
-    rajasthan: "RJ",
-    jharkhand: "JHT",
-    chhattisgarh: "CGT",
+  bihar: "BRT",
+  punjab: "PBT",
+  haryana: "HRT",
+  up: "UPT",
+  uk: "UKT",
+  gujrat: "GJ",
+  gujarat: "GJ",
+  maharashtra: "MH",
+  rajasthan: "RJ",
+  jharkhand: "JHT",
+  chhattisgarh: "CGT",
 
-    // ✅ add Puducherry
-    puducherry: "PYR",
-    pondicherry: "PYR",
-  };
+  // ⭐ NEW ⭐
+  mp: "MPT",
+  madhyapradesh: "MPT",
+
+  telangana: "TGR",
+  tg: "TGR",
+  ts: "TGR",
+
+  puducherry: "PYR",
+  pondicherry: "PYR",
+};
+
 
   const inititals = PREFIX[s] || "RCP";
 
