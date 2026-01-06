@@ -99,6 +99,12 @@ module.exports.receiptNoGenerator = (state, taxFromDate) => {
 
   puducherry: "PYR",
   pondicherry: "PYR",
+  assam: "ASR",
+  tripura: "TRT",
+  "daman & diu": "DDR",
+  daman: "DDR",
+  diu: "DDR",
+  sikkim: "SKT"  
 };
 
 
