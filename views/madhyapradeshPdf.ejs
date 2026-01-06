@@ -290,77 +290,78 @@
 
     <table class="tp-table">
 
-      <tr>
-        <td class="tp-label">1. Name of Permit Holder</td>
-        <td>: <%= data.permitHolder %></td>
-      </tr>
+  <tr>
+    <td class="tp-label">1. Name of Permit Holder</td>
+    <td>: <%= data.ownerName %></td>
+  </tr>
 
-      <tr>
-        <td class="tp-label">2. Routes / Area</td>
-        <td>: <%= data.routesArea %></td>
-      </tr>
+  <tr>
+    <td class="tp-label">2. Routes / Area</td>
+    <td>: Madhya Pradesh State</td>
+  </tr>
 
-      <tr>
-        <td class="tp-label">3. Type of Vehicle</td>
-        <td>: <%= data.vehicleType %></td>
-      </tr>
+  <tr>
+    <td class="tp-label">3. Type of Vehicle</td>
+    <td>: <%= data.vehicleClass %></td>
+  </tr>
 
-      <tr>
-        <td class="tp-label">(i) Registration Mark</td>
-        <td>: <%= data.registrationMark %></td>
-      </tr>
+  <tr>
+    <td class="tp-label">(i) Registration Mark</td>
+    <td>: <%= data.vehicleNo %></td>
+  </tr>
 
-      <tr>
-        <td class="tp-label">(ii) Seating Capacity</td>
-        <td>: <%= data.seatingCapacity %></td>
-      </tr>
+  <tr>
+    <td class="tp-label">(ii) Seating Capacity</td>
+    <td>: <%= data.seatingCapacity || "NA" %></td>
+  </tr>
 
-      <tr>
-        <td class="tp-label">(iii) Gross Vehicle Weight</td>
-        <td>: <%= data.grossWeight %></td>
-      </tr>
+  <tr>
+    <td class="tp-label">(iii) Gross Vehicle Weight</td>
+    <td>: <%= data.grossWeight || data.unladenWeight || "NA" %></td>
+  </tr>
 
-      <tr>
-        <td class="tp-label">4. Gross Vehicle Weight</td>
-        <td>: <%= data.gvwRule %></td>
-      </tr>
+  <tr>
+    <td class="tp-label">4. Gross Vehicle Weight</td>
+    <td>: 87(1)(B) – SHORT PERIOD PERMIT</td>
+  </tr>
 
-      <tr>
-        <td class="tp-label">5. Date of Expiry</td>
-        <td>: <%= data.permitExpiry %></td>
-      </tr>
+  <tr>
+    <td class="tp-label">5. Date of Expiry</td>
+    <td>: <%= data.taxUptoDate %></td>
+  </tr>
 
-      <tr>
-        <td class="tp-label">6. Permit No.</td>
-        <td>: <%= data.permitNo || "T" %></td>
-      </tr>
+  <tr>
+    <td class="tp-label">6. Permit No.</td>
+    <td>: <%= data.permitNo || "T" %></td>
+  </tr>
 
-      <tr>
-        <td class="tp-label">7. Permit Type</td>
-        <td>: <%= data.permitType %></td>
-      </tr>
+  <tr>
+    <td class="tp-label">7. Permit Type</td>
+    <td>: <%= data.permitType || "NOT APPLICABLE" %></td>
+  </tr>
 
-      <tr>
-        <td class="tp-label">Permit Validity</td>
-        <td>: <%= data.permitValidity %></td>
-      </tr>
+  <tr>
+    <td class="tp-label">Permit Validity</td>
+    <td>: <%= data.permitValidity || data.taxUptoDate %></td>
+  </tr>
 
-      <tr>
-        <td class="tp-label">Fitness Validity</td>
-        <td>: <%= data.fitnessValidity %></td>
-      </tr>
+  <tr>
+    <td class="tp-label">Fitness Validity</td>
+    <td>: <%= data.fitnessValidity %></td>
+  </tr>
 
-      <tr>
-        <td class="tp-label">Insurance Validity</td>
-        <td>: <%= data.insuranceValidity %></td>
-      </tr>
+  <tr>
+    <td class="tp-label">Insurance Validity</td>
+    <td>: <%= data.insuranceValidity %></td>
+  </tr>
 
-      <tr>
-        <td class="tp-label">PUCC Validity</td>
-        <td>: <%= data.puccValidity %></td>
-      </tr>
+  <tr>
+    <td class="tp-label">PUCC Validity</td>
+    <td>: <%= data.puccValidity %></td>
+  </tr>
 
-    </table>
+</table>
+
 
     <br/>
 
