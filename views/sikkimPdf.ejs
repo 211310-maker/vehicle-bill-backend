@@ -24,19 +24,16 @@
       width:794px;
       margin:0 auto;
       background:#fff;
-      /* ❌ remove overflow hidden — it was cutting content */
     }
 
     /* ================= RECEIPT BOX ================= */
     .receipt{
       position:relative;
       width:100%;
-      border:2px solid #000;
       padding:10px 14px 12px 14px;
       margin-top:20px;
       background:#fff;
       z-index:5;
-      /* ⭐ allow height to auto grow */
       min-height:480px;
     }
 
@@ -49,7 +46,6 @@
       height:160px;
       object-fit:contain;
       background:#fff;
-      border:1px solid #000;
       padding:3px;
       z-index:999;
     }
@@ -57,7 +53,7 @@
     /* ================= WATERMARK ================= */
     .wm-area{
       position:absolute;
-      inset:0;            /* ⭐ stretch to whole receipt */
+      inset:0;
       pointer-events:none;
       z-index:1;
       overflow:hidden;
@@ -133,6 +129,11 @@
       font-size:12px;
     }
 
+    /* ⭐ PUSH RIGHT SECTION DOWN SO IT DOESN’T TOUCH QR */
+    .right-col{
+      margin-top:28px;
+    }
+
     .drow{
       display:grid;
       grid-template-columns:150px 10px 1fr;
@@ -198,8 +199,8 @@
   const wmText = `${wmVehicle} / ${wmDate}`;
 
   const from = data.taxFrom || data.taxFromDate || "";
-  const to = data.taxTo || data.taxUptoDate || "";
-  const amt = Number(data.totalAmount || data.permitFee || 0) || 0;
+  const to   = data.taxTo   || data.taxUptoDate || "";
+  const amt  = Number(data.totalAmount || data.permitFee || 0) || 0;
 
   const vType = (data.vehiclePermitType || "").toUpperCase();
   const isGoods = vType === "GOODS VEHICLE";
@@ -224,6 +225,7 @@
     </div>
 
     <div class="content">
+
       <div class="header">
         <div class="h1">GOVERNMENT OF SIKKIM</div>
         <div class="h2">Department of Transport</div>
@@ -253,7 +255,7 @@
         </div>
 
         <!-- RIGHT -->
-        <div>
+        <div class="right-col">
           <div class="drow"><div class="label">Tax Mode</div><div class="colon">:</div><div class="value"><%= data.taxMode %></div></div>
           <div class="drow"><div class="label">Vehicle Class</div><div class="colon">:</div><div class="value"><%= data.vehicleClass %></div></div>
           <div class="drow"><div class="label">Checkpost Name</div><div class="colon">:</div><div class="value"><%= data.borderBarrier || data.districtName || "" %></div></div>
@@ -295,6 +297,7 @@
       </div>
 
     </div>
+
   </div>
 </div>
 
