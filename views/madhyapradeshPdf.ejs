@@ -26,43 +26,26 @@ body{
 /* ================= TOP BAR ================= */
 .top-bar{
   display:flex;
-  align-items:flex-start;      /* align along top edge */
+  align-items:flex-start;
   justify-content:space-between;
   width:100%;
 }
 
-/* LEFT LOGO */
 .logo-left{
   height:190px;
   width:160px;
   margin-left:5px;
 }
 
-/* HEADER TEXT (center block) */
 .header{
   text-align:center;
   flex:1;
   margin-top:20px;
 }
 
-.header h1{
-  font-size:19px;
-  font-weight:700;
-  margin:0;
-  text-transform:uppercase;
-}
-
-.header h2{
-  font-size:16px;
-  font-weight:500;
-  margin:4px 0;
-}
-
-.header h3{
-  font-size:15px;
-  font-weight:500;
-  margin:2px 0;
-}
+.header h1{font-size:19px;font-weight:700;margin:0;text-transform:uppercase;}
+.header h2{font-size:16px;font-weight:500;margin:4px 0;}
+.header h3{font-size:15px;font-weight:500;margin:2px 0;}
 
 .receipt-box{
   margin:8px auto 0;
@@ -72,7 +55,6 @@ body{
   font-weight:500;
 }
 
-/* QR CODE */
 .qr{
   height:210px;
   width:210px;
@@ -108,6 +90,13 @@ body{
 .label{ font-weight:500;width:22%;}
 .value{ width:32%;}
 
+/* 🔥 NEW — tighten spacing LEFT column */
+.value.left{ padding-left:2px; }
+
+/* 🔥 NEW — tighten spacing RIGHT column */
+.label.right{ padding-right:2px; }
+.value.right{ padding-left:2px; }
+
 /* ================= OPEN TABLE ================= */
 .money{
   width:100%;
@@ -116,65 +105,40 @@ body{
   font-size:15px;
 }
 
-.money thead tr:first-child{
-  border-top:2px solid #000;
-}
-
+.money thead tr:first-child{border-top:2px solid #000;}
 .money thead th{
   border-bottom:1px solid #000;
   padding:5px 6px;
   font-weight:600;
   text-align:right;
 }
-
-.money thead th:first-child{
-  text-align:left;
-}
-
-.money tbody tr{
-  border-bottom:1px solid #000;
-}
-
+.money thead th:first-child{ text-align:left;}
+.money tbody tr{ border-bottom:1px solid #000;}
 .money td{
   padding:5px 6px;
   text-align:right;
   font-weight:500;
 }
+.money td:first-child{ text-align:left;}
 
-.money td:first-child{
-  text-align:left;
-}
-
-.grand{
-  margin-top:10px;
-  font-weight:600;
-}
-
-.notes{
-  margin-top:6px;
-  font-size:12px;
-}
-
-.page-break{
-  page-break-before:always;
-}
-
+.grand{ margin-top:10px;font-weight:600;}
+.notes{ margin-top:6px;font-size:12px;}
+.page-break{ page-break-before:always;}
 </style>
 </head>
 
 <body>
 
-  <!-- ================= PAGE 1 ================= -->
-    <div class="page">
+<div class="page">
 
-     <div class="top-bar">
+  <div class="top-bar">
 
-      <img class="logo-left" src="/images1/MP.png" />
+    <img class="logo-left" src="/images1/MP.png" />
 
-      <div class="header">
-       <h1>Transport Department MADHYA PRADESH</h1>
-       <h2>DTO <%= data.districtName || data.borderBarrier || "" %></h2>
-       <h3>Checkpost Tax e-Receipt</h3>
+    <div class="header">
+      <h1>Transport Department MADHYA PRADESH</h1>
+      <h2>DTO <%= data.districtName || data.borderBarrier || "" %></h2>
+      <h3>Checkpost Tax e-Receipt</h3>
 
       <div class="receipt-box">
         Receipt No.: <b><%= data.receiptNo %></b>
@@ -185,144 +149,154 @@ body{
 
   </div>
 
+  <img class="wm" src="/images1/MP.png" />
 
-    <img class="wm" src="/images1/MP.png" />
+  <table class="details">
 
-    <table class="details">
+    <tr>
+      <td class="label">Vehicle No.</td>
+      <td class="value left">:<b><%= data.vehicleNo %></b></td>
+
+      <td class="label right">Payment Date</td>
+      <td class="value right">:<%= data.paymentDate %></td>
+    </tr>
+
+    <tr>
+      <td class="label">Owner Name</td>
+      <td class="value left">:<%= data.ownerName %></td>
+
+      <td class="label right">Mobile No.</td>
+      <td class="value right">:<%= data.mobileNo %></td>
+    </tr>
+
+    <tr>
+      <td class="label">Chassis No.</td>
+      <td class="value left">:<%= data.chassisNo %></td>
+
+      <td class="label right">Tax Mode</td>
+      <td class="value right">:<%= data.taxMode %></td>
+    </tr>
+
+    <tr>
+      <td class="label">Vehicle Type</td>
+      <td class="value left">:<%= data.vehiclePermitType %></td>
+
+      <td class="label right">Vehicle Class</td>
+      <td class="value right">:<%= data.vehicleClass %></td>
+    </tr>
+
+    <tr>
+      <td class="label">Permit Type</td>
+      <td class="value left">:<%= data.permitType %></td>
+
+      <td class="label right">Permit No.</td>
+      <td class="value right">:<%= data.permitNo || "T" %></td>
+    </tr>
+
+    <tr>
+      <td class="label">Unladen Weight</td>
+      <td class="value left">:<%= data.unladenWeight %> KG</td>
+
+      <td class="label right">Fitness Validity</td>
+      <td class="value right">:<%= data.fitnessValidity %></td>
+    </tr>
+
+    <tr>
+      <td class="label">Insurance Validity</td>
+      <td class="value left">:<%= data.insuranceValidity %></td>
+
+      <td class="label right">Tax Validity</td>
+      <td class="value right">:<%= data.taxUptoDate %></td>
+    </tr>
+
+    <tr>
+      <td class="label">PUCC Validity</td>
+      <td class="value left">:<%= data.puccValidity %></td>
+
+      <td class="label right">Payment Mode</td>
+      <td class="value right">:<%= data.paymentMode || "ONLINE" %></td>
+    </tr>
+
+    <tr>
+      <td class="label">Bank Ref. No.</td>
+      <td class="value left">: EL9854764321</td>
+
+      <td class="label right">Payment Status</td>
+      <td class="value right">: SUCCESS</td>
+    </tr>
+
+  </table>
+
+
+  <table class="money">
+    <thead>
       <tr>
-        <td class="label">Vehicle No.</td>
-        <td class="value">: <b><%= data.vehicleNo %></b></td>
-        <td class="label">Payment Date</td>
-        <td class="value">: <%= data.paymentDate %></td>
+        <th>Particular</th>
+        <th>Fees/Tax</th>
+        <th>Fine</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr>
+        <td>MV Tax (<%= data.taxFrom %> to <%= data.taxTo %>)</td>
+        <td><%= data.mvTax || 0 %></td>
+        <td>0</td>
+        <td><%= data.mvTax || 0 %></td>
       </tr>
 
       <tr>
-        <td class="label">Owner Name</td>
-        <td class="value">: <%= data.ownerName %></td>
-        <td class="label">Mobile No.</td>
-        <td class="value">: <%= data.mobileNo %></td>
+        <td>Service / User Charge</td>
+        <td><%= data.userCharge || 0 %></td>
+        <td>0</td>
+        <td><%= data.userCharge || 0 %></td>
       </tr>
 
       <tr>
-        <td class="label">Chassis No.</td>
-        <td class="value">: <%= data.chassisNo %></td>
-        <td class="label">Tax Mode</td>
-        <td class="value">: <%= data.taxMode %></td>
+        <td>Permit Fee</td>
+        <td><%= data.permitFee || 0 %></td>
+        <td>0</td>
+        <td><%= data.permitFee || 0 %></td>
       </tr>
 
       <tr>
-        <td class="label">Vehicle Type</td>
-        <td class="value">: <%= data.vehiclePermitType %></td>
-        <td class="label">Vehicle Class</td>
-        <td class="value">: <%= data.vehicleClass %></td>
+        <td>CGST</td>
+        <td><%= data.cgst || 0 %></td>
+        <td>0</td>
+        <td><%= data.cgst || 0 %></td>
       </tr>
 
       <tr>
-        <td class="label">Permit Type</td>
-        <td class="value">: <%= data.permitType %></td>
-        <td class="label">Permit No.</td>
-        <td class="value">: <%= data.permitNo || "T" %></td>
+        <td>SGST</td>
+        <td><%= data.sgst || 0 %></td>
+        <td>0</td>
+        <td><%= data.sgst || 0 %></td>
       </tr>
+    </tbody>
+  </table>
 
-      <tr>
-        <td class="label">Unladen Weight</td>
-        <td class="value">: <%= data.unladenWeight %> KG</td>
-        <td class="label">Fitness Validity</td>
-        <td class="value">: <%= data.fitnessValidity %></td>
-      </tr>
-
-      <tr>
-        <td class="label">Insurance Validity</td>
-        <td class="value">: <%= data.insuranceValidity %></td>
-        <td class="label">Tax Validity</td>
-        <td class="value">: <%= data.taxUptoDate %></td>
-      </tr>
-
-      <tr>
-        <td class="label">PUCC Validity</td>
-        <td class="value">: <%= data.puccValidity %></td>
-        <td class="label">Payment Mode</td>
-        <td class="value">: <%= data.paymentMode || "ONLINE" %></td>
-      </tr>
-
-      <tr>
-        <td class="label">Bank Ref. No.</td>
-        <td class="value">: EL9854764321</td>
-        <td class="label">Payment Status</td>
-        <td class="value">: SUCCESS</td>
-      </tr>
-    </table>
-
-
-    <!-- ================= OPEN STYLE TABLE ================= -->
-    <table class="money">
-      <thead>
-        <tr>
-          <th>Particular</th>
-          <th>Fees/Tax</th>
-          <th>Fine</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <td>MV Tax (<%= data.taxFrom %> to <%= data.taxTo %>)</td>
-          <td><%= data.mvTax || 0 %></td>
-          <td>0</td>
-          <td><%= data.mvTax || 0 %></td>
-        </tr>
-
-        <tr>
-          <td>Service / User Charge</td>
-          <td><%= data.userCharge || 0 %></td>
-          <td>0</td>
-          <td><%= data.userCharge || 0 %></td>
-        </tr>
-
-        <tr>
-          <td>Permit Fee</td>
-          <td><%= data.permitFee || 0 %></td>
-          <td>0</td>
-          <td><%= data.permitFee || 0 %></td>
-        </tr>
-
-        <tr>
-          <td>CGST</td>
-          <td><%= data.cgst || 0 %></td>
-          <td>0</td>
-          <td><%= data.cgst || 0 %></td>
-        </tr>
-
-        <tr>
-          <td>SGST</td>
-          <td><%= data.sgst || 0 %></td>
-          <td>0</td>
-          <td><%= data.sgst || 0 %></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="grand">
-      Grand Total : ₹ <%= data.totalAmount %> /-
-      (<%= data.totalAmountInWord %>)
-    </div>
-
-
-  <!-- ================= PAGE 2 ================= -->
-  <div class="page-break"></div>
-
-  <div class="page">
-    <p><b>Note:</b></p>
-
-    <ol>
-      <li>This is a computer generated printout and no signature is required.</li>
-      <li>Incorrect mentioning of vehicle data may lead to tax evasion and penal action.</li>
-      <li>This permit is valid for one round trip only.</li>
-      <li>The Temporary Permit should be accompanied by the Checkpost e-Receipt with QR code.</li>
-      <li>This permit does not empower the vehicle operator to operate on restricted routes.</li>
-    </ol>
+  <div class="grand">
+    Grand Total : ₹ <%= data.totalAmount %> /-
+    (<%= data.totalAmountInWord %>)
   </div>
+
+</div>
+
+
+<div class="page-break"></div>
+
+<div class="page">
+  <p><b>Note:</b></p>
+
+  <ol>
+    <li>This is a computer generated printout and no signature is required.</li>
+    <li>Incorrect mentioning of vehicle data may lead to tax evasion and penal action.</li>
+    <li>This permit is valid for one round trip only.</li>
+    <li>The Temporary Permit should be accompanied by the Checkpost e-Receipt with QR code.</li>
+    <li>This permit does not empower the vehicle operator to operate on restricted routes.</li>
+  </ol>
+</div>
 
 </body>
 </html>
