@@ -5,160 +5,186 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"/>
 
-  <style>
-    @page {
-      size: A4;
-      margin: 14mm;
-    }
+<style>
+@page {
+  size: A4;
+  margin: 14mm;
+}
 
-    body{
-      margin:0;
-      font-family:"Roboto",sans-serif;
-      color:#000;
-      font-size:12px;
-    }
+body{
+  margin:0;
+  font-family:"Roboto",sans-serif;
+  color:#000;
+  font-size:12px;
+}
 
-    .page{
-      width:100%;
-      position:relative;
-    }
+.page{
+  width:100%;
+  position:relative;
+}
 
-    .qr{
-      position:absolute;
-      top:0;
-      right:0px;
-      height:150px;
-      width:150px;
-    }
+/* ================= TOP BAR ================= */
+.top-bar{
+  display:flex;
+  align-items:flex-start;      /* align along top edge */
+  justify-content:space-between;
+  width:100%;
+  margin-top:5px;
+}
 
-    .logo-left{
-      position:absolute;
-      height:150px;
-      top:0;
-      left:7px;
-      width:130px;
-    }
+/* LEFT LOGO */
+.logo-left{
+  height:90px;
+  width:auto;
+  margin-left:5px;
+}
 
-    .header{
-      text-align:center;
-      margin-top:20px;
-    }
+/* HEADER TEXT (center block) */
+.header{
+  text-align:center;
+  flex:1;
+}
 
-    .header h1{ font-size:16px;font-weight:700;margin:0;text-transform:uppercase;}
-    .header h2{ font-size:13px;font-weight:500;margin:4px 0;}
-    .header h3{ font-size:12px;font-weight:500;margin:2px 0;}
+.header h1{
+  font-size:16px;
+  font-weight:700;
+  margin:0;
+  text-transform:uppercase;
+}
 
-    .receipt-box{
-      margin:10px auto;
-      display:inline-block;
-      padding:6px 16px;
-      border:1px solid #000;
-      font-weight:500;
-    }
+.header h2{
+  font-size:13px;
+  font-weight:500;
+  margin:4px 0;
+}
 
-    .wm{
-      position:absolute;
-      top:215px;
-      left: calc(50% - 50px);
-      height:200px;
-      transform:translateX(-50%);
-      width:160px;
-      opacity:.55;
-      z-index:1;
-    }
+.header h3{
+  font-size:12px;
+  font-weight:500;
+  margin:2px 0;
+}
 
-    .details{
-      margin-top:60px;
-      width:100%;
-      border-collapse:collapse;
-      z-index:5;
-      position:relative;
-    }
+.receipt-box{
+  margin:8px auto 0;
+  display:inline-block;
+  padding:4px 14px;
+  border:1px solid #000;
+  font-weight:500;
+}
 
-    .details td{
-      padding:4px 6px;
-      vertical-align:top;
-    }
+/* QR CODE */
+.qr{
+  height:110px;
+  width:110px;
+  margin-right:5px;
+}
 
-    .label{ font-weight:500;width:22%;}
-    .value{ width:28%;}
+/* ================= WATERMARK ================= */
+.wm{
+  position:absolute;
+  top:200px;
+  left:50%;
+  transform:translateX(-50%);
+  height:210px;
+  width:auto;
+  opacity:.55;
+  z-index:1;
+}
 
+/* ================= DETAILS ================= */
+.details{
+  margin-top:10px;
+  width:100%;
+  border-collapse:collapse;
+  position:relative;
+  z-index:5;
+}
 
-    /* ================== OPEN TABLE STYLE ================== */
+.details td{
+  padding:4px 6px;
+  vertical-align:top;
+}
 
-    .money{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:15px;
-      font-size:12px;
-    }
+.label{ font-weight:500;width:22%;}
+.value{ width:28%;}
 
-    /* thick border line above header */
-    .money thead tr:first-child{
-      border-top:2px solid #000;
-    }
+/* ================= OPEN TABLE ================= */
+.money{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+  font-size:12px;
+}
 
-    /* header row bottom line */
-    .money thead th{
-      border-bottom:1px solid #000;
-      padding:5px 6px;
-      font-weight:600;
-      text-align:right;
-    }
+.money thead tr:first-child{
+  border-top:2px solid #000;
+}
 
-    .money thead th:first-child{
-      text-align:left;
-    }
+.money thead th{
+  border-bottom:1px solid #000;
+  padding:5px 6px;
+  font-weight:600;
+  text-align:right;
+}
 
-    /* row bottom border only */
-    .money tbody tr{
-      border-bottom:1px solid #000;
-    }
+.money thead th:first-child{
+  text-align:left;
+}
 
-    .money td{
-      padding:5px 6px;
-      text-align:right;
-      font-weight:500;
-    }
+.money tbody tr{
+  border-bottom:1px solid #000;
+}
 
-    .money td:first-child{
-      text-align:left;
-    }
+.money td{
+  padding:5px 6px;
+  text-align:right;
+  font-weight:500;
+}
 
-    .grand{
-      margin-top:10px;
-      font-weight:600;
-    }
+.money td:first-child{
+  text-align:left;
+}
 
-    .notes{
-      margin-top:6px;
-      font-size:11px;
-    }
+.grand{
+  margin-top:10px;
+  font-weight:600;
+}
 
-    .page-break{
-      page-break-before:always;
-    }
+.notes{
+  margin-top:6px;
+  font-size:11px;
+}
 
-  </style>
+.page-break{
+  page-break-before:always;
+}
+
+</style>
 </head>
 
 <body>
 
   <!-- ================= PAGE 1 ================= -->
-  <div class="page">
+    <div class="page">
 
-    <img class="logo-left" src="/images1/MP.png" />
-    <img class="qr" src="<%= data.src %>" />
+     <div class="top-bar">
 
-    <div class="header">
-      <h1>Government of Madhya Pradesh</h1>
-      <h2>DTO <%= data.districtName || data.borderBarrier || "" %></h2>
-      <h3>Checkpost Tax e-Receipt</h3>
+      <img class="logo-left" src="/images1/MP.png" />
+
+      <div class="header">
+       <h1>Transport Department MADHYA PRADESH</h1>
+       <h2>DTO <%= data.districtName || data.borderBarrier || "" %></h2>
+       <h3>Checkpost Tax e-Receipt</h3>
 
       <div class="receipt-box">
         Receipt No.: <b><%= data.receiptNo %></b>
       </div>
     </div>
+
+    <img class="qr" src="<%= data.src %>" />
+
+  </div>
+
 
     <img class="wm" src="/images1/MP.png" />
 
