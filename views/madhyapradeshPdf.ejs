@@ -22,18 +22,18 @@
       width:100%;
       position:relative;
     }
-     
+
     .qr{
       position:absolute;
       top:0;
       right:0px;
-      height: 150px;
+      height:150px;
       width:150px;
     }
 
     .logo-left{
       position:absolute;
-      height: 150px;
+      height:150px;
       top:0;
       left:7px;
       width:130px;
@@ -60,7 +60,7 @@
       position:absolute;
       top:215px;
       left: calc(50% - 50px);
-      height: 200px;
+      height:200px;
       transform:translateX(-50%);
       width:160px;
       opacity:.55;
@@ -79,56 +79,64 @@
       padding:4px 6px;
       vertical-align:top;
     }
-    .details-wrap{
-     column-gap: 110px !important;
-    }
+
     .label{ font-weight:500;width:22%;}
     .value{ width:28%;}
+
+
+    /* ================== OPEN TABLE STYLE ================== */
 
     .money{
       width:100%;
       border-collapse:collapse;
       margin-top:15px;
+      font-size:12px;
     }
 
-    .money th,.money td{
-      border:1px solid #000;
-      padding:5px;
+    /* thick border line above header */
+    .money thead tr:first-child{
+      border-top:2px solid #000;
+    }
+
+    /* header row bottom line */
+    .money thead th{
+      border-bottom:1px solid #000;
+      padding:5px 6px;
+      font-weight:600;
       text-align:right;
     }
 
-    .money th:first-child,.money td:first-child{ text-align:left;}
-    .money th{ font-weight:600;}
+    .money thead th:first-child{
+      text-align:left;
+    }
 
-    .grand{ margin-top:10px;font-weight:600;}
-    .notes{ margin-top:6px;font-size:11px;}
+    /* row bottom border only */
+    .money tbody tr{
+      border-bottom:1px solid #000;
+    }
 
-    /* PAGE 2 */
+    .money td{
+      padding:5px 6px;
+      text-align:right;
+      font-weight:500;
+    }
+
+    .money td:first-child{
+      text-align:left;
+    }
+
+    .grand{
+      margin-top:10px;
+      font-weight:600;
+    }
+
+    .notes{
+      margin-top:6px;
+      font-size:11px;
+    }
+
     .page-break{
       page-break-before:always;
-    }
-
-    .tp-heading{
-      text-align:center;
-      font-weight:700;
-      font-size:14px;
-      margin-top:5px;
-    }
-
-    .tp-table{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:10px;
-    }
-
-    .tp-table td{
-      padding:4px 6px;
-      vertical-align:top;
-    }
-
-    .tp-label{
-      width:40%;
-      font-weight:600;
     }
 
   </style>
@@ -213,12 +221,14 @@
 
       <tr>
         <td class="label">Bank Ref. No.</td>
-        <td class="value">: <%= data.bankRefNo || "NA" %></td>
+        <td class="value">: <%= data.bankRefNo || "ISHFHEIRUS" %></td>
         <td class="label">Payment Status</td>
         <td class="value">: SUCCESS</td>
       </tr>
     </table>
 
+
+    <!-- ================= OPEN STYLE TABLE ================= -->
     <table class="money">
       <thead>
         <tr>
@@ -277,8 +287,6 @@
   <div class="page-break"></div>
 
   <div class="page">
-
-
     <p><b>Note:</b></p>
 
     <ol>
@@ -288,7 +296,6 @@
       <li>The Temporary Permit should be accompanied by the Checkpost e-Receipt with QR code.</li>
       <li>This permit does not empower the vehicle operator to operate on restricted routes.</li>
     </ol>
-
   </div>
 
 </body>
