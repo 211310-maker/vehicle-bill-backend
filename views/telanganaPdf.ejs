@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Telangana - Checkpost Tax e-Receipt</title>
+<title>Telangana Checkpost Receipt</title>
 
 <style>
 *{box-sizing:border-box}
@@ -10,8 +10,8 @@
 
 body{
   margin:0;
-  background:#fff;
   font-family: Arial, Helvetica, sans-serif;
+  background:#fff;
   color:#000;
 }
 
@@ -30,82 +30,83 @@ body{
   padding:18mm 16mm;
   font-size:10px;
   line-height:1.5;
-  color:#777;
+  color:#7a7a7a;
   opacity:.18;
   z-index:0;
   pointer-events:none;
 }
-.bg-text .row{
-  white-space:nowrap;
-}
+.bg-text .row{white-space:nowrap}
 
 /* ================= WATERMARK ================= */
 .bg-emblem{
   position:absolute;
   left:50%;
-  top:38%;
+  top:42%;
   transform:translate(-50%,-50%);
-  width:135px;
-  height:135px;
+  width:140px;
+  height:140px;
   opacity:.16;
   z-index:0;
   pointer-events:none;
 }
 
-/* ================= CONTENT ================= */
-.content{position:relative;z-index:1}
-
 /* ================= HEADER ================= */
-.top{
-  display:grid;
-  grid-template-columns:70px 1fr 110px;
-  align-items:start;
-  column-gap:8px;
-}
-
-.top .logo{
+.logo{
+  position:absolute;
+  top:14mm;
+  left:16mm;
   width:70px;
   height:70px;
-  object-fit:contain;
 }
 
-.top .qr{
+.qr{
+  position:absolute;
+  top:14mm;
+  right:16mm;
   width:110px;
   height:110px;
-  object-fit:contain;
-  justify-self:end;
 }
 
-.title{
+.header{
+  position:absolute;
+  top:18mm;
+  left:0;
+  right:0;
   text-align:center;
-  margin-top:6px;
-  line-height:1.2;
+  line-height:1.25;
 }
 
-.title .t1{
+.header .h1{
   font-size:11px;
   font-weight:700;
   text-transform:uppercase;
   text-decoration:underline;
 }
-.title .t2{
+
+.header .h2{
   font-size:11px;
   font-weight:700;
   margin-top:2px;
 }
-.title .t3{
+
+.header .h3{
   font-size:10px;
   font-weight:700;
   margin-top:2px;
 }
 
+/* ================= CONTENT ================= */
+.content{
+  position:relative;
+  margin-top:95px;
+  z-index:1;
+}
+
 /* ================= DETAILS ================= */
 .kv-wrap{
-  margin-top:6px;
   display:grid;
   grid-template-columns:1fr 1fr;
   column-gap:26px;
-  row-gap:6px;
 }
 
 table.kv{
@@ -141,7 +142,6 @@ td.value{
   margin-top:16px;
   width:100%;
   border-collapse:collapse;
-  table-layout:fixed;
   font-size:11px;
 }
 
@@ -152,15 +152,12 @@ td.value{
 }
 
 .tax-table th{
-  text-align:center;
   font-weight:700;
+  text-align:center;
 }
 
 .tax-table td.part{font-weight:700}
-.tax-table td.num{
-  text-align:center;
-  font-weight:700;
-}
+.tax-table td.num{text-align:center;font-weight:700}
 
 /* ================= FOOTER ================= */
 .grand{
@@ -176,7 +173,6 @@ td.value{
 
 .section .hdr{
   font-weight:700;
-  margin-bottom:2px;
 }
 
 .section ol{
@@ -195,127 +191,90 @@ td.value{
 <body>
 
 <%
-  const safe = (v) => (v === null || v === undefined) ? "" : String(v);
-  const pick = (...vals) => {
-    for (const v of vals) {
-      if (v === null || v === undefined) continue;
-      if (typeof v === "string" && v.trim() === "") continue;
-      return v;
-    }
-    return "";
-  };
-  const toNum = (v) => Number.isFinite(Number(v)) ? Number(v) : 0;
-
-  const bgLine = `${safe(pick(data.vehicleNo))} ${safe(pick(data.paymentDate,data.receiptDate))}`;
-
-  const taxFrom = pick(data.taxFrom,data.taxFromDate);
-  const taxTo   = pick(data.taxTo,data.taxUptoDate);
-
-  const rows = [
-    data.mvTax && {
-      particular:`MV Tax (${taxFrom} To ${taxTo})`,
-      tax:data.mvTax,fine:0,total:data.mvTax
-    },
-    data.userCharge && {
-      particular:`Service/User Charge (${taxFrom} To ${taxTo})`,
-      tax:data.userCharge,fine:0,total:data.userCharge
-    },
-    data.taxTokenFee && {
-      particular:`Tax Token Fee (${taxFrom} To ${taxTo})`,
-      tax:data.taxTokenFee,fine:0,total:data.taxTokenFee
-    }
-  ].filter(Boolean);
-
-  const grandTotal = rows.reduce((s,r)=>s+toNum(r.total),0);
+const safe = v => (v==null ? "" : String(v));
+const pick = (...v)=>v.find(x=>x!==null&&x!==undefined&&String(x).trim()!=="")||"";
+const bgLine = `${pick(data.vehicleNo)} ${pick(data.paymentDate,data.receiptDate)}`;
 %>
 
 <div class="page">
 
-  <!-- BACKGROUND -->
+  <!-- background text -->
   <div class="bg-text">
     <% for(let i=0;i<26;i++){ %>
       <div class="row">
-        <%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>
+        <%= bgLine %>&nbsp;&nbsp;&nbsp;<%= bgLine %>&nbsp;&nbsp;&nbsp;<%= bgLine %>
       </div>
     <% } %>
   </div>
 
-  <img class="bg-emblem" src="/images1/Telangana.png" />
+  <img class="bg-emblem" src="/images1/Telangana.png"/>
 
+  <!-- header -->
+  <img class="logo" src="/images1/Telangana.png"/>
+  <img class="qr" src="<%= data.src %>"/>
+
+  <div class="header">
+    <div class="h1">GOVERNMENT OF TELANGANA</div>
+    <div class="h2">Department of Transport</div>
+    <div class="h3">Checkpost Tax e-Receipt (Single Journey)</div>
+  </div>
+
+  <!-- content -->
   <div class="content">
 
-    <!-- HEADER -->
-    <div class="top">
-      <img class="logo" src="/images1/Telangana.png" />
-
-      <div class="title">
-        <div class="t1">GOVERNMENT OF TELANGANA</div>
-        <div class="t2">Department of Transport</div>
-        <div class="t3">Checkpost Tax e-Receipt (Single Journey)</div>
-      </div>
-
-      <img class="qr" src="<%= data.src %>" />
-    </div>
-
-    <!-- DETAILS -->
     <div class="kv-wrap">
-
       <table class="kv">
-        <tr><td class="label">Registration No.</td><td class="colon">:</td><td class="value"><%= data.vehicleNo %></td></tr>
-        <tr><td class="label">Owner Name</td><td class="colon">:</td><td class="value"><%= data.ownerName %></td></tr>
-        <tr><td class="label">Tax Mode</td><td class="colon">:</td><td class="value"><%= data.taxMode %></td></tr>
-        <tr><td class="label">Vehicle Class</td><td class="colon">:</td><td class="value"><%= data.vehicleClass %></td></tr>
-        <tr><td class="label">Mobile No.</td><td class="colon">:</td><td class="value"><%= data.mobileNo %></td></tr>
-        <tr><td class="label">Seating Capacity</td><td class="colon">:</td><td class="value"><%= data.seatingCapacity %></td></tr>
-        <tr><td class="label">Bank Ref. No.</td><td class="colon">:</td><td class="value"><%= data.bankRefNo %></td></tr>
-        <tr><td class="label">Permit Validity</td><td class="colon">:</td><td class="value"><%= data.permitValidity %></td></tr>
-        <tr><td class="label">Permit Type</td><td class="colon">:</td><td class="value"><%= data.permitType %></td></tr>
-        <tr><td class="label">Gross Combination<br>Weight(in kg.)</td><td class="colon">:</td><td class="value"><%= data.grossVehicleWeight %></td></tr>
+        <tr><td class="label">Registration No.</td><td class="colon">:</td><td class="value"><%= pick(data.vehicleNo) %></td></tr>
+        <tr><td class="label">Owner Name</td><td class="colon">:</td><td class="value"><%= pick(data.ownerName) %></td></tr>
+        <tr><td class="label">Tax Mode</td><td class="colon">:</td><td class="value"><%= pick(data.taxMode) %></td></tr>
+        <tr><td class="label">Vehicle Class</td><td class="colon">:</td><td class="value"><%= pick(data.vehicleClass) %></td></tr>
+        <tr><td class="label">Mobile No.</td><td class="colon">:</td><td class="value"><%= pick(data.mobileNo) %></td></tr>
+        <tr><td class="label">Seating Capacity</td><td class="colon">:</td><td class="value"><%= pick(data.seatingCapacity) %></td></tr>
+        <tr><td class="label">Bank Ref. No.</td><td class="colon">:</td><td class="value"><%= pick(data.bankRefNo) %></td></tr>
+        <tr><td class="label">Permit Validity</td><td class="colon">:</td><td class="value"><%= pick(data.permitValidity) %></td></tr>
+        <tr><td class="label">Permit Type</td><td class="colon">:</td><td class="value"><%= pick(data.permitType) %></td></tr>
       </table>
 
       <table class="kv">
-        <tr><td class="label">Receipt No.</td><td class="colon">:</td><td class="value"><%= data.receiptNo %></td></tr>
-        <tr><td class="label">Chassis No.</td><td class="colon">:</td><td class="value"><%= data.chassisNo %></td></tr>
-        <tr><td class="label">Vehicle Type</td><td class="colon">:</td><td class="value"><%= data.vehiclePermitType %></td></tr>
-        <tr><td class="label">Vehicle Category</td><td class="colon">:</td><td class="value"><%= data.vehicleCategory %></td></tr>
-        <tr><td class="label">CheckPost Name</td><td class="colon">:</td><td class="value"><%= data.borderBarrier %></td></tr>
-        <tr><td class="label">Sleeper Cap</td><td class="colon">:</td><td class="value"><%= data.sleeperCapacity %></td></tr>
-        <tr><td class="label">Payment Mode</td><td class="colon">:</td><td class="value"><%= data.paymentMode %></td></tr>
-        <tr><td class="label">Service Type</td><td class="colon">:</td><td class="value"><%= data.serviceType %></td></tr>
-        <tr><td class="label">Route</td><td class="colon">:</td><td class="value"><%= data.route %></td></tr>
+        <tr><td class="label">Receipt No.</td><td class="colon">:</td><td class="value"><%= pick(data.receiptNo) %></td></tr>
+        <tr><td class="label">Chassis No.</td><td class="colon">:</td><td class="value"><%= pick(data.chassisNo) %></td></tr>
+        <tr><td class="label">Vehicle Type</td><td class="colon">:</td><td class="value"><%= pick(data.vehicleType,data.vehiclePermitType) %></td></tr>
+        <tr><td class="label">Vehicle Category</td><td class="colon">:</td><td class="value"><%= pick(data.vehicleCategory) %></td></tr>
+        <tr><td class="label">CheckPost Name</td><td class="colon">:</td><td class="value"><%= pick(data.borderBarrier) %></td></tr>
+        <tr><td class="label">Sleeper Cap</td><td class="colon">:</td><td class="value"><%= pick(data.sleeperCapacity) %></td></tr>
+        <tr><td class="label">Payment Mode</td><td class="colon">:</td><td class="value"><%= pick(data.paymentMode) %></td></tr>
+        <tr><td class="label">Service Type</td><td class="colon">:</td><td class="value"><%= pick(data.serviceType) %></td></tr>
+        <tr><td class="label">Route</td><td class="colon">:</td><td class="value"><%= pick(data.route) %></td></tr>
       </table>
-
     </div>
 
-    <!-- TAX TABLE -->
     <table class="tax-table">
       <thead>
         <tr>
           <th style="width:64%">Tax/Fee Particular</th>
-          <th style="width:12%">Tax/Fees</th>
-          <th style="width:12%">Fine</th>
-          <th style="width:12%">Total</th>
+          <th>Tax/Fees</th>
+          <th>Fine</th>
+          <th>Total</th>
         </tr>
       </thead>
       <tbody>
-        <% rows.forEach(r=>{ %>
-        <tr>
-          <td class="part"><%= r.particular %></td>
-          <td class="num"><%= r.tax %></td>
-          <td class="num"><%= r.fine %></td>
-          <td class="num"><%= r.total %></td>
-        </tr>
+        <% (data.rows||[]).forEach(r=>{ %>
+          <tr>
+            <td class="part"><%= r.particular %></td>
+            <td class="num"><%= r.taxFees %></td>
+            <td class="num"><%= r.fine %></td>
+            <td class="num"><%= r.total %></td>
+          </tr>
         <% }) %>
       </tbody>
     </table>
 
     <div class="grand">
-      Grand Total : <%= grandTotal %> /- (<%= data.totalAmountInWord %>)
+      Grand Total : <%= data.grandTotal %> /- <%= data.grandTotalWords %>
     </div>
 
     <div class="section">
       <div class="hdr">Note :</div>
-      <div class="hdr">Terms and Conditions:</div>
       <ol>
         <li>This is a computer generated printout and no signature is required.</li>
         <li>Should not carry unlawful/unaccompanied goods.</li>
@@ -323,9 +282,7 @@ td.value{
       </ol>
     </div>
 
-    <div class="footer-bold">
-      Scan the QR code for genuinity of the receipt.
-    </div>
+    <div class="footer-bold">Scan the QR code for genuinity of the receipt.</div>
 
   </div>
 </div>
