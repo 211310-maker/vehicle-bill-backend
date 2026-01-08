@@ -1,330 +1,360 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<title>Telangana - Checkpost Tax e-Receipt</title>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Telangana - Checkpost Tax e-Receipt</title>
 
-<style>
-* { box-sizing: border-box; }
-@page { size: A4; margin: 0; }
+    <style>
+      * {
+        box-sizing: border-box;
+      }
 
-body {
-  margin: 0;
-  background: #fff;
-  font-family: Arial, Helvetica, sans-serif;
-  color: #000;
-}
+      @page {
+        size: A4;
+        margin: 0;
+      }
 
-.page {
-  width: 210mm;
-  height: 297mm;
-  padding: 14mm 16mm;
-  position: relative;
-  overflow: hidden;
-}
+      body {
+        margin: 0;
+        padding: 0;
+        background: #fff;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #000;
+      }
 
-/* ================= BACKGROUND TEXT ================= */
-.bg-text {
-  position: absolute;
-  inset: 0;
-  padding: 18mm 16mm;
-  opacity: 0.18;
-  color: #6b6b6b;
-  font-size: 11px;
-  line-height: 1.55;
-  z-index: 0;
-  pointer-events: none;
-}
-.bg-text .row {
-  white-space: nowrap;
-}
+      .page {
+        width: 210mm;
+        height: 297mm;
+        padding: 14mm 16mm;
+        margin: 0 auto;
+        position: relative;
+        overflow: hidden;
+      }
 
-/* ================= WATERMARK (FIXED) ================= */
-.bg-emblem {
-  position: absolute;
-  left: 50%;
-  top: 45%;
-  transform: translate(-50%, -50%);
-  width: 135px;
-  height: 135px;
-  opacity: 0.16;
-  z-index: 0;
-  pointer-events: none;
-}
+      /* repeated faint background text */
+      .bg-text {
+        position: absolute;
+        inset: 0;
+        padding: 18mm 16mm;
+        opacity: 0.18;
+        color: #6b6b6b;
+        font-size: 12px;
+        line-height: 1.55;
+        z-index: 0;
+        pointer-events: none;
+      }
 
-/* ================= HEADER (ABSOLUTE – OG STYLE) ================= */
-.logo {
-  position: absolute;
-  top: 14mm;
-  left: 16mm;
-  width: 70px;
-  height: 70px;
-  object-fit: contain;
-}
+      .bg-text .row {
+        white-space: nowrap;
+        overflow: hidden;
+      }
 
-.qr {
-  position: absolute;
-  top: 14mm;
-  right: 16mm;
-  width: 110px;
-  height: 110px;
-  object-fit: contain;
-}
+      /* center watermark emblem */
+      .bg-emblem {
+        position: absolute;
+        left: 50%;
+        top: 25%;
+        transform: translate(-50%, -50%);
+        width: 150px;
+        height: 150px;
+        opacity: 0.16;
+        z-index: 0;
+        pointer-events: none;
+      }
 
-.header {
-  position: absolute;
-  top: 18mm;
-  left: 0;
-  right: 0;
-  text-align: center;
-  line-height: 1.25;
-}
+      .content {
+        position: relative;
+        z-index: 1;
+      }
 
-.header .t1 {
-  font-weight: 700;
-  font-size: 11px;
-  text-transform: uppercase;
-  text-decoration: underline;
-}
-.header .t2 {
-  font-weight: 700;
-  font-size: 11px;
-  margin-top: 2px;
-}
-.header .t3 {
-  font-weight: 700;
-  font-size: 10px;
-  margin-top: 2px;
-}
+      .top {
+        display: grid;
+        grid-template-columns: 90px 1fr 130px;
+        align-items: start;
+        column-gap: 10px;
+        margin-bottom: 8px;
+      }
 
-/* ================= CONTENT ================= */
-.content {
-  position: relative;
-  margin-top: 95px;
-  z-index: 1;
-}
+      .top .logo {
+        width: 90px;
+        height: 90px;
+        object-fit: contain;
+      }
 
-/* ================= DETAILS ================= */
-.kv-wrap {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 26px;
-}
+      .top .qr {
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
+        justify-self: end;
+      }
 
-table.kv {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  font-size: 11px;
-}
+      .title {
+        text-align: center;
+        margin-top: 10px;
+        line-height: 1.25;
+      }
 
-table.kv td {
-  padding: 1.5px 0;
-  vertical-align: top;
-}
+      .title .t1 {
+        font-weight: 700;
+        font-size: 12px;
+        text-transform: uppercase;
+        text-decoration: underline;
+      }
 
-td.label {
-  width: 42%;
-  font-weight: 600;
-  white-space: nowrap;
-}
-td.colon {
-  width: 4%;
-  text-align: center;
-  font-weight: 600;
-}
-td.value {
-  width: 54%;
-  font-weight: 700;
-  word-break: break-word;
-}
+      .title .t2 {
+        font-weight: 700;
+        font-size: 12px;
+        margin-top: 2px;
+      }
 
-/* ================= TAX TABLE ================= */
-.tax-table {
-  margin-top: 16px;
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 11px;
-}
+      .title .t3 {
+        font-weight: 700;
+        font-size: 11px;
+        margin-top: 2px;
+      }
 
-.tax-table th,
-.tax-table td {
-  border: 1px solid #6fa8ff;
-  padding: 6px 8px;
-}
+      .kv-wrap {
+        margin-top: 6px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 28px;
+        row-gap: 8px;
+      }
 
-.tax-table th {
-  text-align: center;
-  font-weight: 700;
-}
+      table.kv {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        font-size: 12px;
+      }
 
-.tax-table td.part {
-  font-weight: 700;
-}
+      table.kv td {
+        padding: 2px 0;
+        vertical-align: top;
+      }
 
-.tax-table td.num {
-  text-align: center;
-  font-weight: 700;
-}
+      table.kv td.label {
+        width: 42%;
+        white-space: nowrap;
+        font-weight: 600;
+      }
 
-/* ================= FOOTER ================= */
-.grand {
-  margin-top: 8px;
-  font-size: 11px;
-  font-weight: 700;
-}
+      table.kv td.colon {
+        width: 4%;
+        text-align: center;
+        font-weight: 600;
+      }
 
-.section {
-  margin-top: 6px;
-  font-size: 11px;
-}
+      table.kv td.value {
+        width: 54%;
+        font-weight: 700;
+        word-break: break-word;
+      }
 
-.section .hdr {
-  font-weight: 700;
-}
+      /* Tax table */
+      .tax-table {
+        margin-top: 18px;
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        font-size: 11px;
+      }
 
-.section ol {
-  margin: 0;
-  padding-left: 16px;
-}
+      .tax-table th,
+      .tax-table td {
+        border: 1px solid #6fa8ff;
+        padding: 6px 8px;
+      }
 
-.footer-bold {
-  margin-top: 10px;
-  font-size: 16px;
-  font-weight: 800;
-}
-</style>
-</head>
+      .tax-table th {
+        text-align: center;
+        font-weight: 700;
+      }
 
-<body>
+      .tax-table td.part {
+        font-weight: 700;
+      }
 
-<%
-  /* ===== helpers (UNCHANGED) ===== */
-  const safe = (v) => (v === null || v === undefined) ? "" : String(v);
-  const pick = (...vals) => {
-    for (const v of vals) {
-      if (v === null || v === undefined) continue;
-      if (typeof v === "string" && v.trim() === "") continue;
-      return v;
-    }
-    return "";
-  };
-  const toNum = (v) => {
-    const n = Number(v);
-    return Number.isFinite(n) ? n : 0;
-  };
+      .tax-table td.num {
+        text-align: center;
+        font-weight: 700;
+        white-space: nowrap;
+      }
 
-  const bgLine = `${safe(pick(data.vehicleNo))} ${safe(pick(data.receiptDate, data.paymentDate))}`.trim();
-  const taxFrom = safe(pick(data.taxFrom_up, data.taxFrom, data.taxFromDate));
-  const taxTo   = safe(pick(data.taxTo_up, data.taxTo, data.taxUptoDate, data.taxUpto));
+      .grand {
+        margin-top: 10px;
+        font-size: 11px;
+        font-weight: 700;
+      }
 
-  const rows = [
-    {
-      particular: `MV Tax (${taxFrom} To ${taxTo})`,
-      taxFees: data.mvTax || 0,
-      fine: 0,
-      total: data.mvTax || 0
-    },
-    {
-      particular: `Service/User Charge (${taxFrom} To ${taxTo})`,
-      taxFees: data.userCharge || 0,
-      fine: 0,
-      total: data.userCharge || 0
-    },
-    {
-      particular: `Tax Token Fee (${taxFrom} To ${taxTo})`,
-      taxFees: data.taxTokenFee || 0,
-      fine: 0,
-      total: data.taxTokenFee || 0
-    }
-  ];
-%>
+      .section {
+        margin-top: 8px;
+        font-size: 11px;
+      }
 
-<div class="page">
+      .section .hdr {
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
 
-  <!-- BACKGROUND TEXT -->
-  <div class="bg-text">
-    <% for (let i = 0; i < 26; i++) { %>
-      <div class="row">
-        <%= bgLine %>&nbsp;&nbsp;&nbsp;<%= bgLine %>&nbsp;&nbsp;&nbsp;<%= bgLine %>
-      </div>
-    <% } %>
-  </div>
+      .section ol {
+        margin: 0;
+        padding-left: 18px;
+      }
 
-  <!-- WATERMARK -->
-  <img class="bg-emblem" src="/images1/Telangana.png" />
+      .footer-bold {
+        margin-top: 12px;
+        font-size: 18px;
+        font-weight: 800;
+      }
+    </style>
+  </head>
 
-  <!-- HEADER -->
-  <img class="logo" src="/images1/Telangana.png" />
-  <% if (data.src) { %>
-    <img class="qr" src="<%= data.src %>" />
-  <% } %>
+  <body>
+    <%
+      const safe = (v) => (v === null || v === undefined) ? "" : String(v);
 
-  <div class="header">
-    <div class="t1">GOVERNMENT OF TELANGANA</div>
-    <div class="t2">Department of Transport</div>
-    <div class="t3">Checkpost Tax e-Receipt (Single Journey)</div>
-  </div>
+      const pick = (...vals) => {
+        for (const v of vals) {
+          if (v === null || v === undefined) continue;
+          if (typeof v === "string" && v.trim() === "") continue;
+          return v;
+        }
+        return "";
+      };
 
-  <!-- CONTENT -->
-  <div class="content">
+      const toNum = (v) => {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : 0;
+      };
 
-    <div class="kv-wrap">
-      <table class="kv">
-        <tr><td class="label">Registration No.</td><td class="colon">:</td><td class="value"><%= pick(data.vehicleNo) %></td></tr>
-        <tr><td class="label">Owner Name</td><td class="colon">:</td><td class="value"><%= pick(data.ownerName) %></td></tr>
-        <tr><td class="label">Tax Mode</td><td class="colon">:</td><td class="value"><%= pick(data.taxMode) %></td></tr>
-        <tr><td class="label">Vehicle Class</td><td class="colon">:</td><td class="value"><%= pick(data.vehicleClass) %></td></tr>
-        <tr><td class="label">Mobile No.</td><td class="colon">:</td><td class="value"><%= pick(data.mobileNo) %></td></tr>
-      </table>
+      const bgLine = `${safe(pick(data.vehicleNo))} ${safe(
+        pick(data.receiptDate, data.paymentDate, data.upPaymentDate)
+      )}`.trim();
 
-      <table class="kv">
-        <tr><td class="label">Receipt No.</td><td class="colon">:</td><td class="value"><%= pick(data.receiptNo) %></td></tr>
-        <tr><td class="label">Chassis No.</td><td class="colon">:</td><td class="value"><%= pick(data.chassisNo) %></td></tr>
-        <tr><td class="label">Vehicle Type</td><td class="colon">:</td><td class="value"><%= pick(data.vehicleType) %></td></tr>
-        <tr><td class="label">Payment Mode</td><td class="colon">:</td><td class="value"><%= pick(data.paymentMode) %></td></tr>
-        <tr><td class="label">Route</td><td class="colon">:</td><td class="value"><%= pick(data.route) %></td></tr>
-      </table>
-    </div>
+      const taxFrom = safe(pick(data.taxFrom_up, data.taxFrom, data.taxFromDate));
+      const taxTo = safe(
+        pick(data.taxTo_up, data.taxTo, data.taxUptoDate, data.taxUpto)
+      );
 
-    <table class="tax-table">
-      <thead>
-        <tr>
-          <th style="width:64%">Tax/Fee Particular</th>
-          <th>Tax/Fees</th>
-          <th>Fine</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% rows.forEach(r => { %>
-          <tr>
-            <td class="part"><%= r.particular %></td>
-            <td class="num"><%= r.taxFees %></td>
-            <td class="num"><%= r.fine %></td>
-            <td class="num"><%= r.total %></td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+      const permitFeeAmt = pick(
+        data.permitFeeAmount,
+        data.permitFee,
+        data.permitFeeAmt
+      );
+      const permitFine = pick(data.permitFeeFine, data.permitFine);
+      const permitTotal = pick(
+        data.permitFeeTotal,
+        toNum(permitFeeAmt) + toNum(permitFine)
+      );
 
-    <div class="grand">
-      Grand Total : <%= data.grandTotal %> /- <%= data.grandTotalWords %>
-    </div>
+      const mvAmt = pick(
+        data.mvTaxAmount,
+        data.mvTax,
+        data.mvTaxAmt,
+        data.totalAmount
+      );
+      const mvFine = pick(data.mvTaxFine, data.mvFine);
+      const mvTotal = pick(
+        data.mvTaxTotal,
+        toNum(mvAmt) + toNum(mvFine)
+      );
 
-    <div class="section">
-      <div class="hdr">Note :</div>
-      <ol>
-        <li>This is a computer generated printout and no signature is required.</li>
-        <li>Should not carry unlawful/unaccompanied goods.</li>
-        <li>If any false information is found later, action will be taken.</li>
-      </ol>
-    </div>
+      const svcAmt = pick(
+        data.serviceAmount,
+        data.userCharge,
+        data.serviceUserCharge
+      );
+      const svcFine = pick(data.serviceFine, data.userChargeFine);
+      const svcTotal = pick(
+        data.serviceTotal,
+        toNum(svcAmt) + toNum(svcFine)
+      );
 
-    <div class="footer-bold">Scan the QR code for genuinity of the receipt.</div>
+      const tokenAmt = pick(
+        data.taxTokenFee,
+        data.taxTokenFeeAmount,
+        data.tokenFeeAmount,
+        data.tokenFee
+      );
+      const tokenFine = pick(data.tokenFeeFine, data.tokenFine);
+      const tokenTotal = pick(
+        data.tokenFeeTotal,
+        toNum(tokenAmt) + toNum(tokenFine)
+      );
 
-  </div>
-</div>
+      const rows = [
+        permitFeeAmt !== ""
+          ? {
+              particular: `Permit Fee (${taxFrom} To ${taxTo})`,
+              taxFees: permitFeeAmt,
+              fine: permitFine,
+              total: permitTotal,
+            }
+          : null,
+        {
+          particular: `MV Tax (${taxFrom} To ${taxTo})`,
+          taxFees: mvAmt,
+          fine: mvFine,
+          total: mvTotal,
+        },
+        svcAmt !== ""
+          ? {
+              particular: `Service/User Charge (${taxFrom} To ${taxTo})`,
+              taxFees: svcAmt,
+              fine: svcFine,
+              total: svcTotal,
+            }
+          : null,
+        tokenAmt !== ""
+          ? {
+              particular: `Tax Token Fee (${taxFrom} To ${taxTo})`,
+              taxFees: tokenAmt,
+              fine: tokenFine,
+              total: tokenTotal,
+            }
+          : null,
+      ].filter(Boolean);
 
-</body>
+      const computedGrand = rows.reduce((s, r) => s + toNum(r.total), 0);
+      const grandTotal =
+        data.grandTotal !== null &&
+        data.grandTotal !== undefined &&
+        String(data.grandTotal) !== ""
+          ? toNum(data.grandTotal)
+          : computedGrand;
+
+      const grandWords = safe(
+        pick(data.grandTotalWords, data.totalAmountInWord)
+      );
+
+      const grossCombWt = pick(
+        data.grossCombinationWeight,
+        data.grossCombinationWeightInKg,
+        data.grossCombinationWeightKg,
+        data.grossVehicleWeight,
+        data.grossVehicleWeightInKg,
+        data.grossVehicleWeightKg
+      );
+
+      const seatingCap = pick(
+        data.seatingCapacityExcludingDriver,
+        data.seatingCapacity,
+        data.seatCapacity
+      );
+
+      const sleeperCap = pick(
+        data.sleeperCapacityExcludingDriver,
+        data.sleeperCapacity,
+        data.sleeperCap
+      );
+
+      const vehicleType = pick(data.vehicleType, data.vehiclePermitType);
+      const checkpost = pick(
+        data.checkpostName,
+        data.checkPostName,
+        data.borderBarrier
+      );
+    %>
+  </body>
 </html>
