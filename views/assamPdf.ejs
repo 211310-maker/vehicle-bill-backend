@@ -6,10 +6,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
-    @page {
-      size: A4;
-      margin: 0;
-    }
+    @page { size: A4; margin: 0; }
 
     * { box-sizing: border-box; }
 
@@ -28,7 +25,7 @@
       }
     }
 
-    /* ================= PAGE ================= */
+    /* PAGE */
     .page {
       position: relative;
       width: 210mm;
@@ -38,7 +35,7 @@
       overflow: hidden;
     }
 
-    /* ================= HEADER ================= */
+    /* HEADER */
     .logo {
       position: absolute;
       top: 18mm;
@@ -70,7 +67,7 @@
       font-size: 11px;
     }
 
-    /* ================= BACKGROUND TEXT ================= */
+    /* BACKGROUND TEXT */
     .bg-text {
       position: absolute;
       inset: 0;
@@ -89,7 +86,7 @@
       transform: scaleX(0.9);
     }
 
-    /* ================= WATERMARK ================= */
+    /* WATERMARK */
     .watermark {
       position: absolute;
       top: 50%;
@@ -100,11 +97,9 @@
       pointer-events: none;
     }
 
-    .watermark img {
-      width: 220px;
-    }
+    .watermark img { width: 220px; }
 
-    /* ================= CONTENT ================= */
+    /* CONTENT */
     .content {
       position: relative;
       z-index: 2;
@@ -133,7 +128,7 @@
       font-weight: 700;
     }
 
-    /* ================= TAX TABLE ================= */
+    /* TAX TABLE */
     .tax-table {
       margin-top: 12px;
       width: 100%;
@@ -152,7 +147,7 @@
       font-weight: 500;
     }
 
-    /* ================= FOOTER ================= */
+    /* FOOTER */
     .grand {
       margin-top: 8px;
       font-weight: 700;
@@ -181,7 +176,10 @@
 <body>
 
 <%
+  const has = (v) => v !== undefined && v !== null && String(v).trim() !== "";
   const bgLine = `${data.vehicleNo || ''} ${data.paymentDate || data.receiptDate || ''}`.trim();
+
+  const isGoods = (data.vehicleClass || '').includes('GOODS');
 %>
 
 <div class="page">
@@ -189,9 +187,7 @@
   <!-- BG TEXT -->
   <div class="bg-text">
     <% for (let i = 0; i < 28; i++) { %>
-      <div>
-        <%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>
-      </div>
+      <div><%= bgLine %>&nbsp;&nbsp;<%= bgLine %></div>
     <% } %>
   </div>
 
@@ -214,32 +210,59 @@
   <div class="content">
     <table>
       <tr>
-        <td class="label">Registration No.</td><td class="value">: <%= data.vehicleNo %></td>
-        <td class="label">Receipt No.</td><td class="value">: <%= data.receiptNo %></td>
+        <td class="label">Registration No.</td><td class="value">: <%= data.vehicleNo || '' %></td>
+        <td class="label">Receipt No.</td><td class="value">: <%= data.receiptNo || '' %></td>
       </tr>
       <tr>
-        <td class="label">Payment Date</td><td class="value">: <%= data.paymentDate %></td>
-        <td class="label">Owner Name</td><td class="value">: <%= data.ownerName %></td>
+        <td class="label">Payment Date</td><td class="value">: <%= data.paymentDate || data.receiptDate || '' %></td>
+        <td class="label">Owner Name</td><td class="value">: <%= data.ownerName || '' %></td>
       </tr>
       <tr>
-        <td class="label">Chassis No.</td><td class="value">: <%= data.chassisNo %></td>
-        <td class="label">Tax Mode</td><td class="value">: <%= data.taxMode %></td>
+        <td class="label">Chassis No.</td><td class="value">: <%= data.chassisNo || '' %></td>
+        <td class="label">Tax Mode</td><td class="value">: <%= data.taxMode || '' %></td>
       </tr>
       <tr>
         <td class="label">Vehicle Type</td><td class="value">: TRANSPORT</td>
-        <td class="label">Vehicle Class</td><td class="value">: <%= data.vehicleClass %></td>
+        <td class="label">Vehicle Class</td><td class="value">: <%= data.vehicleClass || '' %></td>
       </tr>
       <tr>
-        <td class="label">Vehicle Category</td><td class="value">: <%= data.vehicleCategory %></td>
-        <td class="label">Mobile No.</td><td class="value">: <%= data.mobileNo %></td>
+        <td class="label">Vehicle Category</td><td class="value">: <%= data.vehicleCategory || '' %></td>
+        <td class="label">Mobile No.</td><td class="value">: <%= data.mobileNo || '' %></td>
       </tr>
       <tr>
-        <td class="label">Checkpost Name</td><td class="value">: <%= data.borderBarrier %></td>
-        <td class="label">Seating Capacity</td><td class="value">: <%= data.seatingCapacityExcludingDriver %></td>
+        <td class="label">District / Checkpost</td>
+        <td class="value">: <%= data.borderBarrier || data.district || '' %></td>
+
+        <% if (isGoods) { %>
+          <td class="label">Gross Weight</td>
+          <td class="value">: <%= data.grossVehicleWeight || '' %></td>
+        <% } else { %>
+          <td class="label">Seating Capacity</td>
+          <td class="value">: <%= data.seatingCapacityExcludingDriver || data.seatingCapacity || '' %></td>
+        <% } %>
       </tr>
       <tr>
-        <td class="label">Bank Ref. No.</td><td class="value">: <%= data.bankRefNo %></td>
-        <td class="label">Service Type</td><td class="value">: NOT APPLICABLE</td>
+        <% if (!isGoods) { %>
+          <td class="label">Sleeper Cap</td>
+          <td class="value">: <%= data.sleeperCapacityExcludingDriver || '' %></td>
+        <% } else { %>
+          <td class="label">Unladen Weight</td>
+          <td class="value">: <%= data.unladenWeight || '' %></td>
+        <% } %>
+
+        <td class="label">Bank Ref. No.</td>
+        <td class="value">: <%= data.bankRefNo || data.upBankRefNo || 'NA' %></td>
+      </tr>
+      <tr>
+        <td class="label">Payment Mode</td>
+        <td class="value">: <%= data.paymentMode || '' %></td>
+        <td class="label">Service Type</td>
+        <td class="value">: <%= data.serviceType || 'NOT APPLICABLE' %></td>
+      </tr>
+      <tr>
+        <td class="label">Permit Type</td>
+        <td class="value">: <%= data.permitType || 'NOT APPLICABLE' %></td>
+        <td></td><td></td>
       </tr>
     </table>
 
@@ -254,29 +277,31 @@
       </thead>
       <tbody>
         <tr>
-          <td>Passenger Tax (<%= data.taxFrom %> to <%= data.taxTo %>)</td>
-          <td><%= data.totalAmount %></td>
+          <td>
+            Passenger Tax (<%= data.taxFrom || '' %> to <%= data.taxTo || '' %>)
+          </td>
+          <td><%= data.totalAmount || 0 %></td>
           <td>0</td>
-          <td><%= data.totalAmount %></td>
+          <td><%= data.totalAmount || 0 %></td>
         </tr>
       </tbody>
     </table>
 
     <div class="grand">
-      Grand Total : <%= data.totalAmount %>/- (<%= data.totalAmountInWord %>)
+      Grand Total : <%= data.totalAmount || 0 %>/- (<%= data.totalAmountInWord || '' %>)
     </div>
 
     <div class="terms">
       <b>Terms and Conditions:</b><br>
       1. This is a computer generated printout and no signature is required.<br>
       2. Should not carry unlawful/unaccompanied goods.<br>
-      3. If any discrepancies are found, action will be taken against owner/driver.
+      3. If any discrepancies are found, action will be taken against the vehicle owner/driver.
     </div>
 
     <div class="warning">
       Scan the QR code for genuinity of the receipt, It should land at
       <a href="https://kms.parivahan.gov.in">https://kms.parivahan.gov.in</a>.
-      In case the URL is different, the receipt could be fake.
+      In case the URL is different, then receipt could be fake.
     </div>
   </div>
 </div>
