@@ -25,23 +25,35 @@
         overflow: hidden;
       }
 
-      /* repeated faint background text */
       .bg-text {
         position: absolute;
-        margin: 0 auto; 
         inset: 0;
-        opacity: 0.18;
+        margin: 0 auto;
+
+        /* ✅ THIS CONTROLS START & END (correct already) */
         padding: 32mm 18mm 95mm 18mm;
-        color: #6b6b6b;
-        font-size: 12px;
-        line-height: 1.55;
-        z-index: 0;
-        pointer-events: none;
+
+       /* ✅ OG receipt look */
+        opacity: 0.15;          /* lighter */
+        color: #8a8a8a;
+
+       font-size: 9px;         /* thinner text */
+       line-height: 1.12;      /* tighter rows */
+       letter-spacing: 0.6px;  /* govt-style spacing */
+
+       z-index: 0;
+       pointer-events: none;
       }
-      .bg-text .row {
-        white-space: nowrap;
-        overflow: hidden;
+
+     .bg-text .row {
+       white-space: nowrap;
+       overflow: hidden;
+
+       /* ✅ reduces column-like width */
+       transform: scaleX(0.88);
+       transform-origin: left;
       }
+
 
       /* center watermark emblem */
       .bg-emblem {
