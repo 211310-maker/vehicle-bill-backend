@@ -290,15 +290,18 @@
 
       const vehicleType = pick(data.vehicleType, data.vehiclePermitType); // your old code used vehiclePermitType only
       const checkpost   = pick(data.checkpostName, data.checkPostName, data.borderBarrier);
-    %>
+    %> 
 
-    <div class="bg-text" aria-hidden="true">
-     <% for (let i = 0; i < 26; i++) { %>
-    <div class="row">
-      <%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>
-    </div>
-  <% } %>
-</div>
+
+    <div class="page">
+      <div class="bg-text" aria-hidden="true">
+        <% for (let i = 0; i < 26; i++) { %>
+          <div class="row">
+            <%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>
+          </div>
+        <% } %>
+      </div>
+
 
 
       <img class="bg-emblem" src="/images1/Telangana.png" alt="" />
