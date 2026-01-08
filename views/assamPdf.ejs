@@ -46,7 +46,7 @@
     .qr {
       position: absolute;
       top: 10mm;
-      right: 30mm;
+      right: 27mm;
       width: 120px;
     }
 
@@ -58,20 +58,22 @@
 
     .header h1 {
       margin: 0;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
+      text-decoration: underline;
     }
 
     .header p {
       margin: 0;
       font-size: 11px;
+      font-weight: 700;
     }
 
     /* BACKGROUND TEXT */
     .bg-text {
       position: absolute;
       inset: 0;
-      max-width: 165mm;
+      max-width: 135mm;
       padding: 10mm 25mm 90mm 10mm;
       opacity: 0.25;
       font-size: 14px;
@@ -167,9 +169,11 @@
     }
 
     .warning a {
-      color: #0b57d0;
-      text-decoration: underline;
+      display: inline-block;      /* ensures clean line */
+      color: #0b57d0;              /* govt blue */
       font-weight: 900;
+      text-decoration: underline;
+      margin: 2px 0;
     }
   </style>
 </head>
@@ -302,7 +306,7 @@
     <div class="warning">
       Scan the QR code for genuinity of the receipt, It should land at
       <a href="https://kms.parivahan.gov.in">https://kms.parivahan.gov.in</a>.
-      In case the URL is different, then receipt could be fake.
+      In case the URL is different, then receipt could be fake, please raise a complain.
     </div>
   </div>
 </div>
