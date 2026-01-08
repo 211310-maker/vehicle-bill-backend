@@ -1,383 +1,334 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Telangana - Checkpost Tax e-Receipt</title>
+<head>
+<meta charset="UTF-8" />
+<title>Telangana - Checkpost Tax e-Receipt</title>
 
-    <style>
-      * { box-sizing: border-box; }
-      @page { size: A4; margin: 0; }
+<style>
+*{box-sizing:border-box}
+@page{size:A4;margin:0}
 
-      body {
-        margin: 0;
-        padding: 0;
-        background: #fff;
-        font-family: Arial, Helvetica, sans-serif;
-        color: #000;
-      }
+body{
+  margin:0;
+  background:#fff;
+  font-family: Arial, Helvetica, sans-serif;
+  color:#000;
+}
 
-      .page {
-        width: 210mm;
-        height: 297mm;
-        padding: 14mm 16mm;
-        margin: 0 auto;
-        position: relative;
-        overflow: hidden;
-      }
+.page{
+  width:210mm;
+  height:297mm;
+  padding:14mm 16mm;
+  position:relative;
+  overflow:hidden;
+}
 
-      /* repeated faint background text */
-      .bg-text {
-        position: absolute;
-        inset: 0;
-        padding: 18mm 16mm;
-        opacity: 0.18;
-        color: #6b6b6b;
-        font-size: 12px;
-        line-height: 1.55;
-        z-index: 0;
-        pointer-events: none;
-      }
-      .bg-text .row {
-        white-space: nowrap;
-        overflow: hidden;
-      }
+/* ================= BACKGROUND TEXT ================= */
+.bg-text{
+  position:absolute;
+  inset:0;
+  padding:18mm 16mm;
+  font-size:10px;
+  line-height:1.5;
+  color:#777;
+  opacity:.18;
+  z-index:0;
+  pointer-events:none;
+}
+.bg-text .row{
+  white-space:nowrap;
+}
 
-      /* center watermark emblem */
-      .bg-emblem {
-        position: absolute;
-        left: 50%;
-        top: 25%;
-        transform: translate(-50%, -50%);
-        width: 150px;
-        height: 150px;
-        opacity: 0.16;
-        z-index: 0;
-        pointer-events: none;
-      }
+/* ================= WATERMARK ================= */
+.bg-emblem{
+  position:absolute;
+  left:50%;
+  top:38%;
+  transform:translate(-50%,-50%);
+  width:135px;
+  height:135px;
+  opacity:.16;
+  z-index:0;
+  pointer-events:none;
+}
 
-      .content {
-        position: relative;
-        z-index: 1;
-      }
+/* ================= CONTENT ================= */
+.content{position:relative;z-index:1}
 
-      .top {
-        display: grid;
-        grid-template-columns: 90px 1fr 130px;
-        align-items: start;
-        column-gap: 10px;
-        margin-bottom: 8px;
-      }
+/* ================= HEADER ================= */
+.top{
+  display:grid;
+  grid-template-columns:70px 1fr 110px;
+  align-items:start;
+  column-gap:8px;
+}
 
-      .top .logo {
-        width: 90px;
-        height: 90px;
-        object-fit: contain;
-      }
+.top .logo{
+  width:70px;
+  height:70px;
+  object-fit:contain;
+}
 
-      .top .qr {
-        width: 120px;
-        height: 120px;
-        object-fit: contain;
-        justify-self: end;
-      }
+.top .qr{
+  width:110px;
+  height:110px;
+  object-fit:contain;
+  justify-self:end;
+}
 
-      .title {
-        text-align: center;
-        margin-top: 10px;
-        line-height: 1.25;
-      }
+.title{
+  text-align:center;
+  margin-top:6px;
+  line-height:1.2;
+}
 
-      .title .t1 { font-weight: 700; font-size: 12px; text-transform: uppercase; text-decoration: underline; }
-      .title .t2 { font-weight: 700; font-size: 12px; margin-top: 2px; }
-      .title .t3 { font-weight: 700; font-size: 11px; margin-top: 2px; }
+.title .t1{
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  text-decoration:underline;
+}
+.title .t2{
+  font-size:11px;
+  font-weight:700;
+  margin-top:2px;
+}
+.title .t3{
+  font-size:10px;
+  font-weight:700;
+  margin-top:2px;
+}
 
-      .kv-wrap {
-        margin-top: 6px;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        column-gap: 28px;
-        row-gap: 8px;
-      }
+/* ================= DETAILS ================= */
+.kv-wrap{
+  margin-top:6px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  column-gap:26px;
+  row-gap:6px;
+}
 
-      table.kv {
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
-        font-size: 12px;
-      }
+table.kv{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+  font-size:11px;
+}
 
-      table.kv td {
-        padding: 2px 0;
-        vertical-align: top;
-      }
+table.kv td{
+  padding:1.5px 0;
+  vertical-align:top;
+}
 
-      table.kv td.label {
-        width: 42%;
-        white-space: nowrap;
-        font-weight: 600;
-      }
+td.label{
+  width:42%;
+  font-weight:600;
+  white-space:nowrap;
+}
+td.colon{
+  width:4%;
+  text-align:center;
+  font-weight:600;
+}
+td.value{
+  width:54%;
+  font-weight:700;
+  word-break:break-word;
+}
 
-      table.kv td.colon {
-        width: 4%;
-        text-align: center;
-        font-weight: 600;
-      }
+/* ================= TAX TABLE ================= */
+.tax-table{
+  margin-top:16px;
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+  font-size:11px;
+}
 
-      table.kv td.value {
-        width: 54%;
-        font-weight: 700;
-        word-break: break-word;
-      }
+.tax-table th,
+.tax-table td{
+  border:1px solid #6fa8ff;
+  padding:6px 8px;
+}
 
-      /* Tax table - match screenshot proportions */
-      .tax-table {
-        margin-top: 18px;
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
-        font-size: 11px;
-      }
+.tax-table th{
+  text-align:center;
+  font-weight:700;
+}
 
-      .tax-table th, .tax-table td {
-        border: 1px solid #6fa8ff;
-        padding: 6px 8px;
-      }
+.tax-table td.part{font-weight:700}
+.tax-table td.num{
+  text-align:center;
+  font-weight:700;
+}
 
-      .tax-table th {
-        text-align: center;
-        font-weight: 700;
-      }
+/* ================= FOOTER ================= */
+.grand{
+  margin-top:8px;
+  font-size:11px;
+  font-weight:700;
+}
 
-      .tax-table td.part {
-        font-weight: 700;
-      }
+.section{
+  margin-top:6px;
+  font-size:11px;
+}
 
-      .tax-table td.num {
-        text-align: center;
-        font-weight: 700;
-        white-space: nowrap;
-      }
+.section .hdr{
+  font-weight:700;
+  margin-bottom:2px;
+}
 
-      .grand {
-        margin-top: 10px;
-        font-size: 11px;
-        font-weight: 700;
-      }
+.section ol{
+  margin:0;
+  padding-left:16px;
+}
 
-      .section {
-        margin-top: 8px;
-        font-size: 11px;
-      }
+.footer-bold{
+  margin-top:10px;
+  font-size:16px;
+  font-weight:800;
+}
+</style>
+</head>
 
-      .section .hdr {
-        font-weight: 700;
-        margin-bottom: 4px;
-      }
+<body>
 
-      .section ol {
-        margin: 0;
-        padding-left: 18px;
-      }
+<%
+  const safe = (v) => (v === null || v === undefined) ? "" : String(v);
+  const pick = (...vals) => {
+    for (const v of vals) {
+      if (v === null || v === undefined) continue;
+      if (typeof v === "string" && v.trim() === "") continue;
+      return v;
+    }
+    return "";
+  };
+  const toNum = (v) => Number.isFinite(Number(v)) ? Number(v) : 0;
 
-      .footer-bold {
-        margin-top: 12px;
-        font-size: 18px;
-        font-weight: 800;
-      }
-    </style>
-  </head>
+  const bgLine = `${safe(pick(data.vehicleNo))} ${safe(pick(data.paymentDate,data.receiptDate))}`;
 
-  <body>
-    <%
-      // ----- helpers -----
-      const safe = (v) => (v === null || v === undefined) ? "" : String(v);
+  const taxFrom = pick(data.taxFrom,data.taxFromDate);
+  const taxTo   = pick(data.taxTo,data.taxUptoDate);
 
-      // pick first non-null/undefined/non-empty string
-      // IMPORTANT: keeps 0 as valid
-      const pick = (...vals) => {
-        for (const v of vals) {
-          if (v === null || v === undefined) continue;
-          if (typeof v === "string" && v.trim() === "") continue;
-          return v;
-        }
-        return "";
-      };
+  const rows = [
+    data.mvTax && {
+      particular:`MV Tax (${taxFrom} To ${taxTo})`,
+      tax:data.mvTax,fine:0,total:data.mvTax
+    },
+    data.userCharge && {
+      particular:`Service/User Charge (${taxFrom} To ${taxTo})`,
+      tax:data.userCharge,fine:0,total:data.userCharge
+    },
+    data.taxTokenFee && {
+      particular:`Tax Token Fee (${taxFrom} To ${taxTo})`,
+      tax:data.taxTokenFee,fine:0,total:data.taxTokenFee
+    }
+  ].filter(Boolean);
 
-      const toNum = (v) => {
-        const n = Number(v);
-        return Number.isFinite(n) ? n : 0;
-      };
+  const grandTotal = rows.reduce((s,r)=>s+toNum(r.total),0);
+%>
 
-      // background line
-      const bgLine = `${safe(pick(data.vehicleNo))} ${safe(pick(data.receiptDate, data.paymentDate, data.upPaymentDate))}`.trim();
+<div class="page">
 
-      const taxFrom = safe(pick(data.taxFrom_up, data.taxFrom, data.taxFromDate));
-      const taxTo   = safe(pick(data.taxTo_up, data.taxTo, data.taxUptoDate, data.taxUpto));
+  <!-- BACKGROUND -->
+  <div class="bg-text">
+    <% for(let i=0;i<26;i++){ %>
+      <div class="row">
+        <%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>
+      </div>
+    <% } %>
+  </div>
 
-      // Build rows (support multiple backend keys)
-      const permitFeeAmt  = pick(data.permitFeeAmount, data.permitFee, data.permitFeeAmt);
-      const permitFine    = pick(data.permitFeeFine, data.permitFine);
-      const permitTotal   = pick(data.permitFeeTotal, (toNum(permitFeeAmt) + toNum(permitFine)));
+  <img class="bg-emblem" src="/images1/Telangana.png" />
 
-      const mvAmt   = pick(data.mvTaxAmount, data.mvTax, data.mvTaxAmt, data.totalAmount);
-      const mvFine  = pick(data.mvTaxFine, data.mvFine);
-      const mvTotal = pick(data.mvTaxTotal, (toNum(mvAmt) + toNum(mvFine)));
+  <div class="content">
 
-      const svcAmt   = pick(data.serviceAmount, data.userCharge, data.serviceUserCharge);
-      const svcFine  = pick(data.serviceFine, data.userChargeFine);
-      const svcTotal = pick(data.serviceTotal, (toNum(svcAmt) + toNum(svcFine)));
-      const tokenAmt = pick(
-       data.taxTokenFee,        // ✅ from Telangana.jsx
-       data.taxTokenFeeAmount,  // optional if you add later
-       data.tokenFeeAmount,
-       data.tokenFee
-     );
-      const tokenFine  = pick(data.tokenFeeFine, data.tokenFine);
-      const tokenTotal = pick(data.tokenFeeTotal, (toNum(tokenAmt) + toNum(tokenFine)));
+    <!-- HEADER -->
+    <div class="top">
+      <img class="logo" src="/images1/Telangana.png" />
 
-      const rows = [
-        (permitFeeAmt !== "" ? {
-          particular: `Permit Fee ( ${taxFrom} To ${taxTo} )`,
-          taxFees: permitFeeAmt,
-          fine: permitFine,
-          total: permitTotal
-        } : null),
-        {
-          particular: `MV Tax ( ${taxFrom} To ${taxTo} )`,
-          taxFees: mvAmt,
-          fine: mvFine,
-          total: mvTotal
-        },
-        (svcAmt !== "" ? {
-          particular: `Service/User Charge ( ${taxFrom} To ${taxTo} )`,
-          taxFees: svcAmt,
-          fine: svcFine,
-          total: svcTotal
-        } : null),
-        (tokenAmt !== "" ? {
-          particular: `Tax Token Fee ( ${taxFrom} To ${taxTo} )`,
-          taxFees: tokenAmt,
-          fine: tokenFine,
-          total: tokenTotal
-        } : null),
-      ].filter(Boolean);
-
-      const computedGrand = rows.reduce((s, r) => s + toNum(r.total), 0);
-      const grandTotal = (data.grandTotal !== null && data.grandTotal !== undefined && String(data.grandTotal) !== "")
-        ? toNum(data.grandTotal)
-        : computedGrand;
-
-      const grandWords = safe(pick(data.grandTotalWords, data.totalAmountInWord));
-
-      // IMPORTANT FIX: keep 0 values visible
-      const grossCombWt = pick(
-        data.grossCombinationWeight,
-        data.grossCombinationWeightInKg,
-        data.grossCombinationWeightKg,
-        data.grossVehicleWeight,
-        data.grossVehicleWeightInKg,
-        data.grossVehicleWeightKg
-      );
-
-      const seatingCap = pick(data.seatingCapacityExcludingDriver, data.seatingCapacity, data.seatCapacity);
-      const sleeperCap = pick(data.sleeperCapacityExcludingDriver, data.sleeperCapacity, data.sleeperCap);
-
-      const vehicleType = pick(data.vehicleType, data.vehiclePermitType); // your old code used vehiclePermitType only
-      const checkpost   = pick(data.checkpostName, data.checkPostName, data.borderBarrier);
-    %>
-
-    <div class="page">
-      <div class="bg-text" aria-hidden="true">
-        <% for (let i = 0; i < 26; i++) { %>
-          <div class="row">
-            <%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>
-          </div>
-        <% } %>
+      <div class="title">
+        <div class="t1">GOVERNMENT OF TELANGANA</div>
+        <div class="t2">Department of Transport</div>
+        <div class="t3">Checkpost Tax e-Receipt (Single Journey)</div>
       </div>
 
-      <img class="bg-emblem" src="/images1/Telangana.png" alt="" />
-
-      <div class="content">
-        <div class="top">
-          <img class="logo" src="/images1/Telangana.png" alt="Telangana Logo" />
-
-          <div class="title">
-            <div class="t1">GOVERNMENT OF TELANGANA</div>
-            <div class="t2">Department of Transport</div>
-            <div class="t3">Checkpost Tax e-Receipt(Single Journey)</div>
-          </div>
-
-          <% if (data.src) { %>
-            <img class="qr" src="<%= data.src %>" alt="QR Code" />
-          <% } else { %>
-            <div></div>
-          <% } %>
-        </div>
-
-        <div class="kv-wrap">
-          <table class="kv">
-            <tr><td class="label">Registration No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.vehicleNo)) %></td></tr>
-            <tr><td class="label">Owner Name</td><td class="colon">:</td><td class="value"><%= safe(pick(data.ownerName)) %></td></tr>
-            <tr><td class="label">Tax Mode</td><td class="colon">:</td><td class="value"><%= safe(pick(data.taxMode)) %></td></tr>
-            <tr><td class="label">Vehicle Class</td><td class="colon">:</td><td class="value"><%= safe(pick(data.vehicleClass)) %></td></tr>
-            <tr><td class="label">Mobile No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.mobileNo)) %></td></tr>
-            <tr><td class="label">Seating Capacity</td><td class="colon">:</td><td class="value"><%= safe(seatingCap) %></td></tr>
-            <tr><td class="label">Bank Ref. No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.upBankRefNo, data.bankRefNo)) %></td></tr>
-            <tr><td class="label">Permit Validity</td><td class="colon">:</td><td class="value"><%= safe(pick(data.permitValidity)) %></td></tr>
-            <tr><td class="label">Permit Type</td><td class="colon">:</td><td class="value"><%= safe(pick(data.permitType)) %></td></tr>
-            <tr><td class="label">Gross Combination<br>Weight(in kg.)</td><td class="colon">:</td><td class="value"><%= safe(grossCombWt) %></td></tr>
-          </table>
-
-          <table class="kv">
-            <tr><td class="label">Receipt No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.receiptNo, data.receiptNumber)) %></td></tr>
-            <tr><td class="label">Chassis No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.chassisNo)) %></td></tr>
-            <tr><td class="label">Vehicle Type</td><td class="colon">:</td><td class="value"><%= safe(vehicleType) %></td></tr>
-            <tr><td class="label">Vehicle Category</td><td class="colon">:</td><td class="value"><%= safe(pick(data.vehicleCategory)) %></td></tr>
-            <tr><td class="label">CheckPost Name</td><td class="colon">:</td><td class="value"><%= safe(checkpost) %></td></tr>
-            <tr><td class="label">Sleeper Cap</td><td class="colon">:</td><td class="value"><%= safe(sleeperCap) %></td></tr>
-            <tr><td class="label">Payment Mode</td><td class="colon">:</td><td class="value"><%= safe(pick(data.paymentMode)) %></td></tr>
-            <tr><td class="label">Service Type</td><td class="colon">:</td><td class="value"><%= safe(pick(data.serviceType)) %></td></tr>
-            <tr><td class="label">Route</td><td class="colon">:</td><td class="value"><%= safe(pick(data.route)) %></td></tr>
-          </table>
-        </div>
-
-        <table class="tax-table">
-          <thead>
-            <tr>
-              <th style="width: 64%;">Tax/Fee Particular</th>
-              <th style="width: 12%;">Tax/Fees</th>
-              <th style="width: 12%;">Fine</th>
-              <th style="width: 12%;">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% rows.forEach((r) => { %>
-              <tr>
-                <td class="part"><%= safe(r.particular) %></td>
-                <td class="num"><%= toNum(r.taxFees) %></td>
-                <td class="num"><%= toNum(r.fine) %></td>
-                <td class="num"><%= toNum(r.total) %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-
-        <div class="grand">
-          Grand Total : <%= grandTotal %>/- <%= grandWords ? ("- " + grandWords + " Only") : "" %>
-        </div>
-
-        <div class="section">
-          <div class="hdr">Note :</div>
-          <div class="hdr">Terms and Conditions:</div>
-          <ol>
-            <li>This is a computer generated printout and no signature is required.</li>
-            <li>Should not carry unlawful/unaccompanied goods.</li>
-            <li>If any false information/discrepancies are found at later, necessary action will be taken against the vehicle owner/driver.</li>
-          </ol>
-        </div>
-
-        <div class="footer-bold">Scan the QR code for genuinity of the receipt.</div>
-      </div>
+      <img class="qr" src="<%= data.src %>" />
     </div>
-  </body>
+
+    <!-- DETAILS -->
+    <div class="kv-wrap">
+
+      <table class="kv">
+        <tr><td class="label">Registration No.</td><td class="colon">:</td><td class="value"><%= data.vehicleNo %></td></tr>
+        <tr><td class="label">Owner Name</td><td class="colon">:</td><td class="value"><%= data.ownerName %></td></tr>
+        <tr><td class="label">Tax Mode</td><td class="colon">:</td><td class="value"><%= data.taxMode %></td></tr>
+        <tr><td class="label">Vehicle Class</td><td class="colon">:</td><td class="value"><%= data.vehicleClass %></td></tr>
+        <tr><td class="label">Mobile No.</td><td class="colon">:</td><td class="value"><%= data.mobileNo %></td></tr>
+        <tr><td class="label">Seating Capacity</td><td class="colon">:</td><td class="value"><%= data.seatingCapacity %></td></tr>
+        <tr><td class="label">Bank Ref. No.</td><td class="colon">:</td><td class="value"><%= data.bankRefNo %></td></tr>
+        <tr><td class="label">Permit Validity</td><td class="colon">:</td><td class="value"><%= data.permitValidity %></td></tr>
+        <tr><td class="label">Permit Type</td><td class="colon">:</td><td class="value"><%= data.permitType %></td></tr>
+        <tr><td class="label">Gross Combination<br>Weight(in kg.)</td><td class="colon">:</td><td class="value"><%= data.grossVehicleWeight %></td></tr>
+      </table>
+
+      <table class="kv">
+        <tr><td class="label">Receipt No.</td><td class="colon">:</td><td class="value"><%= data.receiptNo %></td></tr>
+        <tr><td class="label">Chassis No.</td><td class="colon">:</td><td class="value"><%= data.chassisNo %></td></tr>
+        <tr><td class="label">Vehicle Type</td><td class="colon">:</td><td class="value"><%= data.vehiclePermitType %></td></tr>
+        <tr><td class="label">Vehicle Category</td><td class="colon">:</td><td class="value"><%= data.vehicleCategory %></td></tr>
+        <tr><td class="label">CheckPost Name</td><td class="colon">:</td><td class="value"><%= data.borderBarrier %></td></tr>
+        <tr><td class="label">Sleeper Cap</td><td class="colon">:</td><td class="value"><%= data.sleeperCapacity %></td></tr>
+        <tr><td class="label">Payment Mode</td><td class="colon">:</td><td class="value"><%= data.paymentMode %></td></tr>
+        <tr><td class="label">Service Type</td><td class="colon">:</td><td class="value"><%= data.serviceType %></td></tr>
+        <tr><td class="label">Route</td><td class="colon">:</td><td class="value"><%= data.route %></td></tr>
+      </table>
+
+    </div>
+
+    <!-- TAX TABLE -->
+    <table class="tax-table">
+      <thead>
+        <tr>
+          <th style="width:64%">Tax/Fee Particular</th>
+          <th style="width:12%">Tax/Fees</th>
+          <th style="width:12%">Fine</th>
+          <th style="width:12%">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% rows.forEach(r=>{ %>
+        <tr>
+          <td class="part"><%= r.particular %></td>
+          <td class="num"><%= r.tax %></td>
+          <td class="num"><%= r.fine %></td>
+          <td class="num"><%= r.total %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <div class="grand">
+      Grand Total : <%= grandTotal %> /- (<%= data.totalAmountInWord %>)
+    </div>
+
+    <div class="section">
+      <div class="hdr">Note :</div>
+      <div class="hdr">Terms and Conditions:</div>
+      <ol>
+        <li>This is a computer generated printout and no signature is required.</li>
+        <li>Should not carry unlawful/unaccompanied goods.</li>
+        <li>If any false information/discrepancies are found later, action will be taken.</li>
+      </ol>
+    </div>
+
+    <div class="footer-bold">
+      Scan the QR code for genuinity of the receipt.
+    </div>
+
+  </div>
+</div>
+
+</body>
 </html>
