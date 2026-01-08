@@ -69,18 +69,23 @@
 
       .top .logo {
         width: 90px;
-        left: 90px;
         height: 90px;
         object-fit: contain;
+        position: relative;   /* ✅ REQUIRED */
+        left: 20px;           /* → move right */
+        top: 15px;  
       }
 
       .top .qr {
         width: 120px;
         height: 120px;
-        right: 90px;
         object-fit: contain;
         justify-self: end;
-      }
+
+        position: relative;   /* ✅ REQUIRED */
+        left: -20px;          /* ← move left */
+        top: 15px; 
+        }
 
       .title {
         text-align: center;
