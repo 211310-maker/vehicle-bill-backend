@@ -38,7 +38,7 @@
 
       /* QR (fixed at top-right) */
       .qr-image-as {
-        position: absolute;
+        position: relative;
         top: 18px;
         right: 50px;
         width: 120px;
@@ -48,7 +48,7 @@
 
       /* Logo top-left */
       .logo_as {
-        position: absolute;
+        position: relative;
         top: 18px;
         left: 50px;
         z-index: 20;
@@ -101,7 +101,7 @@
         /* ✅ IMPORTANT: stops at end of receipt content area */
         height: 355px; /* tune 330–390 depending on final content */
 
-        opacity: 0.30;
+        opacity: 0.15;
         font-size: 10px;
         line-height: 1.35;
         white-space: nowrap;
@@ -119,10 +119,10 @@
       */
       .wm-center {
         position: absolute;
-        top: 50%;
+        top: 20%;
         left: 50%;
         transform: translate(-50%, -50%);
-        opacity: 0.16; /* darker */
+        opacity: 0.30; /* darker */
         z-index: 2;
         pointer-events: none;
       }
