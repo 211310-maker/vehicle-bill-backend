@@ -28,6 +28,8 @@
       .bg-text {
         position: absolute;
         margin: 0 auto; 
+        max-width: 170mm;                 /* ✅ width preserved */
+        padding: 10mm 18m
         inset: 0;
         opacity: 0.25;
         padding: 10mm 18mm 95mm 18mm;
@@ -297,7 +299,7 @@
       <div class="bg-text" aria-hidden="true">
         <% for (let i = 0; i < 26; i++) { %>
           <div class="row">
-            <%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>
+            <%= bgLine %>&nbsp;&nbsp;&nbsp;&nbsp;<%= bgLine %>
           </div>
         <% } %>
       </div>
