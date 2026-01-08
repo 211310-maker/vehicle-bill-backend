@@ -2,188 +2,196 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Telangana Checkpost Receipt</title>
+<title>Telangana - Checkpost Tax e-Receipt</title>
 
 <style>
-*{box-sizing:border-box}
-@page{size:A4;margin:0}
+* { box-sizing: border-box; }
+@page { size: A4; margin: 0; }
 
-body{
-  margin:0;
+body {
+  margin: 0;
+  background: #fff;
   font-family: Arial, Helvetica, sans-serif;
-  background:#fff;
-  color:#000;
+  color: #000;
 }
 
-.page{
-  width:210mm;
-  height:297mm;
-  padding:14mm 16mm;
-  position:relative;
-  overflow:hidden;
+.page {
+  width: 210mm;
+  height: 297mm;
+  padding: 14mm 16mm;
+  position: relative;
+  overflow: hidden;
 }
 
 /* ================= BACKGROUND TEXT ================= */
-.bg-text{
-  position:absolute;
-  inset:0;
-  padding:18mm 16mm;
-  font-size:10px;
-  line-height:1.5;
-  color:#7a7a7a;
-  opacity:.18;
-  z-index:0;
-  pointer-events:none;
+.bg-text {
+  position: absolute;
+  inset: 0;
+  padding: 18mm 16mm;
+  opacity: 0.18;
+  color: #6b6b6b;
+  font-size: 11px;
+  line-height: 1.55;
+  z-index: 0;
+  pointer-events: none;
 }
-.bg-text .row{white-space:nowrap}
-
-/* ================= WATERMARK ================= */
-.bg-emblem{
-  position:absolute;
-  left:50%;
-  top:42%;
-  transform:translate(-50%,-50%);
-  width:140px;
-  height:140px;
-  opacity:.16;
-  z-index:0;
-  pointer-events:none;
+.bg-text .row {
+  white-space: nowrap;
 }
 
-/* ================= HEADER ================= */
-.logo{
-  position:absolute;
-  top:14mm;
-  left:16mm;
-  width:70px;
-  height:70px;
+/* ================= WATERMARK (FIXED) ================= */
+.bg-emblem {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%);
+  width: 135px;
+  height: 135px;
+  opacity: 0.16;
+  z-index: 0;
+  pointer-events: none;
 }
 
-.qr{
-  position:absolute;
-  top:14mm;
-  right:16mm;
-  width:110px;
-  height:110px;
+/* ================= HEADER (ABSOLUTE – OG STYLE) ================= */
+.logo {
+  position: absolute;
+  top: 14mm;
+  left: 16mm;
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
 }
 
-.header{
-  position:absolute;
-  top:18mm;
-  left:0;
-  right:0;
-  text-align:center;
-  line-height:1.25;
+.qr {
+  position: absolute;
+  top: 14mm;
+  right: 16mm;
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
 }
 
-.header .h1{
-  font-size:11px;
-  font-weight:700;
-  text-transform:uppercase;
-  text-decoration:underline;
+.header {
+  position: absolute;
+  top: 18mm;
+  left: 0;
+  right: 0;
+  text-align: center;
+  line-height: 1.25;
 }
 
-.header .h2{
-  font-size:11px;
-  font-weight:700;
-  margin-top:2px;
+.header .t1 {
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  text-decoration: underline;
 }
-
-.header .h3{
-  font-size:10px;
-  font-weight:700;
-  margin-top:2px;
+.header .t2 {
+  font-weight: 700;
+  font-size: 11px;
+  margin-top: 2px;
+}
+.header .t3 {
+  font-weight: 700;
+  font-size: 10px;
+  margin-top: 2px;
 }
 
 /* ================= CONTENT ================= */
-.content{
-  position:relative;
-  margin-top:95px;
-  z-index:1;
+.content {
+  position: relative;
+  margin-top: 95px;
+  z-index: 1;
 }
 
 /* ================= DETAILS ================= */
-.kv-wrap{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  column-gap:26px;
+.kv-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 26px;
 }
 
-table.kv{
-  width:100%;
-  border-collapse:collapse;
-  table-layout:fixed;
-  font-size:11px;
+table.kv {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 11px;
 }
 
-table.kv td{
-  padding:1.5px 0;
-  vertical-align:top;
+table.kv td {
+  padding: 1.5px 0;
+  vertical-align: top;
 }
 
-td.label{
-  width:42%;
-  font-weight:600;
-  white-space:nowrap;
+td.label {
+  width: 42%;
+  font-weight: 600;
+  white-space: nowrap;
 }
-td.colon{
-  width:4%;
-  text-align:center;
-  font-weight:600;
+td.colon {
+  width: 4%;
+  text-align: center;
+  font-weight: 600;
 }
-td.value{
-  width:54%;
-  font-weight:700;
-  word-break:break-word;
+td.value {
+  width: 54%;
+  font-weight: 700;
+  word-break: break-word;
 }
 
 /* ================= TAX TABLE ================= */
-.tax-table{
-  margin-top:16px;
-  width:100%;
-  border-collapse:collapse;
-  font-size:11px;
+.tax-table {
+  margin-top: 16px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
 }
 
 .tax-table th,
-.tax-table td{
-  border:1px solid #6fa8ff;
-  padding:6px 8px;
+.tax-table td {
+  border: 1px solid #6fa8ff;
+  padding: 6px 8px;
 }
 
-.tax-table th{
-  font-weight:700;
-  text-align:center;
+.tax-table th {
+  text-align: center;
+  font-weight: 700;
 }
 
-.tax-table td.part{font-weight:700}
-.tax-table td.num{text-align:center;font-weight:700}
+.tax-table td.part {
+  font-weight: 700;
+}
+
+.tax-table td.num {
+  text-align: center;
+  font-weight: 700;
+}
 
 /* ================= FOOTER ================= */
-.grand{
-  margin-top:8px;
-  font-size:11px;
-  font-weight:700;
+.grand {
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 700;
 }
 
-.section{
-  margin-top:6px;
-  font-size:11px;
+.section {
+  margin-top: 6px;
+  font-size: 11px;
 }
 
-.section .hdr{
-  font-weight:700;
+.section .hdr {
+  font-weight: 700;
 }
 
-.section ol{
-  margin:0;
-  padding-left:16px;
+.section ol {
+  margin: 0;
+  padding-left: 16px;
 }
 
-.footer-bold{
-  margin-top:10px;
-  font-size:16px;
-  font-weight:800;
+.footer-bold {
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: 800;
 }
 </style>
 </head>
@@ -191,35 +199,74 @@ td.value{
 <body>
 
 <%
-const safe = v => (v==null ? "" : String(v));
-const pick = (...v)=>v.find(x=>x!==null&&x!==undefined&&String(x).trim()!=="")||"";
-const bgLine = `${pick(data.vehicleNo)} ${pick(data.paymentDate,data.receiptDate)}`;
+  /* ===== helpers (UNCHANGED) ===== */
+  const safe = (v) => (v === null || v === undefined) ? "" : String(v);
+  const pick = (...vals) => {
+    for (const v of vals) {
+      if (v === null || v === undefined) continue;
+      if (typeof v === "string" && v.trim() === "") continue;
+      return v;
+    }
+    return "";
+  };
+  const toNum = (v) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const bgLine = `${safe(pick(data.vehicleNo))} ${safe(pick(data.receiptDate, data.paymentDate))}`.trim();
+  const taxFrom = safe(pick(data.taxFrom_up, data.taxFrom, data.taxFromDate));
+  const taxTo   = safe(pick(data.taxTo_up, data.taxTo, data.taxUptoDate, data.taxUpto));
+
+  const rows = [
+    {
+      particular: `MV Tax (${taxFrom} To ${taxTo})`,
+      taxFees: data.mvTax || 0,
+      fine: 0,
+      total: data.mvTax || 0
+    },
+    {
+      particular: `Service/User Charge (${taxFrom} To ${taxTo})`,
+      taxFees: data.userCharge || 0,
+      fine: 0,
+      total: data.userCharge || 0
+    },
+    {
+      particular: `Tax Token Fee (${taxFrom} To ${taxTo})`,
+      taxFees: data.taxTokenFee || 0,
+      fine: 0,
+      total: data.taxTokenFee || 0
+    }
+  ];
 %>
 
 <div class="page">
 
-  <!-- background text -->
+  <!-- BACKGROUND TEXT -->
   <div class="bg-text">
-    <% for(let i=0;i<26;i++){ %>
+    <% for (let i = 0; i < 26; i++) { %>
       <div class="row">
         <%= bgLine %>&nbsp;&nbsp;&nbsp;<%= bgLine %>&nbsp;&nbsp;&nbsp;<%= bgLine %>
       </div>
     <% } %>
   </div>
 
-  <img class="bg-emblem" src="/images1/Telangana.png"/>
+  <!-- WATERMARK -->
+  <img class="bg-emblem" src="/images1/Telangana.png" />
 
-  <!-- header -->
-  <img class="logo" src="/images1/Telangana.png"/>
-  <img class="qr" src="<%= data.src %>"/>
+  <!-- HEADER -->
+  <img class="logo" src="/images1/Telangana.png" />
+  <% if (data.src) { %>
+    <img class="qr" src="<%= data.src %>" />
+  <% } %>
 
   <div class="header">
-    <div class="h1">GOVERNMENT OF TELANGANA</div>
-    <div class="h2">Department of Transport</div>
-    <div class="h3">Checkpost Tax e-Receipt (Single Journey)</div>
+    <div class="t1">GOVERNMENT OF TELANGANA</div>
+    <div class="t2">Department of Transport</div>
+    <div class="t3">Checkpost Tax e-Receipt (Single Journey)</div>
   </div>
 
-  <!-- content -->
+  <!-- CONTENT -->
   <div class="content">
 
     <div class="kv-wrap">
@@ -229,21 +276,13 @@ const bgLine = `${pick(data.vehicleNo)} ${pick(data.paymentDate,data.receiptDate
         <tr><td class="label">Tax Mode</td><td class="colon">:</td><td class="value"><%= pick(data.taxMode) %></td></tr>
         <tr><td class="label">Vehicle Class</td><td class="colon">:</td><td class="value"><%= pick(data.vehicleClass) %></td></tr>
         <tr><td class="label">Mobile No.</td><td class="colon">:</td><td class="value"><%= pick(data.mobileNo) %></td></tr>
-        <tr><td class="label">Seating Capacity</td><td class="colon">:</td><td class="value"><%= pick(data.seatingCapacity) %></td></tr>
-        <tr><td class="label">Bank Ref. No.</td><td class="colon">:</td><td class="value"><%= pick(data.bankRefNo) %></td></tr>
-        <tr><td class="label">Permit Validity</td><td class="colon">:</td><td class="value"><%= pick(data.permitValidity) %></td></tr>
-        <tr><td class="label">Permit Type</td><td class="colon">:</td><td class="value"><%= pick(data.permitType) %></td></tr>
       </table>
 
       <table class="kv">
         <tr><td class="label">Receipt No.</td><td class="colon">:</td><td class="value"><%= pick(data.receiptNo) %></td></tr>
         <tr><td class="label">Chassis No.</td><td class="colon">:</td><td class="value"><%= pick(data.chassisNo) %></td></tr>
-        <tr><td class="label">Vehicle Type</td><td class="colon">:</td><td class="value"><%= pick(data.vehicleType,data.vehiclePermitType) %></td></tr>
-        <tr><td class="label">Vehicle Category</td><td class="colon">:</td><td class="value"><%= pick(data.vehicleCategory) %></td></tr>
-        <tr><td class="label">CheckPost Name</td><td class="colon">:</td><td class="value"><%= pick(data.borderBarrier) %></td></tr>
-        <tr><td class="label">Sleeper Cap</td><td class="colon">:</td><td class="value"><%= pick(data.sleeperCapacity) %></td></tr>
+        <tr><td class="label">Vehicle Type</td><td class="colon">:</td><td class="value"><%= pick(data.vehicleType) %></td></tr>
         <tr><td class="label">Payment Mode</td><td class="colon">:</td><td class="value"><%= pick(data.paymentMode) %></td></tr>
-        <tr><td class="label">Service Type</td><td class="colon">:</td><td class="value"><%= pick(data.serviceType) %></td></tr>
         <tr><td class="label">Route</td><td class="colon">:</td><td class="value"><%= pick(data.route) %></td></tr>
       </table>
     </div>
@@ -258,7 +297,7 @@ const bgLine = `${pick(data.vehicleNo)} ${pick(data.paymentDate,data.receiptDate
         </tr>
       </thead>
       <tbody>
-        <% (data.rows||[]).forEach(r=>{ %>
+        <% rows.forEach(r => { %>
           <tr>
             <td class="part"><%= r.particular %></td>
             <td class="num"><%= r.taxFees %></td>
@@ -278,7 +317,7 @@ const bgLine = `${pick(data.vehicleNo)} ${pick(data.paymentDate,data.receiptDate
       <ol>
         <li>This is a computer generated printout and no signature is required.</li>
         <li>Should not carry unlawful/unaccompanied goods.</li>
-        <li>If any false information/discrepancies are found later, action will be taken.</li>
+        <li>If any false information is found later, action will be taken.</li>
       </ol>
     </div>
 
