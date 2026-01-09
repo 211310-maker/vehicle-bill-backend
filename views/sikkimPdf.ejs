@@ -61,7 +61,7 @@
 
     .wm-text-layer{
       position:absolute;
-      inset:0;
+      inset:0; 
       padding:10px 14px 0 14px;
     }
 
@@ -144,7 +144,7 @@
     .label,
     .colon,
     .value{
-      font-weight:700;
+      font-weight:400;
     }
 
     .colon{
@@ -238,7 +238,7 @@
 
         <!-- LEFT -->
         <div>
-          <div class="drow"><div class="label">Registration No.</div><div class="colon">:</div><div class="value"><%= data.vehicleNo %></div></div>
+          <div class="drow"><div class="label">Registration No.</div><div class="colon">:</div><div class="value reg-bold"><%= data.vehicleNo %></div></div>
           <div class="drow"><div class="label">Receipt No.</div><div class="colon">:</div><div class="value"><%= data.receiptNo %></div></div>
           <div class="drow"><div class="label">Payment Date</div><div class="colon">:</div><div class="value"><%= data.paymentDate %></div></div>
           <div class="drow"><div class="label">Owner Name</div><div class="colon">:</div><div class="value"><%= data.ownerName %></div></div>
