@@ -138,7 +138,7 @@
     .drow{
       display:grid;
       grid-template-columns:150px 10px 1fr;
-      margin-bottom:3px;
+      margin-bottom:6px;
     }
 
     .label,
@@ -246,7 +246,7 @@
           <div class="drow"><div class="label">Vehicle Type</div><div class="colon">:</div><div class="value"><%= data.vehiclePermitType %></div></div>
           <div class="drow"><div class="label">Mobile No.</div><div class="colon">:</div><div class="value"><%= data.mobileNo %></div></div>
           <div class="drow"><div class="label">Service Type</div><div class="colon">:</div><div class="value"><%= data.serviceType || "NOT APPLICABLE" %></div></div>
-          <div class="drow"><div class="label">Bank Ref. No.</div><div class="colon">:</div><div class="value"><%= data.bankRefNo || data.upBankRefNo || "NA" %></div></div>
+          <div class="drow"><div class="label">Bank Ref. No.</div><div class="colon">:</div><div class="value"><%= data.bankRefNo || data.upBankRefNo || "BRN987654321" %></div></div>
 
           <% if(!isGoods){ %>
             <div class="drow"><div class="label">Sleeper Cap.</div><div class="colon">:</div><div class="value"><%= data.sleeperCap || data.sleeperCapacityExcludingDriver || "" %></div></div>
