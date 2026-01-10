@@ -1,6 +1,3 @@
-update in this and give the full complete code 
-
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -350,15 +347,7 @@ update in this and give the full complete code
             <tr><td class="label">Tax Mode</td><td class="colon">:</td><td class="value"><%= safe(pick(data.taxMode)) %></td></tr>
             <tr><td class="label">Vehicle Class</td><td class="colon">:</td><td class="value"><%= safe(pick(data.vehicleClass)) %></td></tr>
             <tr><td class="label">Mobile No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.mobileNo)) %></td></tr>
-            <%
-  const vClass = (pick(data.vehicleClass) || "").toUpperCase();
-  const isGoodsVehicle =
-    vClass.includes("GOODS") ||
-    vClass.includes("DUMPER") ||
-    vClass.includes("TRAILER") ||
-    vClass.includes("TRACTOR") ||
-    vClass.includes("MULTI");
-%>
+            
 
 <% if (isGoodsVehicle) { %>
   <tr>
