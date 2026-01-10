@@ -347,23 +347,11 @@
             <tr><td class="label">Tax Mode</td><td class="colon">:</td><td class="value"><%= safe(pick(data.taxMode)) %></td></tr>
             <tr><td class="label">Vehicle Class</td><td class="colon">:</td><td class="value"><%= safe(pick(data.vehicleClass)) %></td></tr>
             <tr><td class="label">Mobile No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.mobileNo)) %></td></tr>
-            
-
-<% if (isGoodsVehicle) { %>
+            <% if (isGoodsVehicle) { %>
   <tr>
     <td class="label">Gross Vehicle Weight (in Kg)</td>
     <td class="colon">:</td>
-    <td class="value">
-      <%= safe(pick(data.grossVehicleWeight, data.grossVehicleWeightInKg)) %>
-    </td>
-  </tr>
-
-  <tr>
-    <td class="label">Unladen Weight (in Kg)</td>
-    <td class="colon">:</td>
-    <td class="value">
-      <%= safe(pick(data.unladenWeight, data.unLadenWeight)) %>
-    </td>
+    <td class="value"><%= safe(pick(data.grossVehicleWeight, data.grossVehicleWeightInKg)) %></td>
   </tr>
 <% } else { %>
   <tr>
@@ -371,14 +359,7 @@
     <td class="colon">:</td>
     <td class="value"><%= safe(seatingCap) %></td>
   </tr>
-
-  <tr>
-    <td class="label">Sleeper Capacity</td>
-    <td class="colon">:</td>
-    <td class="value"><%= safe(sleeperCap) %></td>
-  </tr>
 <% } %>
-
             <tr><td class="label">Bank Ref. No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.upBankRefNo, data.bankRefNo)) %></td></tr>
             <tr><td class="label">Permit Validity</td><td class="colon">:</td><td class="value"><%= safe(pick(data.permitValidity)) %></td></tr>
             <tr><td class="label">Permit Type</td><td class="colon">:</td><td class="value"><%= safe(pick(data.permitType)) %></td></tr>
@@ -390,6 +371,20 @@
             <tr><td class="label">Chassis No.</td><td class="colon">:</td><td class="value"><%= safe(pick(data.chassisNo)) %></td></tr>
             <tr><td class="label">Vehicle Type</td><td class="colon">:</td><td class="value"><%= safe(vehicleType) %></td></tr>
             <tr><td class="label">Vehicle Category</td><td class="colon">:</td><td class="value"><%= safe(pick(data.vehicleCategory)) %></td></tr>
+<% if (isGoodsVehicle) { %>
+  <tr>
+    <td class="label">Unladen Weight (in Kg)</td>
+    <td class="colon">:</td>
+    <td class="value"><%= safe(pick(data.unladenWeight, data.unLadenWeight)) %></td>
+  </tr>
+<% } else { %>
+  <tr>
+    <td class="label">Sleeper Capacity</td>
+    <td class="colon">:</td>
+    <td class="value"><%= safe(sleeperCap) %></td>
+  </tr>
+<% } %>
+
             <tr><td class="label">CheckPost Name</td><td class="colon">:</td><td class="value"><%= safe(checkpost) %></td></tr>
             <tr><td class="label">Payment Mode</td><td class="colon">:</td><td class="value"><%= safe(pick(data.paymentMode)) %></td></tr>
             <tr><td class="label">Service Type</td><td class="colon">:</td><td class="value"><%= safe(pick(data.serviceType)) %></td></tr>
