@@ -269,40 +269,6 @@ const isNonTransportPassengerClass = useMemo(() => {
   ].some((k) => v.includes(k));
 }, [isNonTransport, payLoad.vehicleClass]);
 
-// ✅ NON-TRANSPORT motor vehicle classes → LMV / MMV / HMV
-const isNonTransportMotorClass = useMemo(() => {
-  if (!isNonTransport) return false;
-
-  const v = norm(payLoad.vehicleClass);
-  return [
-    "VEHICLE FITTED",
-    "ARMOURED",
-    "QUADRICYCLE",
-    "HARVESTER",
-    "RECOVERY",
-    "POWER TILLER",
-    "TRAILER",
-    "TREE",
-    "TOWER",
-    "BREAKDOWN",
-    "TOW",
-    "CAMPER",
-  ].some((k) => v.includes(k));
-}, [isNonTransport, payLoad.vehicleClass]);
-
-
-// ✅ NON-TRANSPORT passenger-like (rare but allowed)
-const isNonTransportPassengerClass = useMemo(() => {
-  if (!isNonTransport) return false;
-
-  const v = norm(payLoad.vehicleClass);
-  return [
-    "THREE WHEELER",
-  ].some((k) => v.includes(k));
-}, [isNonTransport, payLoad.vehicleClass]);
-
-const vehicleCategoryOptions = useMemo(() => {
-  if (!payLoad.vehicleClass) return [];
 
   // 🚚 TRANSPORT – GOODS
   if (isTransport && isGoodsishClass) {
