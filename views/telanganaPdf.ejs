@@ -293,19 +293,51 @@
       const vehicleType = pick(data.vehicleType, data.vehiclePermitType); // your old code used vehiclePermitType only
       const checkpost   = pick(data.checkpostName, data.checkPostName, data.borderBarrier);
     %> 
-    <%
-      const vehicleClassUpper = (pick(data.vehicleClass) || "").toUpperCase();
+   <%
+  const vehicleClassUpper = (pick(data.vehicleClass) || "").toUpperCase();
 
-      const isGoodsVehicle = [
-        "GOODS",
-        "CARRIER",
-        "DUMPER",
-        "TRAILER",
-        "TRACTOR",
-        "MULTI-AXLED",
-        "ARTICULATED",
-        "CASH VAN"
-  ].some(k => vehicleClassUpper.includes(k));
+  // ✅ Vehicle classes that MUST show GVW + Unladen
+  const GOODS_CLASS_KEYWORDS = [
+    "CRANE",
+    "FIRE",
+    "SNORKED",
+    "LIBRARY",
+    "WORKSHOP",
+    "CANTEEN",
+    "BREAKDOWN",
+    "RECOVERY",
+    "TOW",
+    "TREE",
+    "TOWER",
+    "RIG",
+    "GENERATOR",
+    "COMPRESSOR",
+
+    "GOODS",
+    "CARRIER",
+    "DUMPER",
+    "TRAILER",
+    "SEMI-TRAILER",
+    "ARTICULATED",
+    "TRACTOR",
+    "TROLLEY",
+    "MULTI-AXLED",
+    "HYDRAULIC",
+    "AUXILIARY",
+    "CASH VAN",
+    "POWER TILLER",
+    "MODULAR"
+  ];
+
+  // ❌ Passenger exceptions (even though transport)
+  const PASSENGER_EXCEPTIONS = [
+    "AMBULANCE",
+    "ANIMAL AMBULANCE"
+  ];
+
+  const isGoodsVehicle =
+    GOODS_CLASS_KEYWORDS.some(k => vehicleClassUpper.includes(k)) &&
+    !PASSENGER_EXCEPTIONS.some(p => vehicleClassUpper.includes(p));
 %>
 
 
