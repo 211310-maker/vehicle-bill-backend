@@ -269,6 +269,9 @@ const isNonTransportPassengerClass = useMemo(() => {
   ].some((k) => v.includes(k));
 }, [isNonTransport, payLoad.vehicleClass]);
 
+// ✅ Vehicle Category options (FINAL, CORRECT)
+const vehicleCategoryOptions = useMemo(() => {
+  if (!payLoad.vehicleClass) return [];
 
   // 🚚 TRANSPORT – GOODS
   if (isTransport && isGoodsishClass) {
@@ -316,6 +319,8 @@ const isNonTransportPassengerClass = useMemo(() => {
   isNonTransportMotorClass,
   isNonTransportPassengerClass,
 ]);
+
+  
 
   // ✅ Permit Types
   const permitTypeOptions = useMemo(() => {
