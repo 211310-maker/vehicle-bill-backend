@@ -202,10 +202,10 @@ body{
     <tr>
       <% if (isPassengerVehicle) { %>
         <td class="label">Sleeper Capacity</td>
-        <td class="value left">:<%= data.sleeperCapacity || 0 %></td>
+        <td class="value left">:<%= data.sleeperCapacityExcludingDriver || 0 %></td>
 
         <td class="label right">Seating Capacity</td>
-        <td class="value right">:<%= data.seatingCapacity || 0 %></td>
+        <td class="value right">:<%= data.seatingCapacityExcludingDriver || 0 %></td>
       <% } else { %>
         <td class="label">Gross Vehicle Weight</td>
         <td class="value left">:<%= data.grossVehicleWeight || 0 %> KG</td>
