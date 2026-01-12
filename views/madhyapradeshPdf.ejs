@@ -128,7 +128,12 @@ body{
 </head>
 
 <body>
-
+<%
+  const vt = (data.vehiclePermitType || "").toUpperCase();
+  const isPassengerVehicle =
+    vt.includes("CONTRACT") ||
+    vt.includes("PASSENGER");
+%>
 <div class="page">
 
   <div class="top-bar">
@@ -151,7 +156,7 @@ body{
 
   <img class="wm" src="/images1/mpp.png" />
 
-  <table class="details">
+ <table class="details">
 
     <tr>
       <td class="label">Vehicle No.</td>
@@ -193,39 +198,50 @@ body{
       <td class="value right">:<%= data.permitNo || "T" %></td>
     </tr>
 
+    <!-- 🔁 CONDITIONAL ROW -->
     <tr>
-      <td class="label">Unladen Weight</td>
-      <td class="value left">:<%= data.unladenWeight %> KG</td>
+      <% if (isPassengerVehicle) { %>
+        <td class="label">Sleeper Capacity</td>
+        <td class="value left">:<%= data.sleeperCapacity || 0 %></td>
+
+        <td class="label right">Seating Capacity</td>
+        <td class="value right">:<%= data.seatingCapacity || 0 %></td>
+      <% } else { %>
+        <td class="label">Gross Vehicle Weight</td>
+        <td class="value left">:<%= data.grossVehicleWeight || 0 %> KG</td>
+
+        <td class="label right">Unladen Weight</td>
+        <td class="value right">:<%= data.unladenWeight || 0 %> KG</td>
+      <% } %>
+    </tr>
+
+    <!-- ✅ COMMON FOR ALL -->
+    <tr>
+      <td class="label">Insurance Validity</td>
+      <td class="value left">:<%= data.insuranceValidity %></td>
 
       <td class="label right">Fitness Validity</td>
       <td class="value right">:<%= data.fitnessValidity %></td>
     </tr>
 
     <tr>
-      <td class="label">Insurance Validity</td>
-      <td class="value left">:<%= data.insuranceValidity %></td>
+      <td class="label">PUCC Validity</td>
+      <td class="value left">:<%= data.puccValidity %></td>
 
       <td class="label right">Tax Validity</td>
       <td class="value right">:<%= data.taxUptoDate %></td>
     </tr>
 
     <tr>
-      <td class="label">PUCC Validity</td>
-      <td class="value left">:<%= data.puccValidity %></td>
-
-      <td class="label right">Payment Mode</td>
-      <td class="value right">:<%= data.paymentMode || "ONLINE" %></td>
-    </tr>
-
-    <tr>
-      <td class="label">Bank Ref. No.</td>
-      <td class="value left">: EL9854764321</td>
+      <td class="label">Payment Mode</td>
+      <td class="value left">:<%= data.paymentMode || "ONLINE" %></td>
 
       <td class="label right">Payment Status</td>
-      <td class="value right">: SUCCESS</td>
+      <td class="value right">:SUCCESS</td>
     </tr>
 
   </table>
+
 
 
   <table class="money">
