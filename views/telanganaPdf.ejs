@@ -563,7 +563,10 @@ const vehicleCategoryOptions = useMemo(() => {
   }
 
   const disableSeatSleeper = isLoading || !isPassengerCapacityClass;
-  const disableUnladen = isLoading || !isGoodsishClass;
+  const disableUnladen =
+  isLoading || (!isGoodsishClass && !isNonTransport);
+  const disableGrossWeight =
+  isLoading || (!isGoodsishClass && !isNonTransport);
 
   return (
     <>
@@ -785,7 +788,7 @@ const vehicleCategoryOptions = useMemo(() => {
                 <input
                   required={required.grossVehicleWeight}
                   min="0"
-                  disabled={isLoading}
+                  disabled={disableGrossWeight}
                   onChange={onChangeHandler}
                   className="form__input w-100"
                   type="number"
