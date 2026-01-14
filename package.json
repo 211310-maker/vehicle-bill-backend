@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "description": "backend built with Node.js, MongoDb",
   "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "cross-env NODE_ENV=dev nodemon server.js",
-    "test": "node tests/api.test.js"
+ "scripts": {
+  "start": "node server.js",
+  "dev": "cross-env NODE_ENV=dev nodemon server.js",
+  "test": "node tests/api.test.js",
+  "postinstall": "node node_modules/puppeteer/install.mjs"
+}
+
   },
   "engines": {
     "node": "18.x",
@@ -34,7 +37,7 @@
     "mongoose": "^6.0.12",
     "mongoose-unique-validator": "^3.1.0",
     "morgan": "1.10.0",
-    "puppeteer": "^19.7.5",
+    "puppeteer": "^21.6.0",
     "qrcode": "^1.5.0",
     "react-cookie": "^4.1.1",
     "unique-username-generator": "^1.0.1",
