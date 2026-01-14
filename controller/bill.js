@@ -173,102 +173,7 @@ module.exports.getDetails = asyncHandler(async (req, res, next) => {
 });
 
 // Helper: find a usable browser executable (system or bundled)
-const findBrowserExecutable = () => {
-  const pathJoin = path.join;
 
-  const candidates = [
-    process.env.PUPPETEER_EXECUTABLE_PATH,
-    "/usr/bin/chromium-browser",
-    "/usr/bin/chromium",
-    "/snap/bin/chromium",
-    "/usr/bin/google-chrome-stable",
-    "/usr/bin/google-chrome",
-  ].filter(Boolean);
-
-  const isExecutable = (p) => {
-    try {
-      if (!fs.existsSync(p)) return false;
-      const stat = fs.statSync(p);
-      if (!stat.isFile()) return false;
-      fs.accessSync(p, fs.constants.X_OK);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  };
-
-  // 1) env var if valid
-  if (
-    process.env.PUPPETEER_EXECUTABLE_PATH &&
-    isExecutable(process.env.PUPPETEER_EXECUTABLE_PATH)
-  ) {
-    return process.env.PUPPETEER_EXECUTABLE_PATH;
-  }
-
-  // 2) common system locations
-  for (const p of candidates) {
-    if (p && isExecutable(p)) return p;
-  }
-
-  // 3) puppeteer.executablePath() (bundled)
-  try {
-    if (typeof puppeteer.executablePath === "function") {
-      const bundled = puppeteer.executablePath();
-      if (bundled && isExecutable(bundled)) {
-        logger.info(`Found puppeteer.executablePath(): ${bundled}`);
-        return bundled;
-      }
-    }
-  } catch (e) {
-    logger.debug(
-      "puppeteer.executablePath() check failed:",
-      e && e.message ? e.message : e
-    );
-  }
-
-  // 4) scan node_modules/puppeteer/.local-chromium
-  try {
-    const base = pathJoin(__dirname, "..", "node_modules", "puppeteer", ".local-chromium");
-    if (fs.existsSync(base) && fs.statSync(base).isDirectory()) {
-      const scan = (dir) => {
-        const items = fs.readdirSync(dir);
-        for (const it of items) {
-          const p = pathJoin(dir, it);
-          const st = fs.statSync(p);
-          if (st.isDirectory()) {
-            const linuxCandidate = pathJoin(p, "chrome-linux", "chrome");
-            const winCandidate = pathJoin(p, "chrome-win", "chrome.exe");
-            const macCandidate = pathJoin(
-              p,
-              "chrome-mac",
-              "Chromium.app",
-              "Contents",
-              "MacOS",
-              "Chromium"
-            );
-            const direct = pathJoin(p, "chrome");
-            const candidates2 = [linuxCandidate, winCandidate, macCandidate, direct];
-            for (const c of candidates2) {
-              if (fs.existsSync(c) && fs.statSync(c).isFile()) return c;
-            }
-            const rec = scan(p);
-            if (rec) return rec;
-          }
-        }
-        return null;
-      };
-      const found = scan(base);
-      if (found) {
-        logger.info(`Found local-chromium at ${found}`);
-        return found;
-      }
-    }
-  } catch (e) {
-    logger.debug("Error scanning local-chromium:", e && e.message ? e.message : e);
-  }
-
-  return null;
-};
 
 //@desc    get pdf (HTML receipt page; browser can print to PDF)
 //@route   GET /bill/:id/pdf
@@ -381,72 +286,71 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
       htmlWithBase = htmlWithBase.replace(/<head([^>]*)>/i, `<head$1>\n<base href="${hostForBase}">\n`);
     }
 
-    // === Generate PDF using Puppeteer ===
-    let browser = null;
-    try {
-      const execPath = findBrowserExecutable();
+    // === Generate PDF using Puppeteer (Render safe) ===
+// === Generate PDF using Puppeteer (Render safe) ===
+let browser = null;
 
-      if (process.env.PUPPETEER_EXECUTABLE_PATH && !execPath) {
-        logger.warn(
-          `PUPPETEER_EXECUTABLE_PATH is configured (${process.env.PUPPETEER_EXECUTABLE_PATH}) but it was not usable. Clearing it for this launch.`
-        );
-        delete process.env.PUPPETEER_EXECUTABLE_PATH;
-      }
+try {
+  browser = await puppeteer.launch({
+    headless: "new",
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--no-zygote"
+    ],
+    timeout: 60000
+  });
 
-      const launchOptions = {
-        headless: true,
-        args: [
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--disable-dev-shm-usage",
-          "--disable-accelerated-2d-canvas",
-          "--no-first-run",
-          "--no-zygote",
-          "--single-process",
-        ],
-        timeout: 60000,
-      };
+  const page = await browser.newPage();
+  page.setDefaultNavigationTimeout(60000);
+  await page.setViewport({ width: 1200, height: 1000 });
 
-      if (execPath) {
-        launchOptions.executablePath = execPath;
-        logger.info(`Puppeteer will use browser executable at: ${execPath}`);
-      } else {
-        logger.warn("No explicit system/browser path found; Puppeteer will try bundled Chromium or default.");
-      }
+  await page.setContent(htmlWithBase, {
+    waitUntil: "networkidle0",
+    timeout: 60000
+  });
 
-      browser = await puppeteer.launch(launchOptions);
+  try {
+    await page.emulateMediaType("print");
+  } catch (_) {}
 
-      const page = await browser.newPage();
-      page.setDefaultNavigationTimeout(60000);
-      await page.setViewport({ width: 1200, height: 1000 });
-
-      await page.setContent(htmlWithBase, { waitUntil: "networkidle0", timeout: 60000 });
-
-      try {
-        await page.emulateMediaType("print");
-      } catch (e) {}
-
-      const pdfBuffer = await page.pdf({
-        format: "A4",
-        printBackground: true,
-        margin: { top: "10mm", right: "10mm", bottom: "10mm", left: "10mm" },
-      });
-
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="receipt-${id}.pdf"`);
-      return res.send(pdfBuffer);
-    } catch (err) {
-      logger.error(`Puppeteer PDF generation failed for bill ${id}: ${err.message}`, { stack: err.stack });
-      res.setHeader("Content-Type", "text/html; charset=utf-8");
-      return res.send(htmlContent);
-    } finally {
-      if (browser) {
-        try {
-          await browser.close();
-        } catch (e) {}
-      }
+  const pdfBuffer = await page.pdf({
+    format: "A4",
+    printBackground: true,
+    margin: {
+      top: "10mm",
+      right: "10mm",
+      bottom: "10mm",
+      left: "10mm"
     }
-  } catch (err) {
+  });
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename="receipt-${id}.pdf"`
+  );
+
+  return res.send(pdfBuffer);
+
+} catch (err) {
+  logger.error(
+    `Puppeteer PDF generation failed for bill ${id}: ${err.message}`,
+    { stack: err.stack }
+  );
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  return res.send(htmlContent);
+
+} finally {
+  if (browser) {
+    try {
+      await browser.close();
+    } catch (_) {}
+  }
+}
+} catch (err) {
     logger.error(`PDF (HTML) generation error: ${err.message}`, {
       stack: err.stack,
     });
@@ -458,6 +362,8 @@ module.exports.getBillInPdfFormat = asyncHandler(async (req, res, next) => {
     });
   }
 });
+    
+
 
 //@desc    get all
 //@route   GET /bill
