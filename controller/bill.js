@@ -5,7 +5,7 @@ const ErrorResponse = require("../utils/errorResponse");
 const qrCode = require("qrcode");
 const logger = require("../logger");
 const {
-  receiptNoGenerator,
+  receiptNoGenerator, 
   inWords,
   formatDate,
   getAheadTimeWithDate,
